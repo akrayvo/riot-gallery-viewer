@@ -18,8 +18,11 @@ class RiotGalleryViewer {
     this.currentImageKey = null;
     this.curImgWidth = null;
     this.curImgHeight = null;
+    this.windowWidth = null;
+    this.windowHeight = null;
     this.elems = {
       body: null,
+      window: null,
       gallery: null,
       linkContainers: null,
       viewerBackground: null,
@@ -36,7 +39,7 @@ class RiotGalleryViewer {
       startTime: null
     };
     this.options = {
-      doConsoleLog: false,
+      doConsoleLog: true, // false
       useMaterialIcons: true,
       theme: 'default',
       swipeMaxSeconds: 0.9,
@@ -72,7 +75,6 @@ class RiotGalleryViewer {
       return false;
     }
 
-    this.elems.body = $('body');
     this.elems.gallery = galleryElem;
 
     this.elems.linkContainers = this.elems.gallery.find('li');
@@ -196,6 +198,18 @@ class RiotGalleryViewer {
       event.stopPropagation();
       event.data.igvThis.closeViewer();
     });
+
+    this.elems.window.resize({ igvThis: this }, function (event) {
+      event.data.igvThis.consoleLogInfo('window resized');
+      event.data.igvThis.setWindowSize();
+      event.data.igvThis.positionImage();
+    });
+  }
+
+  setWindowSize() {
+    this.windowWidth = this.elems.window.width();
+    this.windowHeight = this.elems.window.height();
+    this.consoleLogInfo('set window size, width = ' + this.windowWidth + ' | height=' + this.windowHeight);
   }
 
   closeViewer() {
@@ -204,11 +218,11 @@ class RiotGalleryViewer {
   }
 
   prevClicked() {
-    this.loadImg(this.currentImageKey-1);
+    this.loadImg(this.currentImageKey - 1);
   }
 
   nextClicked() {
-    this.loadImg(this.currentImageKey+1);
+    this.loadImg(this.currentImageKey + 1);
   }
 
   /*
@@ -216,7 +230,7 @@ class RiotGalleryViewer {
    */
   loadImg(key) {
     if (key < 0) {
-      key = this.imageCount-1;
+      key = this.imageCount - 1;
     }
     if (key >= this.imageCount) {
       key = 0;
@@ -260,6 +274,9 @@ class RiotGalleryViewer {
 
     let html;
 
+    this.elems.body = $('body');
+    this.elems.window = $(window);
+
     // background
     html = '<div id="riot-gallery-viewer-bg"></div>';
     this.elems.body.append(html);
@@ -287,34 +304,47 @@ class RiotGalleryViewer {
 
     this.bindViewer();
 
+    this.setWindowSize();
+
     this.isHtmlLoaded = true;
   }
 
   positionImage() {
     let multiplier = 1;
-    
-    let percent =  (window.innerWidth-(this.displayPadding*2)) / this.curImgWidth;
-    if (percent < multiplier)
-    {
-      multiplier = percent;
-    }
-    
-    percent = (window.innerHeight-(this.displayPadding*2)) / this.curImgHeight;
-    if (percent < multiplier)
-    {
-      multiplier = percent;
-    }
-    
-    const displayWidth = Math.floor(this.curImgWidth * multiplier);
-    const displayHeight = Math.floor(this.curImgHeight * multiplier);
-    
-    const newLeft = 'calc(50vw - ' + (displayWidth /2) + 'px)';
-    const newTop =  'calc(50vh - ' + (displayHeight/2) + 'px)';
-    this.elems.imageCon.css({width:displayWidth+'px', height:displayHeight+'px', left: newLeft, top: newTop});
 
-    const closeRight = 'max(40px, 50vw - ' + ((displayWidth /2)+30) + 'px)';
-    const closeTop =   'max(10px, 50vh - ' + ((displayHeight /2)+30) + 'px)';
-    this.elems.closeCon.css({right: closeRight, top: closeTop});
+    let width = this.curImgWidth;
+    let height = this.curImgHeight;
+
+    const maxWidth = this.windowWidth - 14;
+    const maxHeight = this.windowHeight - 8;
+
+    if (width > maxWidth) {
+      width = maxWidth;
+      height = height / this.curImgWidth * width;
+    }
+    //console.log('width', width, 'height', height, 'maxWidth', maxWidth, 'maxHeight', maxHeight, 'newLeft');
+
+    if (height > maxHeight) {
+      height = maxHeight;
+      width = width / this.curImgHeight * height;
+    }
+
+    let newLeft = (this.windowWidth - width) / 2;
+    let newTop = (this.windowHeight - height) / 2;
+
+    this.elems.imageCon.css({ width: width + 'px', height: height + 'px', left: newLeft + 'px', top: newTop + 'px' });
+
+    //console.log('width', width, 'height', height, 'maxWidth', maxWidth, 'maxHeight', maxHeight, 'newLeft', newLeft, 'newTop', newTop);
+
+    newLeft = newLeft - 30;
+    newTop = newTop - 30;
+    if (newTop < 10) {
+      newTop = 10;
+    }
+    if (newLeft < 30) {
+      newLeft = 30;
+    }
+    this.elems.closeCon.css({ right: newLeft + 'px', top: newTop + 'px' });
   }
 
   imageLoadingStart() {
@@ -322,7 +352,7 @@ class RiotGalleryViewer {
   }
 
   imageLoadingDone() {
-    
+
   }
 
   /*****************************************************************************
