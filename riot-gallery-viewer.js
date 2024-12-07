@@ -13,8 +13,14 @@ class RiotGallery {
    *     function is called. this will give a chance to set parameters.
    */
   constructor(elem) {
+    this.isLoaded = false;
+    this.isHtmlLoaded = false;
+    this.isOpen = false;
+    this.galleryImages = [];
     this.elems = {
-      main: null,
+      gallery: null,
+      linkContainers: null,
+      viewerBackground: null
     };
     this.swipeInfo = {
       startX: null,
@@ -221,45 +227,48 @@ class RiotGallery {
   }
 
   /*
-   * Load/initialize the slider
-   * sliderElem is the jQuery ul element
+   * Load/initialize the gallery viewer
+   * galleryElem is the jQuery ul element
    */
-  load(sliderElem) {
+  load(galleryElem) {
     // check if it was already loaded
     if (this.isLoaded) {
       return false;
     }
 
-    if (typeof sliderElem !== 'object') {
+    if (typeof galleryElem !== 'object') {
       return false;
     }
 
     // check that the element is an unordered list
-    const tagName = sliderElem.prop('tagName').toLowerCase();
-
+    const tagName = galleryElem.prop('tagName').toLowerCase();
     if (tagName !== 'ul') {
       this.consoleLogInfo(
-        'Riot Slider not loaded. tag is "' +
+        'Riot Gallery Viewer not loaded. tag is "' +
         tagName +
         '". must be "ul" (unordered list).'
       );
       return false;
     }
 
-    if (sliderElem.find('li').length < 1) {
-      this.consoleLogInfo('Riot Slider not loaded: No "li" (list item) found');
+    this.elems.gallery = galleryElem;
+
+    this.elems.linkContainers = this.elems.gallery.find('li');
+
+    if (this.elems.linkContainers < 1) {
+      this.consoleLogInfo('Riot Gallery Viewer not loaded: No "li" (list item) found');
       return false;
     }
 
     this.loadMaterialIconsIfNeeded();
 
-    this.loadOptions(sliderElem);
+    //this.loadOptions(galleryElem);
 
-    this.loadHtml(sliderElem);
+    //this.loadHtml(sliderElem);
 
-    this.updateWidth(true);
+    //this.updateWidth(true);
 
-    this.bindAll();
+    this.bindGalleryLinks();
 
     this.isLoaded = true;
 
@@ -328,7 +337,15 @@ class RiotGallery {
    * add new HTML elements, add classes to existing elements, and use selectors to save elements
    */
   loadHtml(sliderElem) {
-    
+    let viewerBackgroundElem = $('.riot-gallery-background');
+    let html = '';
+    if (viewerBackgroundElem.length > 0) {
+      // already loaded
+    } else {
+      // load now
+      html = $('<div></div>')
+        .addClass('riot-gallery-background');
+    }
   }
 
   /*
@@ -374,14 +391,145 @@ class RiotGallery {
   }
 
   /*
+   * return the text or attribute from a jquery element
+   */
+  getJqElemVal(elem, attr, errorReturn) {
+
+    if (elem.length < 1) {
+      return errorReturn;
+    }
+
+    let val;
+
+    if (attr == 'text') {
+      val = elem.text();
+      if (!val) {
+        return errorReturn;
+      }
+      val = val.trim();
+      if (val.length < 1) {
+        return errorReturn;
+      }
+      return val;
+    }
+    
+    val = elem.attr(attr);
+    if (!val) {
+      return errorReturn;
+    }
+    val = val.trim();
+    if (val.length < 1) {
+      return errorReturn;
+    }
+    return val;
+  }
+
+  /*
    * Bind actions to buttons and window resize
    */
-  bindAll() {
+  bindGalleryLinks() {
+    for (let x = 0; x < this.elems.linkContainers.length; x++) {
+      var linkContainer = $(this.elems.linkContainers[x]);
+      
+      let href = '';
+      let caption = '';
+      let val = null;
+      let clickElem = null;
+      let elem = null;
+
+      if (!href) {
+        elem = linkContainer.find('a[target="_blank"]');
+        val = this.getJqElemVal(elem, 'href');
+        if (val) {
+          href = val;
+          clickElem = elem;
+        }
+      }
+      if (!href) {
+        elem = linkContainer.find('a');
+        val = getJqElemVal(elem, 'href');
+        if (val) {
+          href = val;
+          clickElem = elem;
+        }
+      }
+      if (!href) {
+        elem = linkContainer.find('img');
+        val = this.getJqElemVal(elem, 'src');
+        if (val) {
+          href = val;
+          clickElem = elem;
+        }
+      }
+
+      if (href && clickElem) {
+        // only check for label and add event when link is found
+        if (!caption) {
+          caption = this.getJqElemVal(linkContainer.find('.caption'), 'text');
+          if (val) {
+            caption = val;
+          }
+        }
+        if (!caption) {
+          caption = this.getJqElemVal(linkContainer.find('figcaption'), 'text');
+          if (val) {
+            caption = val;
+          }
+        }
+        if (!caption) {
+          caption = this.getJqElemVal(linkContainer.find('span'), 'text');
+          if (val) {
+            caption = val;
+          }
+        }
+
+        this.galleryImages.push({ url: href, caption: caption} );
+        const key = this.galleryImages.length - 1;
+        clickElem.on('click', { igvThis: this, key: key }, function (event) {
+          event.preventDefault();
+          event.stopPropagation();
+          event.data.igvThis.loadImg(event.data.key);
+        }); 
+      }
+    }
+  }
+
+  loadHtml() {
+    if (this.isHtmlLoaded) {
+      return;
+    }
+
+    const bodyElem =  $('body');
+
+    bodyElem.addClass('riot-gallery-viewer-open');
+
+    bodyElem.append($('<div/>', {
+      id: 'riot-gallery-viewer-background' 
+    }));
+
+    /*let spanElem = document.createElement('span');
+    spanElem.className = 'material-icons';
+    spanElem.style.display = 'none';
+    document.body.append(spanElem, document.body.firstChild);*/
+
+    this.isHtmlLoaded = true;
+  }
+
+  /*
+   * Bind actions to buttons and window resize
+   */
+  loadImg() {
+      this.loadHtml();
+  }
+
+  /*
+   * Bind actions to buttons and window resize
+   */
+  /*bindAll() {
     // browswer window resize
     $(window).on('resize', { rsThis: this }, function (event) {
-      event.data.rsThis.updateWidth()
-    })
-    };
+      event.data.rsThis.updateWidth();
+    });
 
     // vanilla javascript bind on swipe events
     for (const x = 0; x < this.elems.slides.length; x++) {
@@ -398,7 +546,7 @@ class RiotGallery {
         this.params.rsThis.slideSwipeEndEvent(event);
       });
     }
-  }
+  }*/
 
   /*
   * Touchscreen swipe started
@@ -539,7 +687,6 @@ class RiotGallery {
     this.consoleLogInfo('slide loaded: ' + this.currentSlideNumber);
   }
 
-
   /*
    * Increment the slide number
    * usually the optional value is no passed to set +1 (next slide)
@@ -660,17 +807,17 @@ window.onload = function () {
     let head = document.getElementsByTagName('head')[0];
     let script = document.createElement('script');
     script.type = 'text/javascript';
-    script.src = RiotSlider.jqueryUrl;
+    script.src = RiotGallery.jqueryUrl;
     head.appendChild(script);
 
     let waitForJQuery = setInterval(function () {
       if (window.jQuery) {
         clearInterval(waitForJQuery);
-        riotSliderInitAll();
+        riotGalleryInitAll();
       }
     }, 100);
   } else {
-    riotSliderInitAll();
+    riotGalleryInitAll();
   }
 }
 
