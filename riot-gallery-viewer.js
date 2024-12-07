@@ -18,6 +18,7 @@ class RiotGallery {
     this.isOpen = false;
     this.galleryImages = [];
     this.elems = {
+      body: null,
       gallery: null,
       linkContainers: null,
       viewerBackground: null
@@ -251,6 +252,7 @@ class RiotGallery {
       return false;
     }
 
+    this.elems.body =  $('body');
     this.elems.gallery = galleryElem;
 
     this.elems.linkContainers = this.elems.gallery.find('li');
@@ -335,7 +337,7 @@ class RiotGallery {
 
   /*
    * add new HTML elements, add classes to existing elements, and use selectors to save elements
-   */
+   
   loadHtml(sliderElem) {
     let viewerBackgroundElem = $('.riot-gallery-background');
     let html = '';
@@ -346,7 +348,7 @@ class RiotGallery {
       html = $('<div></div>')
         .addClass('riot-gallery-background');
     }
-  }
+  }*/
 
   /*
    * changes the width of the slide when the browser/window is resized
@@ -499,13 +501,21 @@ class RiotGallery {
       return;
     }
 
-    const bodyElem =  $('body');
+    let html;
 
-    bodyElem.addClass('riot-gallery-viewer-open');
+    
 
-    bodyElem.append($('<div/>', {
-      id: 'riot-gallery-viewer-background' 
-    }));
+    // background
+    html = '<div id="riot-gallery-viewer-bg"></div>';
+    this.elems.body.append(html);
+
+    // previous button
+    html = '<div id="riot-gallery-viewer-prev-con"><a href="#">&laquo;</a></div>';
+    this.elems.body.append(html);
+    
+    // next button
+    html = '<div id="riot-gallery-viewer-next-con"><a href="#">&raquo;</a></div>';
+    this.elems.body.append(html);  
 
     /*let spanElem = document.createElement('span');
     spanElem.className = 'material-icons';
@@ -519,7 +529,11 @@ class RiotGallery {
    * Bind actions to buttons and window resize
    */
   loadImg() {
+    if (!this.isOpen) {
       this.loadHtml();
+      this.elems.body.addClass('riot-gallery-viewer-open');
+      $('body').isOpen = true;
+    }
   }
 
   /*
