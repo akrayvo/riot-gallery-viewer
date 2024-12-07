@@ -27,6 +27,7 @@ class RiotGalleryViewer {
       prevCon: null,
       nextCon: null,
       imageCon: null,
+      closeCon: null,
       image: null
     };
     this.swipeInfo = {
@@ -185,6 +186,21 @@ class RiotGalleryViewer {
       event.stopPropagation();
       event.data.igvThis.nextClicked();
     });
+    this.elems.closeCon.on('click', { igvThis: this }, function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.data.igvThis.closeViewer();
+    });
+    this.elems.bg.on('click', { igvThis: this }, function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.data.igvThis.closeViewer();
+    });
+  }
+
+  closeViewer() {
+    this.elems.body.removeClass('riot-gallery-viewer-open');
+    this.isOpen = false;
   }
 
   prevClicked() {
@@ -259,10 +275,14 @@ class RiotGalleryViewer {
     html = '<div id="riot-gallery-viewer-image-con"><img></div>';
     this.elems.body.append(html);
 
+    html = '<div id="riot-gallery-viewer-close-con"><a href="#">X</a></div>';
+    this.elems.body.append(html);
+
     this.elems.bg = $('#riot-gallery-viewer-bg');
     this.elems.prevCon = $('#riot-gallery-viewer-prev-con');
     this.elems.nextCon = $('#riot-gallery-viewer-next-con');
     this.elems.imageCon = $('#riot-gallery-viewer-image-con');
+    this.elems.closeCon = $('#riot-gallery-viewer-close-con');
     this.elems.image = this.elems.imageCon.find('img');
 
     this.bindViewer();
@@ -291,6 +311,10 @@ class RiotGalleryViewer {
     const newLeft = 'calc(50vw - ' + (displayWidth /2) + 'px)';
     const newTop =  'calc(50vh - ' + (displayHeight/2) + 'px)';
     this.elems.imageCon.css({width:displayWidth+'px', height:displayHeight+'px', left: newLeft, top: newTop});
+
+    const closeRight = 'max(40px, 50vw - ' + ((displayWidth /2)+30) + 'px)';
+    const closeTop =   'max(10px, 50vh - ' + ((displayHeight /2)+30) + 'px)';
+    this.elems.closeCon.css({right: closeRight, top: closeTop});
   }
 
   imageLoadingStart() {
