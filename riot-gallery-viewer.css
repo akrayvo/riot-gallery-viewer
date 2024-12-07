@@ -141,6 +141,23 @@ ul.riot-gallery.riot-gallery-style li figcaption {
 	text-decoration:none;
 }
 
+#riot-gallery-viewer-image-con {
+
+        max-width:100%;
+        position:fixed;
+        display:none;
+        /* 2147483647 - 3 */
+        z-index: 2147483644;
+    
+
+}
+
+#riot-gallery-viewer-image-con img {
+    width:100%;
+    height:100%;
+    display: block;
+}
+
 
 body.riot-gallery-viewer-open #riot-gallery-viewer-bg,
 body.riot-gallery-viewer-open #riot-gallery-viewer-image-con,
