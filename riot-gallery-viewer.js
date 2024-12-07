@@ -14,6 +14,7 @@ class RiotGalleryViewer {
     this.isHtmlLoaded = false;
     this.isOpen = false;
     this.galleryImages = [];
+    this.imageCount = 0;
     this.currentImageKey = null;
     this.curImgWidth = null;
     this.curImgHeight = null;
@@ -165,13 +166,48 @@ class RiotGalleryViewer {
         });
       }
     }
+    this.imageCount = this.galleryImages.length;
+  }
+
+  bindViewer() {
+    this.elems.prevCon.on('click', { igvThis: this }, function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.data.igvThis.prevClicked();
+    });
+    this.elems.nextCon.on('click', { igvThis: this }, function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.data.igvThis.nextClicked();
+    });
+    this.elems.image.on('click', { igvThis: this }, function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.data.igvThis.nextClicked();
+    });
+  }
+
+  prevClicked() {
+    this.loadImg(this.currentImageKey-1);
+  }
+
+  nextClicked() {
+    this.loadImg(this.currentImageKey+1);
   }
 
   /*
    * Bind actions to buttons and window resize
    */
   loadImg(key) {
+    if (key < 0) {
+      key = this.imageCount-1;
+    }
+    if (key >= this.imageCount) {
+      key = 0;
+    }
+
     this.currentImageKey = key;
+
     if (!this.isOpen) {
       this.loadHtml();
       this.elems.body.addClass('riot-gallery-viewer-open');
@@ -228,6 +264,8 @@ class RiotGalleryViewer {
     this.elems.nextCon = $('#riot-gallery-viewer-next-con');
     this.elems.imageCon = $('#riot-gallery-viewer-image-con');
     this.elems.image = this.elems.imageCon.find('img');
+
+    this.bindViewer();
 
     this.isHtmlLoaded = true;
   }
