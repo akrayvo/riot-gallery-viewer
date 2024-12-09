@@ -1,4 +1,4 @@
-class RiotGallery {
+class RiotGalleryViewer {
   static jqueryUrl =
     'https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js';
   static materialIconsUrl =
@@ -8,13 +8,33 @@ class RiotGallery {
 
   /*
    * initialize all class variables
-   *     if the element ID is passed, the slider will be loaded.
-   * if the element ID is NOT passed, the slider will not be loaded until the load()
-   *     function is called. this will give a chance to set parameters.
    */
   constructor(elem) {
+    this.isLoaded = false;
+    this.isHtmlLoaded = false;
+    this.isOpen = false;
+    this.galleryImages = [];
+    this.imageCount = 0;
+    this.currentImageKey = null;
+    this.curImgWidth = null;
+    this.curImgHeight = null;
+    this.curViewerWidth = null;
+    this.curViewerHeight = null;
+    this.windowWidth = null;
+    this.windowHeight = null;
     this.elems = {
-      main: null,
+      body: null,
+      window: null,
+      gallery: null,
+      linkContainers: null,
+      viewerBackground: null,
+      bg: null,
+      prevCon: null,
+      nextCon: null,
+      imageCon: null,
+      closeCon: null,
+      image: null,
+      loading: null
     };
     this.swipeInfo = {
       startX: null,
@@ -22,7 +42,7 @@ class RiotGallery {
       startTime: null
     };
     this.options = {
-      doConsoleLog: false,
+      doConsoleLog: true, // false
       useMaterialIcons: true,
       theme: 'default',
       swipeMaxSeconds: 0.9,
@@ -33,233 +53,49 @@ class RiotGallery {
     this.load(elem);
   }
 
-  /*****************************************************************************
-   * start SET OPTIONS
-   ****************************************************************************/
-
   /*
-   * set doConsoleLog option
-   * if set, information will be added to the console log
-   * generally only needed for testing/development
-   * default = false
+   * Load/initialize the gallery viewer
+   * galleryElem is the jQuery ul element
    */
-  setDoConsoleLog(value) {
-    this.options.doConsoleLog = this.returnBoolean(value);
-    this.consoleLogInfo('set doConsoleLog:');
-    this.consoleLogInfo(this.options.doConsoleLog);
-  }
-
-  /*
-   * set useMaterialIcons option
-   * if set, material icons will display for play, stop, previous, and next buttons
-   * if unavailable, they will automatically be added from fonts.googleapis.com
-   * default = true
-   */
-  setUseMaterialIcons(value) {
-    this.options.useMaterialIcons = this.returnBoolean(value);
-    this.consoleLogInfo('set useMaterialIcons:');
-    this.consoleLogInfo(this.options.useMaterialIcons);
-  }
-
-  /*
-   * set theme option
-   * current themes are "default", "dark", "pastel"
-   * the theme/color sceme of the slider
-   * default = normal
-   */
-  setTheme(value) {
-    value = this.returnString(value, true);
-    if (typeof value !== 'string') {
-      // return value will be set to null on error
-      return;
-    }
-    if (RiotSlider.validThemes.indexOf(value) < 0) {
-      this.consoleLogInfo('invalid value sent to setTheme: ' + value);
-      return;
-    }
-    this.consoleLogInfo('set theme: ' + value);
-    this.options.theme = value;
-  }
-
-  /*
-   * set setSwipeMinPx option
-   * the minimum number of pixels for a swipe on touchscreen
-   * used with data-swipe-min-percent. if data-swipe-min-px check fails, 
-   *  swipe will still work if the data-swipe-min-percent check succeeds
-   * value must be between 1 and 3000
-   * default = 60
-   */
-  setSwipeMinPx(value) {
-    value = this.returnInt(value, 1, 3000);
-    if (typeof value !== 'number') {
-      return;
-    }
-
-    this.consoleLogInfo('set setSwipeMinPx: ' + value);
-    this.options.swipeMinPx = value;
-  }
-
-  /*
-   * set swipeMinPercent option
-   * the minimum percent of horizontal pixels for a swipe on touchscreen
-   * the percentage of the swipe compared to the full slider width
-   * makes it easier to recognize swipes on smaller screens
-   * used with data-swipe-min-px. if data-swipe-min-px check is successful, 
-   * 	data-swipe-min-percent is not checked
-   * value must be between 1 and 100
-   * default = 13
-   */
-  setSwipeMinPercent(value) {
-    value = this.returnInt(value, 1, 100);
-    if (typeof value !== 'number') {
-      return;
-    }
-
-    this.consoleLogInfo('set swipeMinPercent: ' + value);
-    this.options.swipeMinPercent = value;
-  }
-
-  /*****************************************************************************
-   * end SET OPTIONS
-   ****************************************************************************/
-
-  /*
-   * write information to the console if doConsoleLog is true
-   */
-  consoleLogInfo(info) {
-    if (this.options.doConsoleLog) {
-      console.log(info);
-    }
-  }
-
-  /*
-   * convert a variable to either true or false
-   */
-  returnBoolean(value) {
-
-    if (typeof value === 'string') {
-      // to lower case for string comparison, so "True" and "TRUE" will be "true"
-      value = value.toLowerCase();
-
-      if (value === 'true' || value === 'on' || value === 'yes' || value === '1') {
-        return true;
-      }
-      if (value === 'false' || value === 'off' || value === 'no' || value === '0') {
-        return false;
-      }
-    }
-
-    if (value) {
-      return true;
-    }
-    return false;
-  }
-
-  /*
-   * convert a variable to an integer
-   * note: bigint type will return null since we don't need to handles number that large
-   * returns null on failure (not a number, invalid type, etc)
-   */
-  returnInt(value, min, max) {
-    value = this.returnFloat(value, min, max);
-
-    if (typeof value !== 'number') {
-      return null;
-    }
-    
-    return Math.round(value);
-  }
-
-  /*
-   * convert a variable to an float (decimal)
-   * note: bigint type will return null since we don't need to handles number that large
-   * returns null on failure (not a number, invalid type, etc)
-   */
-  returnFloat(value, min, max) {
-    const valueType = typeof value;
-
-    if (valueType === 'string') {
-      if (isNaN(value)) {
-        return null;
-      }
-      value = parseFloat(value);
-    } else if (valueType === 'number') {
-      // the value is already a number, do nothing
-    } else {
-      // only a number or string can be passed
-      return null;
-    }
-
-    if (value >= min && value <= max) {
-      return value;
-    }
-
-    return null;
-  }
-
-  /*
-   * convert a variable to a string
-   * if doStringCleanup is set, trim and set lower case
-   */
-  returnString(value, doCleanup) {
-    const valueType = typeof value;
-
-    if (valueType === 'string') {
-      // already a string
-      const doCleanupType = typeof doCleanup;
-      if (doCleanupType === 'boolean' || doCleanupType === 'number') {
-        if (doCleanup) {
-          value = value.trim().toLowerCase();
-        }
-      }
-      return value;
-    } else if (valueType === 'number') {
-      return value.toString();
-    }
-
-    return null;
-  }
-
-  /*
-   * Load/initialize the slider
-   * sliderElem is the jQuery ul element
-   */
-  load(sliderElem) {
+  load(galleryElem) {
     // check if it was already loaded
     if (this.isLoaded) {
       return false;
     }
 
-    if (typeof sliderElem !== 'object') {
+    if (typeof galleryElem !== 'object') {
       return false;
     }
 
     // check that the element is an unordered list
-    const tagName = sliderElem.prop('tagName').toLowerCase();
-
+    const tagName = galleryElem.prop('tagName').toLowerCase();
     if (tagName !== 'ul') {
       this.consoleLogInfo(
-        'Riot Slider not loaded. tag is "' +
+        'Riot Gallery Viewer not loaded. tag is "' +
         tagName +
         '". must be "ul" (unordered list).'
       );
       return false;
     }
 
-    if (sliderElem.find('li').length < 1) {
-      this.consoleLogInfo('Riot Slider not loaded: No "li" (list item) found');
+    this.elems.gallery = galleryElem;
+
+    this.elems.linkContainers = this.elems.gallery.find('li');
+
+    if (this.elems.linkContainers < 1) {
+      this.consoleLogInfo('Riot Gallery Viewer not loaded: No "li" (list item) found');
       return false;
     }
 
     this.loadMaterialIconsIfNeeded();
 
-    this.loadOptions(sliderElem);
+    //this.loadOptions(galleryElem);
 
-    this.loadHtml(sliderElem);
+    //this.loadHtml(sliderElem);
 
-    this.updateWidth(true);
+    //this.updateWidth(true);
 
-    this.bindAll();
+    this.bindGalleryLinks();
 
     this.isLoaded = true;
 
@@ -269,304 +105,314 @@ class RiotGallery {
   }
 
   /*
-   * read settings/options from data attributes
-   */
-  loadOptions(elem) {
-    let attrName = 'data-do-console-log';
-    if (typeof elem.attr(attrName) !== 'undefined') {
-      this.setDoConsoleLog(elem.attr(attrName));
-    }
+  * Bind clicks to gallery images
+  */
+  bindGalleryLinks() {
+    for (let x = 0; x < this.elems.linkContainers.length; x++) {
+      var linkContainer = $(this.elems.linkContainers[x]);
 
-    attrName = 'data-use-material-icons';
-    if (typeof elem.attr(attrName) !== 'undefined') {
-      this.setUseMaterialIcons(elem.attr(attrName));
-    }
+      let href = '';
+      let caption = '';
+      let val = null;
+      let clickElem = null;
+      let elem = null;
 
-    attrName = 'data-theme';
-    if (typeof elem.attr(attrName) !== 'undefined') {
-      this.setTheme(elem.attr(attrName));
-    }
-
-    attrName = 'data-swipe-max-seconds';
-    if (typeof elem.attr(attrName) !== 'undefined') {
-      this.setSwipeMaxSeconds(elem.attr(attrName));
-    }
-
-    attrName = 'data-swipe-min-px';
-    if (typeof elem.attr(attrName) !== 'undefined') {
-      this.setSwipeMinPx(elem.attr(attrName));
-    }
-
-    attrName = 'data-swipe-min-percent';
-    if (typeof elem.attr(attrName) !== 'undefined') {
-      this.setSwipeMinPercent(elem.attr(attrName));
-    }
-
-    // check that additional additional data fields are not set. they could be used by the page, so it is
-    // not a definite error, but it is likely that an invalid or misspelled parameter was used
-    // ex "data-show-buttons" instead of "data-do-show-buttons"
-    // if possible issue is found, disply if console logging is turned on
-
-    const validData = ['data-do-console-log', 'data-use-material-icons', 
-      'data-swipe-max-seconds', 'data-swipe-min-px', 'data-swipe-min-percent'];
-
-    const attributes = elem[0].attributes;
-    for (const attribute in attributes) {
-      if (Object.prototype.hasOwnProperty.call(attributes, attribute)) {
-        // do stuff
-        const attr = attributes[attribute].name.toLowerCase();
-        if (attr.substring(0, 5) === 'data-') {
-          if (validData.indexOf(attr) < 0) {
-            this.consoleLogInfo('Possible error - container data field not recognized - ' + attr);
-          }
+      if (!href) {
+        elem = linkContainer.find('a[target="_blank"]');
+        val = this.getJqElemVal(elem, 'href');
+        if (val) {
+          href = val;
+          clickElem = elem;
         }
       }
+      if (!href) {
+        elem = linkContainer.find('a');
+        val = getJqElemVal(elem, 'href');
+        if (val) {
+          href = val;
+          clickElem = elem;
+        }
+      }
+      if (!href) {
+        elem = linkContainer.find('img');
+        val = this.getJqElemVal(elem, 'src');
+        if (val) {
+          href = val;
+          clickElem = elem;
+        }
+      }
+
+      if (href && clickElem) {
+        // only check for label and add event when link is found
+        if (!caption) {
+          caption = this.getJqElemVal(linkContainer.find('.caption'), 'text');
+          if (val) {
+            caption = val;
+          }
+        }
+        if (!caption) {
+          caption = this.getJqElemVal(linkContainer.find('figcaption'), 'text');
+          if (val) {
+            caption = val;
+          }
+        }
+        if (!caption) {
+          caption = this.getJqElemVal(linkContainer.find('span'), 'text');
+          if (val) {
+            caption = val;
+          }
+        }
+
+        // bind images in the gallery
+        this.galleryImages.push({ url: href, caption: caption });
+        const key = this.galleryImages.length - 1;
+        clickElem.on('click', { igvThis: this, key: key }, function (event) {
+          event.preventDefault();
+          event.stopPropagation();
+          event.data.igvThis.loadImg(event.data.key);
+        });
+      }
     }
+    this.imageCount = this.galleryImages.length;
   }
 
-  /*
-   * add new HTML elements, add classes to existing elements, and use selectors to save elements
-   */
-  loadHtml(sliderElem) {
-    
+  bindViewer() {
+    this.elems.prevCon.on('click', { igvThis: this }, function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.data.igvThis.prevClicked();
+    });
+    this.elems.nextCon.on('click', { igvThis: this }, function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.data.igvThis.nextClicked();
+    });
+    this.elems.image.on('click', { igvThis: this }, function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.data.igvThis.nextClicked();
+    });
+    this.elems.closeCon.on('click', { igvThis: this }, function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.data.igvThis.closeViewer();
+    });
+    this.elems.bg.on('click', { igvThis: this }, function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.data.igvThis.closeViewer();
+    });
+
+    this.elems.window.resize({ igvThis: this }, function (event) {
+      event.data.igvThis.consoleLogInfo('window resized');
+      event.data.igvThis.setWindowSize();
+      event.data.igvThis.positionImage();
+    });
   }
 
-  /*
-   * changes the width of the slide when the browser/window is resized
-   */
-  updateWidth(isInitial) {
-    if (typeof isInitial === 'undefined') {
-      isInitial = false;
-    }
-
-    let width = this.elems.main.width()
-    if (width === this.sliderWidth) {
-      return;
-    }
-
-    // reset the with of the inner-slider element. this will resize each
-    //    slide inside it
-    this.sliderWidth = width;
-    let sliderInnerWidth = this.sliderWidth * this.slideCount;
-    this.elems.slidesInner.css('width', sliderInnerWidth + 'px');
-
-    if (!isInitial) {
-      // reposition the slider so that the slide display correctly
-      // without this, the position will be wrong until the next slide loads
-      this.goToSlide();
-    }
-
-    this.consoleLogInfo('Riot Slider width set to ' + sliderInnerWidth);
+  setWindowSize() {
+    this.windowWidth = this.elems.window.width();
+    this.windowHeight = this.elems.window.height();
+    this.consoleLogInfo('set window size, width = ' + this.windowWidth + ' | height=' + this.windowHeight);
   }
 
-  /*
-   * remove the is-active class from a button after a pause.
-   * used on the stop, previous, and next buttons
-   */
-  removeActiveClassIn1Sec(element) {
-    setInterval(
-      function (element) {
-        element.removeClass('is-active')
-      },
-      1000,
-      element
-    );
+  closeViewer() {
+    this.elems.body.removeClass('riot-gallery-viewer-open');
+    this.isOpen = false;
+  }
+
+  prevClicked() {
+    this.loadImg(this.currentImageKey - 1);
+  }
+
+  nextClicked() {
+    this.loadImg(this.currentImageKey + 1);
   }
 
   /*
    * Bind actions to buttons and window resize
    */
-  bindAll() {
-    // browswer window resize
-    $(window).on('resize', { rsThis: this }, function (event) {
-      event.data.rsThis.updateWidth()
-    })
-    };
-
-    // vanilla javascript bind on swipe events
-    for (const x = 0; x < this.elems.slides.length; x++) {
-      this.elems.slides[x].params = { rsThis: this };
-      this.elems.slides[x].addEventListener("touchstart", function (event) {
-        //this
-        //}
-        event.preventDefault();
-        this.params.rsThis.slideSwipeStartEvent(event);
-
-      });
-      this.elems.slides[x].addEventListener("touchend", function (event) {
-        event.preventDefault();
-        this.params.rsThis.slideSwipeEndEvent(event);
-      });
+  loadImg(key) {
+    if (key < 0) {
+      key = this.imageCount - 1;
     }
-  }
-
-  /*
-  * Touchscreen swipe started
-  * save time in milliseconds and the X and Y position
-  */
-  slideSwipeStartEvent(event) {
-
-    const temp = this.getSwipeXYFromEvent(event);
-    const x = temp[0];
-    //const y = temp[1];
-
-    if (!x) {
-      this.swipeInfoReset();
-      this.consoleLogInfo('slideSwipeStartEvent - no position found, stop swipe action;');
-      return;
+    if (key >= this.imageCount) {
+      key = 0;
     }
 
-    const d = new Date();
+    this.currentImageKey = key;
 
-    this.swipeInfo.startX = x;
-    //this.swipeInfo.startY = y;
-    this.swipeInfo.startTime = d.getTime();
-
-    this.consoleLogInfo('slideSwipeStartEvent - position = ' + x);
-  }
-
-  /*
-  * Touchscreen swipe ended
-  * make sure the time and position is valid
-  * go to the next or previous slide
-  */
-  slideSwipeEndEvent(event) {
-
-    if (!this.swipeInfo.startX || !this.swipeInfo.startTime) {
-      this.swipeInfoReset();
-      this.consoleLogInfo('slideSwipeEndEvent - end swipe with no start swipe, stop swipe action');
-      return;
+    if (!this.isOpen) {
+      this.loadHtml();
+      this.elems.body.addClass('riot-gallery-viewer-open');
+      this.isOpen = true;
     }
 
-    const d = new Date();
-    const timeDif = d.getTime() - this.swipeInfo.startTime;
+    var img = new Image();
+    img.caption = '';
 
-    if (timeDif > this.options.swipeMaxSeconds * 1000) {
-      this.swipeInfoReset();
-      // too much time passed bewteen start and end. either event missed or very slow slide.
-      this.consoleLogInfo('slideSwipeEndEvent - slide time too long, stop swipe action, max seconds = '
-        + this.options.swipeMaxSeconds + ', seconds taken = ' + (timeDif/1000));
-      return;
-    }
-
-    const temp = this.getSwipeXYFromEvent(event);
-    const x = temp[0];
-    //const y = temp[1];
-
-    if (!x) {
-      this.swipeInfoReset();
-      this.consoleLogInfo('slideSwipeEndEvent - no position found, stop swipe action');
-      return;
-    }
-
-    const xDif = Math.abs(x - this.swipeInfo.startX);
-    //const yDif = Math.abs(y - this.swipeInfo.startY);
-
-    this.consoleLogInfo('slideSwipeEndEvent - x=' + xDif + 'px, time=' + timeDif + 'MS');
-
-
-    if (xDif < this.options.swipeMinPx) {
-      this.consoleLogInfo('slideSwipeEndEvent - xDif=' + xDif + ', < ' + this.options.swipeMinPx + ', check percednt');
-
-      const windowWidth = this.elems.main.width();
-      const widthPercent = xDif / windowWidth * 100;
-
-      if (widthPercent < this.options.swipeMinPercent) {
-        this.swipeInfoReset();
-        this.consoleLogInfo('slideSwipeEndEvent - xDif=' + xDif + ', windowWidth=' + windowWidth +
-          ', percent=' + (Math.round(widthPercent * 100) / 100) + '%, < 20%, stop swipe action');
-        return;
-      }
-    }
-
-    this.stopInterval()
-    if (x > this.swipeInfo.startX) {
-      this.consoleLogInfo('slideSwipeEndEvent - previous');
-      this.incrementSlideNumber(-1);
+    img.src = this.galleryImages[this.currentImageKey].url;
+    if (img.complete) {
+      this.imageLoaded(img);
     } else {
-      this.consoleLogInfo('slideSwipeEndEvent - next');
-      this.incrementSlideNumber();
-    }
-    this.goToSlide();
-  }
-
-  swipeInfoReset() {
-    this.swipeInfo.startX = null;
-    //this.swipeInfo.startY = null;
-    this.swipeInfo.startTime = null;
-  }
-
-  getSwipeXYFromEvent(event) {
-    if (event.TouchList) {
-      if (event.TouchList[0]) {
-        if (event.TouchList[0].screenX && event.TouchList[0].screenY) {
-          console.log('pageX', event.TouchList[0].pageX, vent.TouchList[0].pageY);
-          return [event.TouchList[0].pageX, vent.TouchList[0].pageY];
-        }
-      }
-    }
-
-    if (event.changedTouches) {
-      if (event.changedTouches[0]) {
-        if (event.changedTouches[0].screenX && event.changedTouches[0].screenX) {
-          console.log('pageX', event.changedTouches[0].screenX, event.changedTouches[0].screenY);
-          return [event.changedTouches[0].screenX, event.changedTouches[0].screenY];
-        }
-      }
-    }
-
-    return [null, null];
-  }
-
-  /*
-   * display the current slide
-   */
-  goToSlide() {
-    // change the left margin of the slider container so that that correct slide displays
-    const val = (this.currentSlideNumber - 1) * this.sliderWidth;
-    this.elems.slidesInner.css('margin-left', '-' + val + 'px');
-
-    if (this.elems.slideLinkNumbers) {
-      // remove the "is-active" class from all slide numbers
-      this.elems.slideLinkNumbers.removeClass('is-active');
-
-      // add the "is-active" class to the displaying slide number
-      $(this.elems.slideLinkNumbers[this.currentSlideNumber - 1]).addClass(
-        'is-active'
-      );
-    }
-
-    this.consoleLogInfo('slide loaded: ' + this.currentSlideNumber);
-  }
-
-
-  /*
-   * Increment the slide number
-   * usually the optional value is no passed to set +1 (next slide)
-   * -1 can be passed to go to the previous slide
-   */
-  incrementSlideNumber(increment) {
-    // set default value if needed
-    if (typeof increment === 'undefined') {
-      increment = 1;
-    }
-
-    // change the current sli
-    this.currentSlideNumber += increment;
-
-    // check if before the first slide, go to the last slide
-    // will happen when the "previous" button is clicked on the first slide
-    if (this.currentSlideNumber < 1) {
-      this.currentSlideNumber = this.slideCount;
-    }
-
-    // check if after the first slide, go to the first slide
-    // will happen when on the last slide and trying to move to the next slide
-    if (this.currentSlideNumber > this.slideCount) {
-      this.currentSlideNumber = 1;
+      this.imageLoadingStart();
+      img.rgvThis = this;
+      img.onload = function (e) {
+        this.rgvThis.imageLoaded(this);
+        this.rgvThis.imageLoadingDone();
+      };
     }
   }
 
+
+
+  imageLoaded(loadedImage) {
+    this.curImgWidth = loadedImage.width;
+    this.curImgHeight = loadedImage.height;
+    this.positionImage();
+    this.elems.image.attr('src', loadedImage.src);
+  };
+
+  loadHtml() {
+    if (this.isHtmlLoaded) {
+      return;
+    }
+
+    let html;
+
+    this.elems.body = $('body');
+    this.elems.window = $(window);
+
+    // background
+    html = '<div id="riot-gallery-viewer-bg"></div>';
+    this.elems.body.append(html);
+
+    // previous button
+    html = '<div id="riot-gallery-viewer-prev-con"><a href="#">&laquo;</a></div>';
+    this.elems.body.append(html);
+
+    // next button
+    html = '<div id="riot-gallery-viewer-next-con"><a href="#">&raquo;</a></div>';
+    this.elems.body.append(html);
+
+    html = '<div id="riot-gallery-viewer-image-con">' +
+      '<img>' +
+      '<div id="riot-gallery-viewer-loading"><div></div></div>' +
+      '</div>';
+    this.elems.body.append(html);
+
+    html = '<div id="riot-gallery-viewer-close-con"><a href="#">X</a></div>';
+    this.elems.body.append(html);
+
+    html = '<div id="riot-gallery-viewer-spinner">' +
+      '<div></div>' +
+      '<div></div>' +
+      '<div></div>' +
+      '<div></div>' +
+      '<div></div>' +
+      '<div></div>' +
+      '<div></div>' +
+      '<div></div>' +
+      '<div></div>' +
+      '<div></div>' +
+      '<div></div>' +
+      '<div></div>' +
+      '</div>';
+    this.elems.body.append(html);
+
+    this.elems.bg = $('#riot-gallery-viewer-bg');
+    this.elems.prevCon = $('#riot-gallery-viewer-prev-con');
+    this.elems.nextCon = $('#riot-gallery-viewer-next-con');
+    this.elems.imageCon = $('#riot-gallery-viewer-image-con');
+    this.elems.closeCon = $('#riot-gallery-viewer-close-con');
+    this.elems.loading = $('#riot-gallery-viewer-loading');
+    this.elems.image = this.elems.imageCon.find('img');
+
+    this.bindViewer();
+
+    this.setWindowSize();
+
+    this.isHtmlLoaded = true;
+  }
+
+  positionImage() {
+    let multiplier = 1;
+
+    let width = this.curImgWidth;
+    let height = this.curImgHeight;
+
+    const maxWidth = this.windowWidth - 14;
+    const maxHeight = this.windowHeight - 8;
+
+    if (width > maxWidth) {
+      width = maxWidth;
+      height = height / this.curImgWidth * width;
+    }
+    //console.log('width', width, 'height', height, 'maxWidth', maxWidth, 'maxHeight', maxHeight, 'newLeft');
+
+    if (height > maxHeight) {
+      height = maxHeight;
+      width = width / this.curImgHeight * height;
+    }
+
+    let newLeft = (this.windowWidth - width) / 2;
+    let newTop = (this.windowHeight - height) / 2;
+
+    this.elems.imageCon.css({ width: width + 'px', height: height + 'px', left: newLeft + 'px', top: newTop + 'px' });
+
+    this.curViewerWidth = width;
+    this.curViewerHeight = height;
+
+    //console.log('width', width, 'height', height, 'maxWidth', maxWidth, 'maxHeight', maxHeight, 'newLeft', newLeft, 'newTop', newTop);
+
+    newLeft = newLeft - 30;
+    newTop = newTop - 30;
+    if (newTop < 10) {
+      newTop = 10;
+    }
+    if (newLeft < 30) {
+      newLeft = 30;
+    }
+    this.elems.closeCon.css({ right: newLeft + 'px', top: newTop + 'px' });
+  }
+
+  imageLoadingStart() {
+
+    this.elems.imageCon.addClass('is-loading');
+
+    // defaults, will load if no image has been loaded yeat
+    if (!this.curImgHeight || !this.curImgWidth) {
+      this.curImgHeight = this.curImgWidth = 200;
+      this.positionImage();
+    }
+
+    // get shorter dimension
+    var minSide = this.curViewerWidth;
+    if (this.curViewerHeight < minSide) {
+      minSide = this.curViewerHeight;
+    }
+
+    const extraPadding = 20;
+
+    minSide = minSide - (extraPadding * 2);
+
+    const hMargin = (this.curViewerWidth - minSide) / 2;
+    const vMargin = (this.curViewerHeight - minSide) / 2;
+
+    this.elems.loading.css({
+      width: minSide + 'px',
+      height: minSide + 'px',
+      margin: vMargin + 'px ' + hMargin + 'px ' + vMargin + 'px ' + hMargin + 'px'
+    });
+  }
+
+  imageLoadingDone() {
+    this.elems.imageCon.removeClass('is-loading');
+  }
+
+  /*****************************************************************************
+  * start HELPER FUNCTIONS
+  ****************************************************************************/
 
   /*
    * load material icons from googleapis if needed
@@ -610,74 +456,81 @@ class RiotGallery {
     document.body.removeChild(spanElem);
   }
 
+  /*
+   * return the text or attribute from a jquery element
+   */
+  getJqElemVal(elem, attr, errorReturn) {
+
+    if (elem.length < 1) {
+      return errorReturn;
+    }
+
+    let val;
+
+    if (attr == 'text') {
+      val = elem.text();
+      if (!val) {
+        return errorReturn;
+      }
+      val = val.trim();
+      if (val.length < 1) {
+        return errorReturn;
+      }
+      return val;
+    }
+
+    val = elem.attr(attr);
+    if (!val) {
+      return errorReturn;
+    }
+    val = val.trim();
+    if (val.length < 1) {
+      return errorReturn;
+    }
+    return val;
+  }
+
+  /*
+  * write information to the console if doConsoleLog is true
+  */
+  consoleLogInfo(info) {
+    if (this.options.doConsoleLog) {
+      console.log(info);
+    }
+  }
+
   /*****************************************************************************
-   * BUTTON CLICK ACTIONS
-   ****************************************************************************/
-  /*
-   * changes the width of the slide when the browser/window is resized
-   */
-  slideNumberClicked(buttonClicked) {
-    this.stopInterval();
-    this.currentSlideNumber = parseInt($(buttonClicked).html());
-    this.goToSlide();
-  }
-
-
-  /*
-   * the previous button was clicked. got to the next slide
-   */
-  prevClicked() {
-    if (this.elems.prev) {
-      this.elems.prev.addClass('is-active');
-      this.removeActiveClassIn1Sec(this.elems.prev);
-    }
-    this.stopInterval();
-    this.incrementSlideNumber(-1);
-    this.goToSlide();
-  }
-
-  /*
-   * the previous button was clicked. got to the previous slide
-   */
-  nextClicked() {
-    if (this.elems.next) {
-      this.elems.next.addClass('is-active');
-      this.removeActiveClassIn1Sec(this.elems.next);
-    }
-    this.stopInterval();
-    this.incrementSlideNumber();
-    this.goToSlide();
-  }
+  * end HELPER FUNCTIONS
+  ****************************************************************************/
 }
 
 /*
- * check for jquery. load if needed. then load riot slider
+ * check for jquery. load if needed. then load riot gallery
  */
-
-// This will check if jQuery has loaded. If not, it will add to <head>
 window.onload = function () {
   if (!window.jQuery) {
     let head = document.getElementsByTagName('head')[0];
     let script = document.createElement('script');
     script.type = 'text/javascript';
-    script.src = RiotSlider.jqueryUrl;
+    script.src = RiotGalleryViewer.jqueryUrl;
     head.appendChild(script);
 
     let waitForJQuery = setInterval(function () {
       if (window.jQuery) {
         clearInterval(waitForJQuery);
-        riotSliderInitAll();
+        riotGalleryViewerInitAll();
       }
     }, 100);
   } else {
-    riotSliderInitAll();
+    riotGalleryViewerInitAll();
   }
 }
 
-function riotGalleryInitAll() {
+var globalRgv;
+function riotGalleryViewerInitAll() {
   $(document).ready(function () {
     $('.riot-gallery').each(function () {
-      new RiotGallery($(this));
+      globalRgv = new RiotGalleryViewer($(this));
     })
   })
 }
