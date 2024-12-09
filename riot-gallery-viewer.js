@@ -18,6 +18,8 @@ class RiotGalleryViewer {
     this.currentImageKey = null;
     this.curImgWidth = null;
     this.curImgHeight = null;
+    this.curViewerWidth = null;
+    this.curViewerHeight = null;
     this.windowWidth = null;
     this.windowHeight = null;
     this.elems = {
@@ -31,7 +33,8 @@ class RiotGalleryViewer {
       nextCon: null,
       imageCon: null,
       closeCon: null,
-      image: null
+      image: null,
+      loading: null
     };
     this.swipeInfo = {
       startX: null,
@@ -160,6 +163,7 @@ class RiotGalleryViewer {
           }
         }
 
+        // bind images in the gallery
         this.galleryImages.push({ url: href, caption: caption });
         const key = this.galleryImages.length - 1;
         clickElem.on('click', { igvThis: this, key: key }, function (event) {
@@ -260,6 +264,8 @@ class RiotGalleryViewer {
     }
   }
 
+
+
   imageLoaded(loadedImage) {
     this.curImgWidth = loadedImage.width;
     this.curImgHeight = loadedImage.height;
@@ -289,10 +295,29 @@ class RiotGalleryViewer {
     html = '<div id="riot-gallery-viewer-next-con"><a href="#">&raquo;</a></div>';
     this.elems.body.append(html);
 
-    html = '<div id="riot-gallery-viewer-image-con"><img></div>';
+    html = '<div id="riot-gallery-viewer-image-con">' +
+      '<img>' +
+      '<div id="riot-gallery-viewer-loading"><div></div></div>' +
+      '</div>';
     this.elems.body.append(html);
 
     html = '<div id="riot-gallery-viewer-close-con"><a href="#">X</a></div>';
+    this.elems.body.append(html);
+
+    html = '<div id="riot-gallery-viewer-spinner">' +
+      '<div></div>' +
+      '<div></div>' +
+      '<div></div>' +
+      '<div></div>' +
+      '<div></div>' +
+      '<div></div>' +
+      '<div></div>' +
+      '<div></div>' +
+      '<div></div>' +
+      '<div></div>' +
+      '<div></div>' +
+      '<div></div>' +
+      '</div>';
     this.elems.body.append(html);
 
     this.elems.bg = $('#riot-gallery-viewer-bg');
@@ -300,6 +325,7 @@ class RiotGalleryViewer {
     this.elems.nextCon = $('#riot-gallery-viewer-next-con');
     this.elems.imageCon = $('#riot-gallery-viewer-image-con');
     this.elems.closeCon = $('#riot-gallery-viewer-close-con');
+    this.elems.loading = $('#riot-gallery-viewer-loading');
     this.elems.image = this.elems.imageCon.find('img');
 
     this.bindViewer();
@@ -334,6 +360,9 @@ class RiotGalleryViewer {
 
     this.elems.imageCon.css({ width: width + 'px', height: height + 'px', left: newLeft + 'px', top: newTop + 'px' });
 
+    this.curViewerWidth = width;
+    this.curViewerHeight = height;
+
     //console.log('width', width, 'height', height, 'maxWidth', maxWidth, 'maxHeight', maxHeight, 'newLeft', newLeft, 'newTop', newTop);
 
     newLeft = newLeft - 30;
@@ -349,10 +378,36 @@ class RiotGalleryViewer {
 
   imageLoadingStart() {
 
+    this.elems.imageCon.addClass('is-loading');
+
+    // defaults, will load if no image has been loaded yeat
+    if (!this.curImgHeight || !this.curImgWidth) {
+      this.curImgHeight = this.curImgWidth = 200;
+      this.positionImage();
+    }
+
+    // get shorter dimension
+    var minSide = this.curViewerWidth;
+    if (this.curViewerHeight < minSide) {
+      minSide = this.curViewerHeight;
+    }
+
+    const extraPadding = 20;
+
+    minSide = minSide - (extraPadding * 2);
+
+    const hMargin = (this.curViewerWidth - minSide) / 2;
+    const vMargin = (this.curViewerHeight - minSide) / 2;
+
+    this.elems.loading.css({
+      width: minSide + 'px',
+      height: minSide + 'px',
+      margin: vMargin + 'px ' + hMargin + 'px ' + vMargin + 'px ' + hMargin + 'px'
+    });
   }
 
   imageLoadingDone() {
-
+    this.elems.imageCon.removeClass('is-loading');
   }
 
   /*****************************************************************************
@@ -471,10 +526,11 @@ window.onload = function () {
   }
 }
 
+var globalRgv;
 function riotGalleryViewerInitAll() {
   $(document).ready(function () {
     $('.riot-gallery').each(function () {
-      new RiotGalleryViewer($(this));
+      globalRgv = new RiotGalleryViewer($(this));
     })
   })
 }
