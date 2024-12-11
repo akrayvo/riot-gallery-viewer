@@ -155,6 +155,7 @@ ul.riot-gallery.riot-gallery-style li figcaption {
     max-width: 100%;
     max-height: 100%;
     text-align: center;
+    background-color:#FFF;
 }
 
 #riot-gallery-viewer-image-con img {
@@ -200,11 +201,35 @@ ul.riot-gallery.riot-gallery-style li figcaption {
     color: #002;
 }
 
+#riot-gallery-viewer-caption-con {
+    /* 2147483647 - 2 */
+    z-index: 2147483645;
+    position: fixed;
+    left: 10%;
+    bottom: 6px;
+    width: 80%;
+    text-align: center;
+    box-sizing: border-box;
+    text-align: center;
+    display: none;
+}
+
+#riot-gallery-viewer-caption {
+    display: inline-block;
+    margin: 0 auto;
+    background-color: #FFF;
+    padding: 6px 14px;
+    border: 2px solid #000;
+    border-radius: 10px;
+    color: #000;
+    font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+    font-size: 14px;
+}
 
 body.riot-gallery-viewer-open #riot-gallery-viewer-bg,
 body.riot-gallery-viewer-open #riot-gallery-viewer-image-con,
-body.riot-gallery-viewer-open #riot-gallery-viewer-label-con,
-body.riot-gallery-viewer-open #riot-gallery-viewer-close-con {
+body.riot-gallery-viewer-open #riot-gallery-viewer-close-con,
+body.riot-gallery-viewer-open #riot-gallery-viewer-caption-con.is-displayed {
     display: block;
 }
 
@@ -213,20 +238,22 @@ body.riot-gallery-viewer-open #riot-gallery-viewer-next-con {
     display: flex;
 }
 
+
+
 /*
 * STYLES FOR GENERATED HTML END
 */
 
 
-#riot-gallery-viewer-image-con.is-loading #riot-gallery-viewer-loading {
+body.riot-gallery-viewer-is-loading #riot-gallery-viewer-loading {
     display: block;
 }
 
-#riot-gallery-viewer-image-con.is-loading {
-    background-color: #FFF;
-}
-
-#riot-gallery-viewer-image-con.is-loading img {
+body.riot-gallery-viewer-open.riot-gallery-viewer-is-loading #riot-gallery-viewer-image-con img,
+body.riot-gallery-viewer-open.riot-gallery-viewer-is-loading #riot-gallery-viewer-prev-con,
+body.riot-gallery-viewer-open.riot-gallery-viewer-is-loading #riot-gallery-viewer-next-con,
+body.riot-gallery-viewer-open.riot-gallery-viewer-is-loading #riot-gallery-viewer-caption-con
+{
     display: none;
 }
 
@@ -235,15 +262,19 @@ body.riot-gallery-viewer-open #riot-gallery-viewer-next-con {
 */
 
 #riot-gallery-viewer-loading {
+    display: none;
     margin-left: 50px;
     width: 100px;
     height: 100px;
     border: 10px solid #BBB;
     border-top-color: #080;
     border-radius: 50%;
-    animation: riot-gallery-viewer-loading 1s ease infinite;
     box-sizing: border-box;
-    display:none;
+}
+
+body.riot-gallery-viewer-open.riot-gallery-viewer-is-loading #riot-gallery-viewer-loading {
+    display: block;
+    animation: riot-gallery-viewer-loading 1s ease infinite;
 }
 
 @keyframes riot-gallery-viewer-loading {
