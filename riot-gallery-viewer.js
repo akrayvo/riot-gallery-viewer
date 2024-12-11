@@ -1,3 +1,5 @@
+let globalVariable = null;
+
 class RiotGalleryViewer {
   static jqueryUrl =
     'https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js';
@@ -34,7 +36,9 @@ class RiotGalleryViewer {
       imageCon: null,
       closeCon: null,
       image: null,
-      loading: null
+      loading: null,
+      captionCon: null,
+      caption: null
     };
     this.swipeInfo = {
       startX: null,
@@ -52,6 +56,114 @@ class RiotGalleryViewer {
 
     this.load(elem);
   }
+
+  /*****************************************************************************
+    * start SET OPTIONS
+    ****************************************************************************/
+
+  /*
+   * set doConsoleLog option
+   * if set, information will be added to the console log
+   * generally only needed for testing/development
+   * default = false
+   */
+  setDoConsoleLog(value) {
+    this.options.doConsoleLog = this.returnBoolean(value);
+    this.consoleLogInfo('set doConsoleLog:');
+    this.consoleLogInfo(this.options.doConsoleLog);
+  }
+
+  /*
+   * set useMaterialIcons option
+   * if set, material icons will display for play, stop, previous, and next buttons
+   * if unavailable, they will automatically be added from fonts.googleapis.com
+   * default = true
+   */
+  setUseMaterialIcons(value) {
+    this.options.useMaterialIcons = this.returnBoolean(value);
+    this.consoleLogInfo('set useMaterialIcons:');
+    this.consoleLogInfo(this.options.useMaterialIcons);
+  }
+
+  /*
+   * set theme option
+   * current themes are "default", "dark", "pastel"
+   * the theme/color sceme of the slider
+   * default = normal
+   * */
+  setTheme(value) {
+    value = this.returnString(value, true);
+    if (typeof value !== 'string') {
+      // return value will be set to null on error
+      return;
+    }
+    if (this.validThemes.indexOf(value) < 0) {
+      this.consoleLogInfo('invalid value sent to setTheme: ' + value);
+      return;
+    }
+    this.consoleLogInfo('set theme: ' + value);
+    this.options.theme = value;
+  }
+
+  /*
+   * set swipeMaxSeconds option
+  * the max time in seconds between the start and end swipe on a touchscreen
+  * can be a decimal (ex: 0.7 or 1.25)
+  * if the time is too long, it is likely that the user isn't swiping or there was a missed event
+  * value must be between 0.1 (100 milliseconds) and 5
+  * default = 0.9 (900 milliseconds)
+  */
+  setSwipeMaxSeconds(value) {
+    value = this.returnFloat(value, 1, 5000);
+    if (typeof value !== 'number') {
+      return;
+    }
+
+    this.consoleLogInfo('set swipeMaxSeconds: ' + value);
+    this.options.swipeMaxSeconds = value;
+  }
+
+  /*
+   * set setSwipeMinPx option
+   * the minimum number of pixels for a swipe on touchscreen
+   * used with data-swipe-min-percent. if data-swipe-min-px check fails, 
+   *  swipe will still work if the data-swipe-min-percent check succeeds
+   * value must be between 1 and 3000
+   * default = 60
+   */
+  setSwipeMinPx(value) {
+    value = this.returnInt(value, 1, 3000);
+    if (typeof value !== 'number') {
+      return;
+    }
+
+    this.consoleLogInfo('set setSwipeMinPx: ' + value);
+    this.options.swipeMinPx = value;
+  }
+
+  /*
+   * set swipeMinPercent option
+   * the minimum percent of horizontal pixels for a swipe on touchscreen
+   * the percentage of the swipe compared to the full slider width
+   * makes it easier to recognize swipes on smaller screens
+   * used with data-swipe-min-px. if data-swipe-min-px check is successful, 
+   * 	data-swipe-min-percent is not checked
+   * value must be between 1 and 100
+   * default = 13
+   */
+  setSwipeMinPercent(value) {
+    value = this.returnInt(value, 1, 100);
+    if (typeof value !== 'number') {
+      return;
+    }
+
+    this.consoleLogInfo('set swipeMinPercent: ' + value);
+    this.options.swipeMinPercent = value;
+  }
+
+  /*****************************************************************************
+    * end SET OPTIONS
+    ****************************************************************************/
 
   /*
    * Load/initialize the gallery viewer
@@ -88,12 +200,6 @@ class RiotGalleryViewer {
     }
 
     this.loadMaterialIconsIfNeeded();
-
-    //this.loadOptions(galleryElem);
-
-    //this.loadHtml(sliderElem);
-
-    //this.updateWidth(true);
 
     this.bindGalleryLinks();
 
@@ -144,27 +250,52 @@ class RiotGalleryViewer {
 
       if (href && clickElem) {
         // only check for label and add event when link is found
+
         if (!caption) {
-          caption = this.getJqElemVal(linkContainer.find('.caption'), 'text');
-          if (val) {
-            caption = val;
-          }
-        }
-        if (!caption) {
-          caption = this.getJqElemVal(linkContainer.find('figcaption'), 'text');
-          if (val) {
-            caption = val;
-          }
-        }
-        if (!caption) {
-          caption = this.getJqElemVal(linkContainer.find('span'), 'text');
+          val = this.getJqElemVal(clickElem, 'data-caption');
           if (val) {
             caption = val;
           }
         }
 
+        if (!caption) {
+          val = this.getJqElemVal(linkContainer.find('.caption'), 'text');
+          if (val) {
+            caption = val;
+          }
+        }
+        if (!caption) {
+          val = this.getJqElemVal(linkContainer.find('figcaption'), 'text');
+          if (val) {
+            caption = val;
+          }
+        }
+        if (!caption) {
+          val = this.getJqElemVal(linkContainer.find('span'), 'text');
+          if (val) {
+            caption = val;
+          }
+        }
+
+        let imgElem = clickElem.find('img');
+        if (imgElem) {
+          if (!caption) {
+            val = this.getJqElemVal(imgElem, 'alt');
+            if (val) {
+              caption = val;
+            }
+          }
+          if (!caption) {
+            val = this.getJqElemVal(imgElem, 'title');
+            if (val) {
+              caption = val;
+            }
+          }
+        }
+
         // bind images in the gallery
         this.galleryImages.push({ url: href, caption: caption });
+        console.log(this.galleryImages);
         const key = this.galleryImages.length - 1;
         clickElem.on('click', { igvThis: this, key: key }, function (event) {
           event.preventDefault();
@@ -187,11 +318,6 @@ class RiotGalleryViewer {
       event.stopPropagation();
       event.data.igvThis.nextClicked();
     });
-    this.elems.image.on('click', { igvThis: this }, function (event) {
-      event.preventDefault();
-      event.stopPropagation();
-      event.data.igvThis.nextClicked();
-    });
     this.elems.closeCon.on('click', { igvThis: this }, function (event) {
       event.preventDefault();
       event.stopPropagation();
@@ -207,6 +333,23 @@ class RiotGalleryViewer {
       event.data.igvThis.consoleLogInfo('window resized');
       event.data.igvThis.setWindowSize();
       event.data.igvThis.positionImage();
+    });
+
+    this.elems.image.on('click', { igvThis: this }, function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.data.igvThis.nextClicked();
+    });
+
+    let jsImgElem = this.elems.image[ 0 ];
+    jsImgElem.params = { igvThis: this };
+    jsImgElem.addEventListener("touchstart", function (event) {
+      event.preventDefault();
+      this.params.igvThis.slideSwipeStartEvent(event);
+    });
+    jsImgElem.addEventListener("touchend", function (event) {
+      event.preventDefault();
+      this.params.igvThis.slideSwipeEndEvent(event);
     });
   }
 
@@ -249,7 +392,6 @@ class RiotGalleryViewer {
     }
 
     var img = new Image();
-    img.caption = '';
 
     img.src = this.galleryImages[this.currentImageKey].url;
     if (img.complete) {
@@ -257,21 +399,40 @@ class RiotGalleryViewer {
     } else {
       this.imageLoadingStart();
       img.rgvThis = this;
+
+      console.log('start load');
       img.onload = function (e) {
-        this.rgvThis.imageLoaded(this);
-        this.rgvThis.imageLoadingDone();
+        console.log(e);
+        console.log(this);
+        globalVariable = this;
+        setTimeout(function () {
+          console.log(globalVariable);
+          globalVariable.rgvThis.imageLoaded(globalVariable);
+          globalVariable.rgvThis.imageLoadingDone();
+        }, 4000);
+        //this.rgvThis.imageLoaded(this);
+        //this.rgvThis.imageLoadingDone();
       };
+
     }
   }
-
-
 
   imageLoaded(loadedImage) {
     this.curImgWidth = loadedImage.width;
     this.curImgHeight = loadedImage.height;
     this.positionImage();
     this.elems.image.attr('src', loadedImage.src);
+    this.displayCaption();
   };
+
+  displayCaption() {
+    if (this.galleryImages[this.currentImageKey].caption) {
+      this.elems.caption.html(this.galleryImages[this.currentImageKey].caption);
+      this.elems.captionCon.addClass('is-displayed');
+    } else {
+      this.elems.captionCon.removeClass('is-displayed');
+    }
+  }
 
   loadHtml() {
     if (this.isHtmlLoaded) {
@@ -304,29 +465,18 @@ class RiotGalleryViewer {
     html = '<div id="riot-gallery-viewer-close-con"><a href="#">X</a></div>';
     this.elems.body.append(html);
 
-    html = '<div id="riot-gallery-viewer-spinner">' +
-      '<div></div>' +
-      '<div></div>' +
-      '<div></div>' +
-      '<div></div>' +
-      '<div></div>' +
-      '<div></div>' +
-      '<div></div>' +
-      '<div></div>' +
-      '<div></div>' +
-      '<div></div>' +
-      '<div></div>' +
-      '<div></div>' +
-      '</div>';
+    html = '<div id="riot-gallery-viewer-caption-con"><div id="riot-gallery-viewer-caption"></div</div>';
     this.elems.body.append(html);
 
     this.elems.bg = $('#riot-gallery-viewer-bg');
     this.elems.prevCon = $('#riot-gallery-viewer-prev-con');
     this.elems.nextCon = $('#riot-gallery-viewer-next-con');
     this.elems.imageCon = $('#riot-gallery-viewer-image-con');
+    this.elems.image = this.elems.imageCon.find('img');
     this.elems.closeCon = $('#riot-gallery-viewer-close-con');
     this.elems.loading = $('#riot-gallery-viewer-loading');
-    this.elems.image = this.elems.imageCon.find('img');
+    this.elems.captionCon = $('#riot-gallery-viewer-caption-con');
+    this.elems.caption = $('#riot-gallery-viewer-caption');
 
     this.bindViewer();
 
@@ -341,8 +491,8 @@ class RiotGalleryViewer {
     let width = this.curImgWidth;
     let height = this.curImgHeight;
 
-    const maxWidth = this.windowWidth - 14;
-    const maxHeight = this.windowHeight - 8;
+    const maxWidth = this.windowWidth - 40;
+    const maxHeight = this.windowHeight - 24;
 
     if (width > maxWidth) {
       width = maxWidth;
@@ -378,7 +528,7 @@ class RiotGalleryViewer {
 
   imageLoadingStart() {
 
-    this.elems.imageCon.addClass('is-loading');
+    this.elems.body.addClass('riot-gallery-viewer-is-loading');
 
     // defaults, will load if no image has been loaded yeat
     if (!this.curImgHeight || !this.curImgWidth) {
@@ -402,12 +552,126 @@ class RiotGalleryViewer {
     this.elems.loading.css({
       width: minSide + 'px',
       height: minSide + 'px',
-      margin: vMargin + 'px ' + hMargin + 'px ' + vMargin + 'px ' + hMargin + 'px'
+      margin: vMargin + 'px ' + hMargin + 'px'
     });
   }
 
   imageLoadingDone() {
-    this.elems.imageCon.removeClass('is-loading');
+    this.elems.body.removeClass('riot-gallery-viewer-is-loading');
+  }
+
+  /*
+  * Touchscreen swipe started
+  * save time in milliseconds and the X and Y position
+  */
+  slideSwipeStartEvent(event) {
+
+    const temp = this.getSwipeXYFromEvent(event);
+    const x = temp[0];
+    //const y = temp[1];
+
+    if (!x) {
+      this.swipeInfoReset();
+      this.consoleLogInfo('slideSwipeStartEvent - no position found, stop swipe action;');
+      return;
+    }
+
+    const d = new Date();
+
+    this.swipeInfo.startX = x;
+    //this.swipeInfo.startY = y;
+    this.swipeInfo.startTime = d.getTime();
+
+    this.consoleLogInfo('slideSwipeStartEvent - position = ' + x);
+  }
+
+  /*
+  * Touchscreen swipe ended
+  * make sure the time and position is valid
+  * go to the next or previous slide
+  */
+  slideSwipeEndEvent(event) {
+
+    if (!this.swipeInfo.startX || !this.swipeInfo.startTime) {
+      this.swipeInfoReset();
+      this.consoleLogInfo('slideSwipeEndEvent - end swipe with no start swipe, stop swipe action');
+      return;
+    }
+
+    const d = new Date();
+    const timeDif = d.getTime() - this.swipeInfo.startTime;
+
+    if (timeDif > this.options.swipeMaxSeconds * 1000) {
+      this.swipeInfoReset();
+      // too much time passed bewteen start and end. either event missed or very slow slide.
+      this.consoleLogInfo('slideSwipeEndEvent - slide time too long, stop swipe action, max seconds = '
+        + this.options.swipeMaxSeconds + ', seconds taken = ' + (timeDif / 1000));
+      return;
+    }
+
+    const temp = this.getSwipeXYFromEvent(event);
+    const x = temp[0];
+    //const y = temp[1];
+
+    if (!x) {
+      this.swipeInfoReset();
+      this.consoleLogInfo('slideSwipeEndEvent - no position found, stop swipe action');
+      return;
+    }
+
+    const xDif = Math.abs(x - this.swipeInfo.startX);
+    //const yDif = Math.abs(y - this.swipeInfo.startY);
+
+    this.consoleLogInfo('slideSwipeEndEvent - x=' + xDif + 'px, time=' + timeDif + 'MS');
+
+
+    if (xDif < this.options.swipeMinPx) {
+      this.consoleLogInfo('slideSwipeEndEvent - xDif=' + xDif + ', < ' + this.options.swipeMinPx + ', check percednt');
+
+      const windowWidth = this.elems.main.width();
+      const widthPercent = xDif / windowWidth * 100;
+
+      if (widthPercent < this.options.swipeMinPercent) {
+        this.swipeInfoReset();
+        this.consoleLogInfo('slideSwipeEndEvent - xDif=' + xDif + ', windowWidth=' + windowWidth +
+          ', percent=' + (Math.round(widthPercent * 100) / 100) + '%, < 20%, stop swipe action');
+        return;
+      }
+    }
+
+    if (x > this.swipeInfo.startX) {
+      this.consoleLogInfo('slideSwipeEndEvent - previous');
+      this.nextClicked();
+    } else {
+      this.consoleLogInfo('slideSwipeEndEvent - next');
+      this.prevClicked();
+    }
+  }
+
+  swipeInfoReset() {
+    this.swipeInfo.startX = null;
+    //this.swipeInfo.startY = null;
+    this.swipeInfo.startTime = null;
+  }
+
+  getSwipeXYFromEvent(event) {
+    if (event.TouchList) {
+      if (event.TouchList[0]) {
+        if (event.TouchList[0].screenX && event.TouchList[0].screenY) {
+          return [event.TouchList[0].pageX, vent.TouchList[0].pageY];
+        }
+      }
+    }
+
+    if (event.changedTouches) {
+      if (event.changedTouches[0]) {
+        if (event.changedTouches[0].screenX && event.changedTouches[0].screenX) {
+          return [event.changedTouches[0].screenX, event.changedTouches[0].screenY];
+        }
+      }
+    }
+
+    return [null, null];
   }
 
   /*****************************************************************************
