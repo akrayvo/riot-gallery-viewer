@@ -27,8 +27,8 @@ $images = array(
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Riot Gallery Viewer - Test</title>
-    <link rel="stylesheet" href="../example-styles.css?x=<?php echo time(); ?>">
-    <link rel="stylesheet" href="../../riot-gallery-viewer.css?x=<?php echo time(); ?>">
+    <link rel="stylesheet" href="./../example-pages.css?x=<?php echo time(); ?>">
+    <link rel="stylesheet" href="./../../riot-gallery-viewer.css?x=<?php echo time(); ?>">
 </head>
 
 <body>
@@ -36,11 +36,11 @@ $images = array(
         <h1>Riot Gallery Viewer - Test</h1>
 
         <h2>riot-gallery-1 - div - sent an array of images with no caption</h2>
-        <ul class="riot-gallery">
+        <ul class="riot-gallery riot-gallery-default">
             <?php
             foreach ($images as $image) {
                 $caption = ucwords(str_replace('-', ' ', $image));
-                echo '<li><figure><img src="./../'.$image.'_thumb.jpg"><figcaption>'.$caption.'</figcaption></li>';
+                echo '<li><figure><img src="./../images/'.$image.'_thumb.jpg"><figcaption>'.$caption.'</figcaption></li>';
             }
             ?>
         </ul>
@@ -75,7 +75,7 @@ $images = array(
 
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="../../riot-gallery-viewer.js?x=<?php echo time(); ?>"></script>
+    <script src="./../../riot-gallery-viewer.js?x=<?php echo time(); ?>"></script>
     <script>
     let images;
     // class
