@@ -35,7 +35,7 @@ $images = array(
     <div id="page-content">
         <h1>Riot Gallery Viewer - Test</h1>
 
-        <h2>riot-gallery-1 - div - sent an array of images with no caption</h2>
+        <?php /*<h2>riot-gallery-1 - div - sent an array of images with no caption</h2>
         <ul class="riot-gallery riot-gallery-default">
             <?php
             foreach ($images as $image) {
@@ -43,12 +43,17 @@ $images = array(
                 echo '<li><figure><img src="./../images/'.$image.'_thumb.jpg"><figcaption>'.$caption.'</figcaption></li>';
             }
             ?>
-        </ul>
+        </ul>*/ ?>
 
-        <h2>riot-gallery-1 - div - sent an array of images with no caption</h2>
-        <div id="riot-gallery-1"></div>
+        <h2>riot-gallery-1 - ul - sent an array of images strings (not objects)</h2>
+        <ul id="riot-gallery-1" class="riot-gallery-dark"></ul>
 
         <br><br>
+
+        <h2>riot-gallery-1b - div - sent an array of images strings (not objects)</h2>
+        <div id="riot-gallery-1b"></div>
+
+        <br><br>        
 
         <h2>riot-gallery-2 - table - sent an array of images with captions</h2>
         <table id="riot-gallery-2"></table>
@@ -56,7 +61,7 @@ $images = array(
         <br><br>
 
         <h2>riot-gallery-3 - ul - sent an array of images with thumbnails and captions</h2>
-        <ul id="riot-gallery-3"></ul>
+        <div id="riot-gallery-3"></div>
 
         <br><br>
 
@@ -87,31 +92,32 @@ $images = array(
             echo 'images.push("./../images/'.htmlentities($image).'.jpg");'."\n";
         } ?>
     console.log(images);
-    //RiotGalleryViewer.buildGallery('riot-gallery-1', images);
+    RiotGalleryViewer.addGallery('riot-gallery-1', images);
+    //RiotGalleryViewer.addGallery('riot-gallery-1b', images);
 
     images = [];
     <?php
         foreach ($images as $image) {
             $caption = ucwords(str_replace('-', ' ', $image));
-            echo 'images.push("./../images/'.htmlentities($image).'.jpg", "", "'.htmlentities($image).'");'."\n";
+            echo 'images.push(["./../images/'.htmlentities($image).'.jpg", "", "'.htmlentities($caption).'"]);'."\n";
         } ?>
     console.log(images);
-    //RiotGalleryViewer.buildGallery('riot-gallery-2', images);
+    //RiotGalleryViewer.addGallery('riot-gallery-2', images);
 
     images = [];
     <?php
         foreach ($images as $image) {
             $caption = ucwords(str_replace('-', ' ', $image));
-            echo 'images.push("./../images/'.htmlentities($image).'.jpg", "", "./../images/'.htmlentities($image).'_thumb.jpg", "'.htmlentities($image).'");'."\n";
+            echo 'images.push(["./../images/'.htmlentities($image).'.jpg", "./../images/'.htmlentities($image).'_thumb.jpg", "'.htmlentities($image).'"]);'."\n";
         } ?>
     console.log(images);
-    //RiotGalleryViewer.buildGallery('riot-gallery-3', images);
+    //RiotGalleryViewer.addGallery('riot-gallery-3', images);
 
-    //RiotGalleryViewer.buildGallery('riot-gallery-4', images);
+    //RiotGalleryViewer.addGallery('riot-gallery-4', images);
 
-    //RiotGalleryViewer.buildGallery('riot-gallery-5', images);
+    //RiotGalleryViewer.addGallery('riot-gallery-5', images);
 
-    //RiotGalleryViewer.buildGallery('riot-gallery-6', images);
+    RiotGalleryViewer.addGallery('riot-gallery-6', images);
     </script>
 </body>
 
