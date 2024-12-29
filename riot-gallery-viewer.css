@@ -20,8 +20,9 @@ ul.riot-gallery-style {
     flex-wrap: wrap;
     list-style-type: none;
     margin: 0;
-    padding: 0;
+    padding: 4px;
     width: 100%;
+    min-width:170px;
     box-sizing: border-box;
     background-color: #FFF;
 }
@@ -31,16 +32,18 @@ ul.riot-gallery-style.riot-gallery-dark {
 }
 
 ul.riot-gallery-style li {
-    width: 220px;
+    /*width: 220px;*/
+    width: 19%;
+    min-width:140px;
     min-height: 200px;
+    max-width:240px;
     box-sizing: border-box;
     padding: 10px;
-    margin: 4px;
+    margin: 6px 0.5%;
     align-items: center;
     justify-content: center;
     display: flex;
     position: relative;
-    
     border-radius: 8px;
     overflow: hidden;
     font-family: Verdana, Geneva, sans-serif;
@@ -48,6 +51,34 @@ ul.riot-gallery-style li {
     background-color: #DDD;
     border: 1px solid #000;
 }
+
+
+@media screen and (max-width: 420px) {
+    ul.riot-gallery-style li {
+        width: 99%;
+    }
+}
+@media screen and (min-width: 420px) and (max-width: 650px) {
+    ul.riot-gallery-style li {
+        width: 49%;
+    }
+}
+@media screen and (min-width: 650px) and (max-width: 850px) {
+    ul.riot-gallery-style li {
+        width: 32.3333%;
+    }
+}
+@media screen and (min-width: 850px) and (max-width: 1050px) {
+    ul.riot-gallery-style li {
+        width: 24%;
+    }
+}
+/* For Mobile 
+For Mobile Devices – 320px — 480px
+iPads and Tablets – 481px — 768px
+Laptops and small screen – 769px — 1024px
+Large screens and Desktops – 1025px — 1200px
+TV and Extra Large Screens – 1201px and more*/
 
 ul.riot-gallery-style.riot-gallery-dark li {
     background-color: #222;
