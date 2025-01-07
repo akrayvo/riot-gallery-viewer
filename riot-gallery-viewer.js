@@ -4,87 +4,123 @@
  * load a viewer with previous/next buttons to view each image in the gallery
  */
 
-class RiotGalleryViewer {
+RiotGalleryViewer = {
 
-    static galleriesToBulidAr = [];
+    galleries: [],
+
+    galleryTemplate: {
+        elementId: null,
+        elem: null,
+        initImages: null,
+        images: null,
+        initOptions: null,
+        options:null,
+        isHtmlBuilt: false,
+        isLoaded: false
+    },
 
     /*****************************************************************************
      *****************************************************************************
      * Initialization - START */
 
-    static initialize() {
+    initialize() {
         console.log('static initialize() {');
         // include jquery here if not available
-        RiotGalleryViewer.buildGalleries();
-    }
+        this.buildGalleries();
+    },
 
-    static buildGalleries() {
+    buildGalleries() {
         console.log('static buildGalleries() {');
-        console.log('RiotGalleryViewer.galleriesToBulidAr', RiotGalleryViewer.galleriesToBulidAr);
-        console.log('RiotGalleryViewer.galleriesToBulidAr.length', RiotGalleryViewer.galleriesToBulidAr.length);
-        for (let x = 0; x < RiotGalleryViewer.galleriesToBulidAr.length; x++) {
-            console.log('gallery in loop', RiotGalleryViewer.galleriesToBulidAr[x]);
-            RiotGalleryViewer.buildGallery(RiotGalleryViewer.galleriesToBulidAr[x]);
+        console.log('this.galleries', this.galleries);
+        console.log('this.galleries.length', this.galleries.length);
+        for (let x = 0; x < this.galleries.length; x++) {
+            if (!this.galleries[x].isHtmlBuilt) {
+                console.log('gallery in loop', this.galleries[x]);
+                this.buildGallery(x);
+            }
         }
-    }
+    },
 
-    static buildGallery(gallery) {
-        console.log('static buildGallery(gallery) {', gallery);
-        let elem = $('#' + gallery.elementId).first();
+    buildGallery(x) {
+        if (!this.galleries[x]) {
+            return;
+        }
+        console.log('static buildGallery(gallery) {', this.galleries[x]);
+        //let elem = $('#' + gallery.elementId).first();
+        let elem = document.getElementById(this.galleries[x].elementId);
         if (!elem) {
             return false;
         }
-        if (elem.length < 1) {
-            return false;
-        }
 
-        const tagName = RiotGalleryViewer.getElementTagName(elem);
+        const tagName = this.getElementTagName(elem);
+
+        let ulElem = null;
 
         if (tagName === 'ul' || tagName === 'ol') {
-            console.log('do nothing. we\'re already in a list');
+            console.log('we\'re already in a list. make sure class is set');
+            ulElem = elem;
+            ulElem = this.elemAddClass(elem, 'riot-gallery-style');
             // do nothing. we're already in a list
         } else if (tagName === 'div') {
             console.log('insert here');
-            let tempElem = $('<ul></ul>');
-            console.log(1, tempElem);
-            console.log(2, elem);
-            elem.html(tempElem);
-            elem = tempElem;
-            console.log(3, elem);
+            //let tempElem = $('<ul></ul>');
+            ulElem = document.createElement('ul');
+            ulElem.className = 'riot-gallery-style';
+            elem.innerHTML = '';
+            elem.appendChild(ulElem);
         } else {
             console.log('not list or div');
-            let tempElem = $('<ul></ul>');
-            console.log(1, tempElem);
-            console.log(2, elem);
-            tempElem.insertAfter(elem);
-            elem = tempElem;
-            console.log(3, elem);
+            ulElem = document.createElement('ul');
+            ulElem.className = 'riot-gallery-style';
+            this.insertAfter(elem, ulElem);
         }
 
-        elem.addClass('riot-gallery-style');
+        //elem.addClass('riot-gallery-style');
+        
 
-        let html;
+        //let html;
         console.log('tagName', tagName);
+        
+        let images = [];
         console.log('images', images);
-        for (let x = 0; x < gallery.images.length; x++) {
-            const img = RiotGalleryViewer.buildGalleryImageInfo(gallery.images[x]);
+        for (let y = 0; y < this.galleries[x].initImages.length; y++) {
+            const img = this.buildGalleryImageInfo(this.galleries[x].initImages[y]);
             if (!img) {
                 continue;
             }
             console.log(img);
 
-            html = '<li><a href="' + img.url + '" target="_blank"><img src="' + img.thumbUrl + '"></a>';
+            let liElem = document.createElement('li');
+            let aElem = document.createElement('a')
+            aElem.href = img.url;
+            aElem.setAttribute('target', '_blank');
+            let imgElem = document.createElement('img');
+            imgElem.src = img.thumbUrl;
+            aElem.appendChild(imgElem);
+            liElem.appendChild(aElem);
+            if (img.caption) {
+                let divCapElem = document.createElement('div');
+                divCapElem.innerHTML = img.caption;
+                divCapElem.className = "riot-gallery-image-caption";
+                liElem.appendChild(divCapElem);
+            }
+            ulElem.appendChild(liElem);
+
+            images.push(img);
+            /*html = '<li><a href="' + img.url + '" target="_blank"><img src="' + img.thumbUrl + '"></a>';
             if (img.caption) {
                 html += '<div class="riot-gallery-image-caption">'+img.caption+'</div>';    
             }
             html += '</li>';
-            elem.append(html);
+            elem.append(html);*/
         }
-    }
+        this.galleries[x].isHtmlBuilt = true;
+        this.galleries[x].images = images;
+    },
 
-    static buildGalleryImageInfo(img) {
-        console.log('---------------');
-        console.log('img', img);
+    buildGalleryImageInfo(img) {
+        //console.log('---------------');
+        //console.log('img', img);
         let info = { url: null, thumbUrl: null, caption: null };
         if (typeof img === 'string') {
             info.url = img;
@@ -119,9 +155,9 @@ class RiotGalleryViewer {
         if (!info.url) {
             return null;
         }
-        console.log(info);
+        //console.log(info);
         return info;
-    }
+    },
 
     /* Initialization - END
     *****************************************************************************
@@ -131,14 +167,14 @@ class RiotGalleryViewer {
      *****************************************************************************
      * Create html image gallery through class - START */
 
-    static addGallery(elementId, images, options) {
+    addGallery(elementId, images, options) {
 
         // validate element id.
         if (typeof elementId !== 'number') {
             // the elementid is a number, convert to string
             elementId = elementId.toString();
         }
-        /*const tagName = RiotGalleryViewer.getTagNameFromIdJs(elementId);
+        /*const tagName = this.getTagNameFromIdJs(elementId);
         if (!tagName) {
             console.log('addGallery error 1');
             // element not found
@@ -151,8 +187,11 @@ class RiotGalleryViewer {
         }
         let elem = document.getElementById(elementId);
         if (!elem) {
+            // the element is not found
             let pageText = document.body.textContent;
             if (pageText.includes('[' + elementId + ']')) {
+                // the element text in the code, formatted with square brackets, ex "[my-gallery]"
+                // replace with an html element
                 document.body.innerHTML = document.body.innerHTML.replace(
                     '[' + elementId + ']',
                     '<div id="' + elementId + '"></div>');
@@ -167,12 +206,12 @@ class RiotGalleryViewer {
         // validate image array
         if (typeof images !== 'object') {
             console.log('addGallery error 3', typeof images);
-            // no image passed
+            // images are not in an array
             return false;
         }
         if (images.length < 1) {
             console.log('addGallery error 4');
-            // no images passed
+            // no images are in the passed array
             return false;
         }
 
@@ -187,17 +226,22 @@ class RiotGalleryViewer {
             return false;
         }
 
-        RiotGalleryViewer.galleriesToBulidAr.push({ elementId: elementId, images: images, options: options });
-        console.log(RiotGalleryViewer.galleriesToBulidAr);
+        const info = Object.assign({}, this.galleryTemplate);        
+        info.elementId = elementId;
+        info.initImages = images;
+        info.initOptions = options;
+
+        this.galleries.push(info);
+        console.log(this.galleries);
         /*let elem = $('#' + galleryElementId);
 
-        const tagName = RiotGalleryViewer.getElementTag(elem);
+        const tagName = this.getElementTag(elem);
 
         if (!tagName) {
             // could not get the tag name.
             return false;
         }*/
-    }
+    },
 
     /* Create html image gallery through class - END
     *****************************************************************************
@@ -249,30 +293,87 @@ class RiotGalleryViewer {
     /*
      * get the tag name (a, img, table, ul, li) from a jquery element
      */
-    static getElementTagName(elem) {
+    getElementTagName(elem) {
         if (!elem) {
             // invalid jquery element
             return null;
         }
 
-        if (!(elem instanceof jQuery)) {
-            // no a jquery object
+        //if (!(elem instanceof jQuery)) {
+        //    // no a jquery object
+        //    return null;
+        //}
+
+        if (!this.isDomElement(elem)) {
+            // not a dom element
             return null;
         }
 
-        if (elem.length < 1) {
+        console.log(elem);
+
+        /*if (elem.length < 1) {
             // element not found
             return null;
-        }
+        }*/
 
-        const tagName = elem.prop('tagName');
-
-        if (!tagName) {
+        if (!elem.tagName) {
             // could not retrieve tag name
             return null;
         }
 
-        return tagName.trim().toLowerCase();
+        return elem.tagName.trim().toLowerCase();
+    },
+
+    getElemClassArray(elem) {
+        let classes = [];
+
+        if (!elem) {
+            return classes;
+        }
+        
+        if (!elem.className) {
+            return classes;
+        }
+
+        const classSplit = elem.className.split(' ');
+        
+        for (let x = 0; x < classSplit.length; x++) {
+            let c = classSplit[x].trim();
+            if (c.length > 0) {
+                classes.push(c);
+            }
+        }
+        return classes;
+    },
+
+    elemAddClass(elem, classes) {
+        if (typeof classes == 'string') {
+            classes = [classes];
+        }
+
+        let setClasses = this.getElemClassArray(elem);
+
+        for (let x = 0; x < classes.length; x++) {
+            if (setClasses.indexOf(classes[x]) < 0) {
+                setClasses.push(classes[x]);
+            }
+        }
+
+        elem.className = setClasses.join(' ');
+
+        return elem;
+    },
+
+    //Returns true if it is a DOM element    
+    isDomElement(elem) {
+        if (elem instanceof Element || elem instanceof HTMLDocument) {
+            return true;
+        }
+        return false;
+    },
+
+    insertAfter(previousExistingElem, newNextElem) {
+        previousExistingElem.parentNode.insertBefore(newNextElem, previousExistingElem.nextSibling);
     }
 
 
@@ -284,7 +385,7 @@ class RiotGalleryViewer {
 
 
 // global variable to store an array of galleries
-let riotGalleryViewerInstances = [];
+//let riotGalleryViewerInstances = [];
 // initialzie gallery/galleries on page load
 window.onload = function () {
     RiotGalleryViewer.initialize();
