@@ -59,7 +59,7 @@ $images = array(
         <table id="riot-gallery-2"></table>
 
         <br><br>
-
+<?php /*
         <h2>riot-gallery-3 - ul - sent an array of images with thumbnails and captions</h2>
         <div id="riot-gallery-3"></div>
 
@@ -77,9 +77,9 @@ $images = array(
 
         <h2>riot-gallery-6 - match text in the page - sent an array of images with thumbnails and captions</h2>
         [riot-gallery-6]
-
+*/ ?>
     </div>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <?php /*<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>*/ ?>
     <script src="./../../riot-gallery-viewer.js?x=<?php echo time(); ?>"></script>
     <script>
     let images;
@@ -92,8 +92,8 @@ $images = array(
             echo 'images.push("./../images/'.htmlentities($image).'.jpg");'."\n";
         } ?>
     console.log(images);
-    RiotGalleryViewer.addGallery('riot-gallery-1', images);
-    //RiotGalleryViewer.addGallery('riot-gallery-1b', images);
+    //RiotGalleryViewer.addGallery('riot-gallery-1', images);
+    RiotGalleryViewer.addGallery('riot-gallery-1b', images);
 
     images = [];
     <?php
@@ -102,7 +102,7 @@ $images = array(
             echo 'images.push(["./../images/'.htmlentities($image).'.jpg", "", "'.htmlentities($caption).'"]);'."\n";
         } ?>
     console.log(images);
-    //RiotGalleryViewer.addGallery('riot-gallery-2', images);
+    RiotGalleryViewer.addGallery('riot-gallery-2', images);
 
     images = [];
     <?php
@@ -117,7 +117,7 @@ $images = array(
 
     //RiotGalleryViewer.addGallery('riot-gallery-5', images);
 
-    RiotGalleryViewer.addGallery('riot-gallery-6', images);
+    //RiotGalleryViewer.addGallery('riot-gallery-6', images);
     </script>
 </body>
 

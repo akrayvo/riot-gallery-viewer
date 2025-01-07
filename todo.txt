@@ -1,0 +1,13 @@
+set gallery
+    - X create html from js info
+    - by html tag attributes and classes (class="riot-gallery-item" data-riot-gallery-caption="My Image")
+    - 1 gallery by default, do not set gallery, just set items
+    - from text file of images
+multiple image sizes based on screen size
+x screen resize
+swipe
+x slide fade transition
+X image loading
+X     image load failed
+load scripts if not available (js and material icons)
+material icons
