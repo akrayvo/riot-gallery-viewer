@@ -1,0 +1,16 @@
+/********************************************************************************************
+ * default styles for example pages
+ ********************************************************************************************/
+
+html, body {
+    margin: 0;
+	padding: 10px 0;
+}
+
+#page-content {
+    width:100%;
+    max-width:1038px;
+    box-sizing:border-box;
+    margin:0 auto;
+    padding:10px;
+}
