@@ -4,13 +4,18 @@
 
 html, body {
     margin: 0;
-	padding: 10px 0;
+	padding: 0;
 }
 
 #page-content {
     width:100%;
-    max-width:1038px;
+    max-width:1030px;
     box-sizing:border-box;
     margin:0 auto;
-    padding:10px;
+    padding:6px;
+}
+
+h1 {
+    margin: 0 0 15px 0;
+    padding:0;
 }
