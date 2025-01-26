@@ -151,6 +151,14 @@ RiotGalleryViewer = {
     called after remote image urls have been read (if required)
     */
     galleryFileRemoteUrlsComplete() {
+        for (let x = 0; x < this.galleries.length; x++) {
+            const gal = this.galleries[x];
+            if (gal.imageFileUrl && !gal.imageFileUrlIsComplete && !gal.isError) {
+                // there is still a remote file to process (file set, not complete, and no error)
+                // do not continue. function will be called again
+                return;
+            }
+        }
         this.buildHtmlGalleries();
         console.log(this);
     },
