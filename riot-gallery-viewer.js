@@ -31,6 +31,8 @@ RiotGalleryViewer = {
         },
     },
 
+    // is the RiotGalleryViewer HTML (main image, background, previous/next butttons, close button, etc) loaded
+    isViewerHtmlLoaded: false,
 
 
     /*****************************************************************************
@@ -160,6 +162,7 @@ RiotGalleryViewer = {
             }
         }
         this.buildHtmlGalleries();
+        this.();
         console.log(this);
     },
 
