@@ -162,7 +162,7 @@ RiotGalleryViewer = {
             }
         }
         this.buildHtmlGalleries();
-        this.();
+        this.setGalleriesByClass();
         console.log(this);
     },
 
@@ -582,6 +582,46 @@ RiotGalleryViewer = {
     },
 
     /*
+    get the key of the galleries array. if it doesn't exist, add it
+    */
+    getGalleryKeyByElem(elem, isAddOnly) { // canBeNull
+
+        console.log('getGalleryKeyByElem(elem) {', elem);
+
+        var tagName = this.getElementTagName(elem);
+
+        if (!tagName) {
+            console.log('getGalleryKeyByElem error - tag name not found, not an element', elem);
+            return false;
+        }
+
+        for (let x = 0; x < this.galleries.length; x++) {
+            if (this.galleries[x].elem === elem) {
+                if (this.isError) {
+                    console.log('addGallery error 2b - gallery already created with error', elemId);
+                    return false;
+                }
+                if (isAddOnly) {
+                    return false;
+                }
+                return x;
+            }
+        }
+
+        let gal = Object.assign({}, this.galleryTemplate);
+
+        gal.elem = elem;
+
+        // add a new empty gallery to the galleries array. assign so that it is copied by value.
+        this.galleries.push(gal);
+
+        // array key of the current (new) gallery
+        const galleryKey = this.galleries.length - 1;
+
+        return galleryKey;
+    },    
+
+    /*
     add an initImages record to a gallery record
     */
     addImageByGalleryKey(galleryKey, url, thumbUrl, caption) {
@@ -809,6 +849,55 @@ RiotGalleryViewer = {
         return true;
     },
 
+    /*
+     * automatically create gallery instances on ui, ol, table, and ld tags with the "riot-gallery-viewer" class
+     */
+    setGalleriesByClass() {
+        const elems = document.getElementsByClassName('riot-gallery')
+        for (let x = 0; x < elems.length; x++) {
+            this.setGalleryByElem(elems[x]);
+        }
+
+    },
+
+    setGalleryByElem(galleryElem) {
+        const isAddOnly = true
+        const galleryKey = this.getGalleryKeyByElem(galleryElem, isAddOnly);
+        if (!galleryKey) {
+            // already set up
+            return false;
+        }
+
+        // HERE
+        let elems = galleryElem.getElementsByClassName('riot-gallery-item');
+        
+        if (elems.length < 1) {
+            const tagName = this.getElementTagName(galleryElem);
+            let subTag = null;
+            if (tagName == 'ul' || tagName == 'ol') {
+                elems = galleryElem.getElementsByTagName('li');
+            } else if (tagName == 'table') {
+                elems = galleryElem.getElementsByTagName('td');
+            } else {
+                elems = galleryElem.getElementsByTagName('figure');
+            }
+            elems = galleryElem.getElementsByTagName(subTag);
+        }
+        if (elems.length < 1) {
+            this.galleries[galleryKey].isError = 1;
+            this.galleries[galleryKey].errorMessages.push('no image containers found found');
+            return false;
+        }
+
+        for (let x = 0; x < elems.length; x++) {
+            setGalleryImageByElem(galleryKey, elem);
+        }
+    },
+
+    setGalleryByElem(galleryElem) {
+
+    },
+
     /*****************************************************************************
      *****************************************************************************
      * Helper - START - no specific to this program */
@@ -926,228 +1015,6 @@ RiotGalleryViewer = {
      *****************************************************************************
      *****************************************************************************/
 
-
-
-
-
-
-
-
-    //     addImageByObj(galleryElemId, obj) {
-    //         obj = { url: null, thumbUrl: null, caption: null };
-    //         if (Array.isArray(temp)) {
-    //             if (temp[0]) {
-    //                 obj.url = temp[0];
-    //             }
-    //             if (temp[1]) {
-    //                 obj.thumbUrl = temp[1];
-    //             }
-    //             if (temp[2]) {
-    //                 obj.caption = temp[2];
-    //             }
-    //         }
-    //         if ()
-    //     },
-
-
-
-    ///////////
-
-
-
-
-
-
-
-
-
-
-
-    ///////////
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // addImageByString(galleryElemId, string) {
-    //     let img = this.strLineToItem(string);
-    //             //if (item) {
-    //                 //imgs.push(img);
-    //             //}
-    //             //console.log('abc', line, item);
-    // },
-
-
-
-
-
-
-
-    //         /*strLineToItem(str) {
-    //             console.log('strLineToItem(line) {', line);
-    //             if (str.indexOf("\t") >= 0) {
-    //                 console.log('230', 'has tab');
-    //                 const allCols = line.split("\t");
-    //                 let url = '';
-    //                 let thumbUrl = '';
-    //                 let caption = '';
-    //                 let temp = '';
-    //                 if (allCols[0]) {
-    //                     temp = allCols[0].trim();
-    //                     if (temp.length > 0) {
-    //                         url = temp;
-    //                     } else {
-    //                         return false;
-    //                     }
-    //                 }
-    //                 if (allCols[1]) {
-    //                     temp = allCols[1].trim();
-    //                     if (temp.length > 0) {
-    //                         thumbUrl = temp;
-    //                     }
-    //                 }
-    //                 if (allCols[2]) {
-    //                     temp = allCols[2].trim();
-    //                     if (temp.length > 0) {
-    //                         caption = temp;
-    //                     }
-    //                 }
-    //                 return { url: line, thumbUrl: thumbUrl, caption: caption };
-    //             } else {
-
-    //             }
-
-    //         },* /
-
-
-
-    //     */
-
-    //     // addGallery(elemId, images, options) {
-    //     //     console.log('addGallery(elemId, images, options, ) {', elemId, images, options);
-
-    //     //     // add a new empty gallery to the galleries array. assign so that it is copied by value.
-    //     //     this.galleries.push(Object.assign({}, this.galleryTemplate));
-
-    //     //     // array key of the current (new) gallery
-    //     //     const galleryKey = this.galleries.length - 1;
-
-    //     //     // validate element id.
-    //     //     if (typeof elemId === 'number') {
-    //     //         // the elemId is a number, convert to string
-    //     //         elemId = elemId.toString();
-    //     //     }
-
-    //     //     if (typeof elemId !== 'string') {
-    //     //         // id must be a string
-    //     //         this.galleries[galleryKey].isError = true;
-    //     //         this.galleries[galleryKey].errorMessage = 'addGallery - Invalid element ID passed.';
-    //     //         console.log('addGallery error 1', typeof elemId);
-    //     //         return false;
-    //     //     }
-
-    //     //     this.galleries[galleryKey].elemId = elemId;
-
-    //     //     let elem = document.getElementById(elemId);
-    //     //     if (!elem) {
-    //     //         // the element is not found
-    //     //         let matchText = '[riotgalleryviewer' + elemId + ']';
-    //     //         if (document.body.textContent.includes(matchText)) {
-    //     //             // the element text in the code, formatted with square brackets, ex "[riotgalleryviewer my-gallery]"
-    //     //             // replace with an html element
-    //     //             document.body.innerHTML = document.body.innerHTML.replace(
-    //     //                 matchText,
-    //     //                 '<div id="' + elemId + '"></div>');
-    //     //             elem = document.getElementById(elemId);
-    //     //         } else {
-    //     //             matchText = '[rgv ' + elemId + ']';
-    //     //             if (document.body.textContent.includes(matchText)) {
-    //     //                 // the element text in the code, formatted with square brackets, ex "[rgv my-gallery]"
-    //     //                 // replace with an html element
-    //     //                 document.body.innerHTML = document.body.innerHTML.replace(
-    //     //                     matchText,
-    //     //                     '<div id="' + elemId + '"></div>');
-    //     //                 elem = document.getElementById(elemId);
-    //     //             }
-    //     //         }
-    //     //     }
-
-    //     //     if (!elem) {
-    //     //         // the gallery element was not found
-    //     //         this.galleries[galleryKey].isError = true;
-    //     //         this.galleries[galleryKey].errorMessage = 'addGallery - Element ID (' + elemId + ') not found.';
-    //     //         console.log('addGallery error 2', typeof elemId);
-    //     //         return false;
-    //     //     }
-
-    //     //     this.galleries[galleryKey].elem = elem;
-
-
-    //     //     // validate options
-    //     //     if (typeof images === 'undefined') {
-    //     //         // nothing passed, set to empty object
-    //     //         images = [];
-    //     //     }
-
-    //     //     if (!Array.isArray(images)) {
-    //     //         console.log('addGallery error 3', typeof images);
-    //     //         // images are not in an array
-    //     //         this.galleries[galleryKey].isError = true;
-    //     //         this.galleries[galleryKey].errorMessage = 'addGallery - Passed images must be an array.';
-    //     //         return false;
-    //     //     }
-
-    //     //     //if (images.length < 1) {
-    //     //     //    console.log('addGallery error 4');
-    //     //     //    // no images are in the passed array
-    //     //     //    this.galleries[galleryKey].isError = true;
-    //     //     //    this.galleries[galleryKey].errorMessage = 'addGallery - No Images passed.';
-    //     //     //    return false;
-    //     //     //}
-
-
-    //     //     /*this.galleries[galleryKey].initImages = images;
-
-
-    //     //     // validate options
-    //     //     if (typeof options === 'undefined') {
-    //     //         // nothing passed, set to empty object
-    //     //         options = {};
-    //     //     }
-
-    //     //     if (typeof options !== 'object') {
-    //     //         console.log('addGallery error 4');
-    //     //         // invalid options passed
-    //     //         this.galleries[galleryKey].isError = true;
-    //     //         this.galleries[galleryKey].errorMessage = 'addGallery - invalid Options passed.';
-    //     //         return false;
-    //     //     }
-
-    //     //     this.galleries[galleryKey].initOptions = options;*/
-    //     //     /*
-
-    //     //     //console.log(this.galleries);
-    //     //     //console.log(this.galleryTemplate);
-    //     //     / * let elem = $('#' + galleryelemId);
-
-    //     //     const tagName = this.getElementTag(elem);
-
-    //     //     if (!tagName) {
-    //     //         // could not get the tag name.
-    //     //         return false;
-    //     //     }*/
-
-    //     //     return true;
-    //     // },
 };
 
 // global variable to store an array of galleries
