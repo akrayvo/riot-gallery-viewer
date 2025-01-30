@@ -55,8 +55,8 @@ RiotGalleryViewer = {
             return false;
         }
 
-        console.log(this.galleries[galleryKey]);
-        this.addImageByGalleryKey(galleryKey, url, thumbUrl, caption);
+        //console.log(this.galleries[galleryKey]);
+        this.addInitImage(galleryKey, url, thumbUrl, caption);
     },
 
 
@@ -66,8 +66,13 @@ RiotGalleryViewer = {
     called by user
     gallery is created if needed
     */
-    addGalleryByFile(galleryElemId, fileUrl) {
-        console.log('addGalleryByFile(galleryElemId, fileUrl) {', galleryElemId, fileUrl);
+    addImagesByFile(galleryElemId, fileUrl) {
+        if (!fileUrl || typeof fileUrl !== 'string') {
+            console.log('addGalleryByString failed, no fileUrl', fileUrl);
+            return false;
+        }
+        
+        console.log('addImagesByFile(galleryElemId, fileUrl) {', galleryElemId, fileUrl);
         const galleryKey = this.getGalleryKeyByElemId(galleryElemId);
 
         if (galleryKey === false) {
@@ -75,10 +80,7 @@ RiotGalleryViewer = {
             return false;
         }
 
-        if (!fileUrl || typeof fileUrl !== 'string') {
-            console.log('addGalleryByString failed, no fileUrl', fileUrl);
-            return false;
-        }
+        
 
         //let gal = Object.assign({}, this.galleryTemplate);
 
@@ -88,12 +90,6 @@ RiotGalleryViewer = {
 
         // add a new empty gallery to the galleries array. assign so that it is copied by value.
         //this.galleries.push(gal);
-
-        console.log(this.galleries);
-
-        /*
-
-        */
     },
 
     /*
@@ -116,11 +112,11 @@ RiotGalleryViewer = {
 
         if (option === 'doConsoleLog') {
             if (value) {
-                this.options.doConsoleLog = true;
+                this.galleries[galleryKey].options.doConsoleLog = true;
             } else {
-                this.options.doConsoleLog = false;
+                this.galleries[galleryKey].options.doConsoleLog = false;
             }
-            console.log('doConsoleLog set to', this.options.doConsoleLog);
+            console.log('doConsoleLog set to', this.galleries[galleryKey].doConsoleLog);
             return true;
         }
 
@@ -163,7 +159,8 @@ RiotGalleryViewer = {
         }
         this.buildHtmlGalleries();
         this.setGalleriesByClass();
-        console.log(this);
+        this.setUnloadedGalleries();
+        console.log(this.galleries);
     },
 
     /* User Input - END
@@ -249,7 +246,7 @@ RiotGalleryViewer = {
         text = text.trim();
 
         if (!text) {
-            this.galleries[galleryKey].isError = 1;
+            this.galleries[galleryKey].isError = true;
             this.galleries[galleryKey].errorMessages.push('addGalleryImagesByText - text file is empty: ' + galleryKey);
             return false;
         }
@@ -272,8 +269,9 @@ RiotGalleryViewer = {
 
             for (let x = 0; x < lines.length; x++) {
                 //let line = lines[x].trim();
-                console.log('lines[x]', lines[x]);
+                console.log('270 ------- lines[x]', lines[x]);
                 this.addImageByString(galleryKey, lines[x]);
+                console.log('272 ------- galleries', this.galleries);
                 //img = this.strLineToItem(line);
                 //if (item) {
                 //imgs.push(img);
@@ -331,7 +329,7 @@ RiotGalleryViewer = {
 
         /*const newObj = { url: url, thumbUrl: thumbUrl, caption: caption };
         this.galleries[galleryKey].initImages.push(newObj);*/
-        this.addImageByGalleryKey(galleryKey, url, thumbUrl, caption);
+        this.addInitImage(galleryKey, url, thumbUrl, caption);
 
         return true;
         //let img = this.strLineToItem(string);
@@ -357,7 +355,7 @@ RiotGalleryViewer = {
             // tab separated
             if (strs[0]) {
                 url = this.strStripStartEndQuotes(strs[0]);
-                console.log('---------------if (strs[0]) {', url, strs[0]);
+                //console.log('---------------if (strs[0]) {', url, strs[0]);
             }
             if (strs[1]) {
                 thumbUrl = this.strStripStartEndQuotes(strs[1]);
@@ -365,7 +363,7 @@ RiotGalleryViewer = {
             if (strs[2]) {
                 caption = this.strStripStartEndQuotes(strs[2]);
             }
-            this.addImageByGalleryKey(galleryKey, url, thumbUrl, caption);
+            this.addInitImage(galleryKey, url, thumbUrl, caption);
         } else {
             // strings in quotes (with validation)
             console.log(line);
@@ -421,7 +419,7 @@ RiotGalleryViewer = {
     add image to a gallery based on a quoted string ("./image1.jpg", "./image1_thumbnail.jpg", "My Image")
     */
     addImageByStringsWithQuotes(galleryKey, line) {
-        console.log(line);
+        console.log('addImageByStringsWithQuotes(galleryKey, line) {', galleryKey, line);
         const tempQuoteReplace = "[~~(quote here, riotgallery)~~]";
         line = this.strReplace('\\"', tempQuoteReplace, line);
         line = line.trim();
@@ -432,7 +430,7 @@ RiotGalleryViewer = {
             strs[x] = this.strReplace('\\"', tempQuoteReplace, strs[x]);
         }
 
-        console.log(strs);
+        //console.log(strs);
 
         // 0 = [before first quote], 1 = url, 2 = [between quotes], 3 = thumUrl, 4 = [between quotes], 5 = caption
 
@@ -442,10 +440,10 @@ RiotGalleryViewer = {
 
         if (strs[1]) {
             url = strs[1];
-        } else {
+        }/* else {
             console.log('addImageByStringsWithQuotes(galleryKey, line) {', galleryKey, line);
             return false;
-        }
+        }*/
         if (strs[3]) {
             thumbUrl = strs[3];
         }
@@ -453,8 +451,12 @@ RiotGalleryViewer = {
             caption = strs[5];
         }
 
-        const newObj = { url: url, thumbUrl: thumbUrl, caption: caption };
-        this.galleries[galleryKey].initImages.push(newObj);
+        //const newObj = { url: url, thumbUrl: thumbUrl, caption: caption };
+        //this.galleries[galleryKey].initImages.push(newObj);
+
+        this.addInitImage(galleryKey, url, thumbUrl, caption);
+
+        console.log('453 ------------ ', this.galleries);
         return true;
     },
 
@@ -472,21 +474,7 @@ RiotGalleryViewer = {
     */
     getGalleryKeyByElemId(elemId) { // canBeNull
 
-        //if (typeof canBeNull === 'undefined') {
-        //    canBeNull = false;
-        // }
-
         console.log('getGalleryKeyByElemId(elemId) {', elemId);
-
-        //if (elemId === false || (elemId === null) {
-        //    elemId = null;
-        //}
-
-        // validate element id.
-        //if (typeof elemId === 'number') {
-        //    // the elemId is a number, convert to string
-        //    elemId = elemId.toString();
-        //}
 
         if (typeof elemId !== 'string') {
             console.log('getGalleryKeyByElemId error - invalid elemId type', elemId, typeof elemId);
@@ -494,23 +482,9 @@ RiotGalleryViewer = {
         }
 
         if (elemId.length < 1) {
-            console.log('getGalleryKeyByElemId error - invalid elemId is empty', elemId, typeof elemId);
+            console.log('getGalleryKeyByElemId error - elemId is empty', elemId, typeof elemId);
             return false;
         }
-        //     if (typeof elemId !== 'string') {
-        //         // id is not null and not a string
-        //         console.log('getGalleryKeyByElemId error - invalid elemId type', elemId, typeof elemId);
-        //         return false;
-        //     }
-        //     if (elemId.length < 1) {
-        //         elemId = null;
-        //     }
-        // }
-
-        // if (elemId === null) { // !canBeNull && 
-        //     console.log('getGalleryKeyByElemId error - elemId is null, canBeNull not set', elemId, typeof elemId);
-        //     return false;
-        // }
 
         for (let x = 0; x < this.galleries.length; x++) {
             if (this.galleries[x].elemId === elemId) {
@@ -522,7 +496,8 @@ RiotGalleryViewer = {
             }
         }
 
-        let gal = Object.assign({}, this.galleryTemplate);
+        //let gal = Object.assign({}, this.galleryTemplate);
+        let gal = JSON.parse(JSON.stringify(this.galleryTemplate))
 
         gal.elemId = elemId;
 
@@ -533,62 +508,16 @@ RiotGalleryViewer = {
         const galleryKey = this.galleries.length - 1;
 
         return galleryKey;
-
-        // this.galleries[galleryKey].elemId = elemId;
-
-        // if (elemId === null) {
-        //     this.galleries[galleryKey].elem = null;
-        //     return galleryKey;
-        // }
-
-        /*let elem = document.getElementById(elemId);
-        if (!elem) {
-            // the element is not found
-            let matchText = '[riotgalleryviewer' + elemId + ']';
-            if (document.body.textContent.includes(matchText)) {
-                // the element text in the code, formatted with square brackets, ex "[riotgalleryviewer my-gallery]"
-                // replace with an html element
-                document.body.innerHTML = document.body.innerHTML.replace(
-                    matchText,
-                    '<div id="' + elemId + '"></div>');
-                elem = document.getElementById(elemId);
-            } else {
-                matchText = '[rgv ' + elemId + ']';
-                if (document.body.textContent.includes(matchText)) {
-                    // the element text in the code, formatted with square brackets, ex "[rgv my-gallery]"
-                    // replace with an html element
-                    document.body.innerHTML = document.body.innerHTML.replace(
-                        matchText,
-                        '<div id="' + elemId + '"></div>');
-                    elem = document.getElementById(elemId);
-                }
-            }
-        }*/
-
-        // if (!elem) {
-        //     // the gallery element was not found
-        //     this.galleries[galleryKey].isError = true;
-        //     this.galleries[galleryKey].errorMessage = 'addGallery - Element ID (' + elemId + ') not found.';
-        //     console.log('addGallery error 2 - could not find element', elemId);
-        //     return false;
-        // }
-
-        // //this.galleries[galleryKey].isReady = true;
-        // this.galleries[galleryKey].elem = elem;
-
-        // console.log('galleryKey', galleryKey);
-
-        // return galleryKey;
     },
 
     /*
     get the key of the galleries array. if it doesn't exist, add it
     */
-    getGalleryKeyByElem(elem, isAddOnly) { // canBeNull
+    getNewGalleryKeyByElem(elem) { // canBeNull
 
-        console.log('getGalleryKeyByElem(elem) {', elem);
+        console.log('getNewGalleryKeyByElem(elem) {', elem);
 
-        var tagName = this.getElementTagName(elem);
+        const tagName = this.getElemTagName(elem);
 
         if (!tagName) {
             console.log('getGalleryKeyByElem error - tag name not found, not an element', elem);
@@ -619,17 +548,24 @@ RiotGalleryViewer = {
         const galleryKey = this.galleries.length - 1;
 
         return galleryKey;
-    },    
+    },
 
     /*
     add an initImages record to a gallery record
     */
-    addImageByGalleryKey(galleryKey, url, thumbUrl, caption) {
+    addInitImage(galleryKey, url, thumbUrl, caption) {
+        console.log('++++++++++++ addInitImage(galleryKey, url, thumbUrl, caption) {', galleryKey, url, thumbUrl, caption);
         // double check that the gallery exists.
         if (!this.galleries[galleryKey]) {
             return false;
         }
+
+        if (!url || typeof url !== 'string') {
+            return false;
+        }
+
         this.galleries[galleryKey].initImages.push({ url: url, thumbUrl: thumbUrl, caption: caption });
+        console.log('=============', galleryKey, this.galleries[galleryKey]);
         return true;
     },
 
@@ -667,7 +603,7 @@ RiotGalleryViewer = {
             return false;
         }
 
-        this.setGalleryElement(galleryKey);
+        this.setGalleryElem(galleryKey);
 
         if (!this.galleries[galleryKey].elem) {
             return false;
@@ -705,8 +641,8 @@ RiotGalleryViewer = {
         }*/
     },
 
-    setGalleryElement(galleryKey) {
-        console.log('setGalleryElement(gallery) {', galleryKey);
+    setGalleryElem(galleryKey) {
+        console.log('setGalleryElem(gallery) {', galleryKey);
 
         if (!this.galleries[galleryKey]) {
             return false;
@@ -714,22 +650,22 @@ RiotGalleryViewer = {
 
         if (!this.galleries[galleryKey].elemId) {
             this.galleries[galleryKey].isError = true;
-            this.galleries[galleryKey].errorMessages.push('setGalleryElement - gallery Element ID not set');
+            this.galleries[galleryKey].errorMessages.push('setGalleryElem - gallery Elem ID not set');
             return false;
         }
 
         let elem = document.getElementById(this.galleries[galleryKey].elemId);
         if (!elem) {
             this.galleries[galleryKey].isError = true;
-            this.galleries.errorMessages.push('setGalleryElement - gallery Element ID not found: ' + this.galleries[galleryKey].elemId);
+            this.galleries[galleryKey].errorMessages.push('setGalleryElem - gallery Elem ID not found: ' + this.galleries[galleryKey].elemId);
             return false;
         }
 
-        const tagName = this.getElementTagName(elem);
+        const tagName = this.getElemTagName(elem);
 
         if (!tagName) {
             this.galleries[galleryKey].isError = true;
-            this.galleries.errorMessages.push('setGalleryElement - could not get element tag name: ' + this.galleries[galleryKey].elemId);
+            this.galleries.errorMessages.push('setGalleryElem - could not get element tag name: ' + this.galleries[galleryKey].elemId);
             return false;
         }
 
@@ -853,27 +789,47 @@ RiotGalleryViewer = {
      * automatically create gallery instances on ui, ol, table, and ld tags with the "riot-gallery-viewer" class
      */
     setGalleriesByClass() {
-        const elems = document.getElementsByClassName('riot-gallery')
+        console.log('setGalleriesByClass() {');
+        const elems = document.getElementsByClassName('riot-gallery');
+        console.log(elems);
         for (let x = 0; x < elems.length; x++) {
-            this.setGalleryByElem(elems[x]);
+            this.setGalleryByElem(elems[x], null);
         }
 
     },
 
-    setGalleryByElem(galleryElem) {
-        const isAddOnly = true
-        const galleryKey = this.getGalleryKeyByElem(galleryElem, isAddOnly);
-        if (!galleryKey) {
-            // already set up
+    setUnloadedGalleries() {
+        console.log('setUnloadedGalleries() {');
+        for (let galleryKey = 0; galleryKey < this.galleries.length; galleryKey++) {
+            let gal = this.galleries[galleryKey];
+            console.log(gal);
+            if (!gal.isLoaded && !gal.isError && gal.elem) {
+                this.setGalleryByElem(gal.elem, galleryKey);
+            }
+        }
+    },
+
+    setGalleryByElem(galleryElem, galleryKey) {
+        console.log('setGalleryByElem() {', galleryElem);
+        if (galleryKey === null || galleryKey === false) {
+            galleryKey = this.getNewGalleryKeyByElem(galleryElem);
+            if (galleryKey === null || galleryKey === false) {
+                // already set up
+                console.log('a');
+                return false;
+            }
+        }
+
+        if (this.galleries[galleryKey].isError) {
+            console.log('b');
             return false;
         }
 
-        // HERE
         let elems = galleryElem.getElementsByClassName('riot-gallery-item');
-        
+
         if (elems.length < 1) {
-            const tagName = this.getElementTagName(galleryElem);
-            let subTag = null;
+            const tagName = this.getElemTagName(galleryElem);
+            //let subTag = null;
             if (tagName == 'ul' || tagName == 'ol') {
                 elems = galleryElem.getElementsByTagName('li');
             } else if (tagName == 'table') {
@@ -881,21 +837,352 @@ RiotGalleryViewer = {
             } else {
                 elems = galleryElem.getElementsByTagName('figure');
             }
-            elems = galleryElem.getElementsByTagName(subTag);
+            //elems = galleryElem.getElementsByTagName(subTag);
         }
         if (elems.length < 1) {
-            this.galleries[galleryKey].isError = 1;
-            this.galleries[galleryKey].errorMessages.push('no image containers found found');
+            this.galleries[galleryKey].isError = true;
+            this.galleries[galleryKey].errorMessages.push('no items (image containers) found');
             return false;
         }
 
         for (let x = 0; x < elems.length; x++) {
-            setGalleryImageByElem(galleryKey, elem);
+            this.setGalleryImageByElem(galleryKey, elems[x]);
         }
+
+        console.log('this.galleries[galleryKey].items = ', this.galleries[galleryKey].items);
+        if (this.galleries[galleryKey].items.length < 1) {
+            this.galleries[galleryKey].isError = true;
+            this.galleries[galleryKey].errorMessages.push('no items found');
+            console.log('c');
+            return false;
+        }
+
+        this.galleries[galleryKey].isLoaded = true;
+        return true;
     },
 
-    setGalleryByElem(galleryElem) {
+    setGalleryImageByElem(galleryKey, elem) {
+        const url = this.getImageUrlFromContainerElem(elem);
+        const clickElem = this.getClickElemFromContainerElem(elem);
+        if (!url || !clickElem) {
+            return false;
+        }
+        const caption = this.getCaptionFromContainerElem(elem);
 
+        const item = { url: url, clickElem: clickElem, caption: caption };
+        this.galleries[galleryKey].items.push(item);
+    },
+
+    /*
+     * Get image url and element to bind click action
+     * uses several methods to find the image url
+     * also returns the clickable element if found
+     */
+    getImageUrlFromContainerElem(linkContainer) {
+        console.log('getImageUrlFromContainerElem(linkContainer) {', linkContainer);
+        let url;
+        let elem;
+
+        // data-riot-gallery-image-url set on container or children
+        // <li data-riot-gallery-image-url="./image.jpg"><img src="./thumb.jpg"></li>
+        // <li><img src="./thumb.jpg" data-riot-gallery-image-url="./image.jpg"></li>
+        url = this.getSubElemAttrVal(linkContainer, 'data-riot-gallery-image-url');
+        if (url) {
+            return url;
+        }
+        // data-image-url set on li container or children
+        // <li data-image-url="./image.jpg"><img src="./thumb.jpg"></li>
+        // <li><a href="./image.jpg" data-image-url="./image.jpg"><img src="./thumb.jpg"></a></li>
+        url = this.getSubElemAttrVal(linkContainer, 'data-image-url');
+        if (url) {
+            return url;
+        }
+
+        // href from a tag (link) with a class of "riot-gallery-image-link"
+        // <li><a href="./image.jpg" class="riot-gallery-image-link"><img src="./thumb.jpg"></a></li>
+        url = this.getSubElemAttrValBySelector(linkContainer, 'a.riot-gallery-image-link', 'href');
+        if (url) {
+            return url;
+        }
+
+        // href from a tag (link) with a class of "image-link"
+        // <li><a href="./image.jpg" class="image-link"><img src="./thumb.jpg"></a></li>
+        url = this.getSubElemAttrValBySelector(linkContainer, 'a.image-link', 'href');
+        if (url) {
+            return url;
+        }
+
+        // src from img tag with "riot-gallery-image-thumb" class
+        // <li><img src="./image.jpg" class="riot-gallery-image-thumb"></li>
+        url = this.getSubElemAttrValBySelector(linkContainer, 'img.riot-gallery-image-thumb', 'src');
+        if (url) {
+            return url;
+        }
+
+        // src from img tag with "image-thumb" class
+        // <li><img src="./thumb.jpg" class="image-thumb"></li>
+        url = this.getSubElemAttrValBySelector(linkContainer, 'img.image-thumb', 'src');
+        if (url) {
+            return url;
+        }
+
+        // href from a tag (link)
+        // <li><a href="./image.jpg"><img src="./thumb.jpg"></a></li>
+        url = this.getSubElemAttrValBySelector(linkContainer, 'a', 'href');
+        if (url) {
+            return url;
+        }
+
+        // src from img tag
+        // <li><img src="./image.jpg"></li>
+        url = this.getSubElemAttrValBySelector(linkContainer, 'img', 'src');
+        if (url) {
+            return url;
+        }
+
+        return null;
+    },
+
+    getClickElemFromContainerElem(linkContainer) {
+        console.log('getClickElemFromContainerElem(linkContainer) {', linkContainer);
+
+        // a tag (link) with a class of "riot-gallery-image-link"
+        // <li><a href="./image.jpg" class="riot-gallery-image-link"><img src="./thumb.jpg"></a></li>
+        let elem = this.getSubElemBySelector(linkContainer, 'a.riot-gallery-image-link');
+        if (elem) {
+            return elem;
+        }
+
+        // img tag with "riot-gallery-image-thumb" class
+        // <li><img src="./thumb.jpg" class="riot-gallery-image-thumb"></li>
+        elem = this.getSubElemBySelector(linkContainer, 'img.riot-gallery-image-thumb');
+        if (elem) {
+            return elem;
+        }
+
+        // a tag (link) with a class of "image-link"
+        // <li><a href="./image.jpg" class="image-link"><img src="./thumb.jpg"></a></li>
+        elem = this.getSubElemBySelector(linkContainer, 'a.image-link');
+        if (elem) {
+            return elem;
+        }
+
+        // img tag with "image-thumb" class
+        // <li><img src="./thumb.jpg" class="image-thumb"></li>
+        elem = this.getSubElemBySelector(linkContainer, 'img.image-thumb');
+        if (elem) {
+            return elem;
+        }
+
+        // data-riot-gallery-image-url set on an img
+        // <li><img src="./thumb.jpg" data-riot-gallery-image-url="./image.jpg"></li>
+        elem = this.getElemSubByAttr(linkContainer, 'data-riot-gallery-image-url');
+        if (elem) {
+            return url;
+        }
+
+        // data-image-url set on an img
+        // <li><img src="./thumb.jpg" data-image-url="./image.jpg"></li>
+        elem = this.getElemSubByAttr(linkContainer, 'data-image-url');
+        if (elem) {
+            return url;
+        }
+
+        // a tag (link)
+        // <li><a href="./image.jpg"><img src="./thumb.jpg"></a></li>
+        elem = this.getSubElemBySelector(linkContainer, 'a');
+        if (elem) {
+            return elem;
+        }
+
+        // src from img tag
+        // <li><img src="./image.jpg"></li>
+        elem = this.getSubElemBySelector(linkContainer, 'img');
+        if (elem) {
+            return elem;
+        }
+
+        // no link or image found
+        return linkContainer;
+    },
+
+    getCaptionFromContainerElem(linkContainer) {
+        console.log('getCaptionFromContainerElem(linkContainer) {', linkContainer);
+        // data-riot-gallery-image-caption on the container
+        // <li data-riot-gallery-image-caption="My Pic"><img src="./image.jpg"></li>
+        // <li><img src="./image.jpg" data-riot-gallery-image-caption="My Pic"></li>
+        let caption = this.getSubElemAttrVal(linkContainer, 'data-riot-gallery-image-caption');
+        if (caption) {
+            return caption;
+        }
+
+        // data-image-caption on the container
+        // <li data-image-caption="My Pic"><img src="./image.jpg"></li>
+        // <li><img src="./image.jpg" data-image-caption="My Pic"></li>
+        caption = this.getSubElemAttrVal(linkContainer, 'data-image-caption');
+        if (caption) {
+            return caption;
+        }
+
+        // riot-gallery-image-caption class on any text container
+        // <li><img src="./image.jpg"><div class="riot-gallery-image-caption">My Pic</div></li>
+        caption = this.getSubElemTextBySelector(linkContainer, '.riot-gallery-image-caption', 'text');
+        if (caption) {
+            return caption;
+        }
+
+        // image-caption class on any text container
+        // <li><img src="./image.jpg"><div class="image-caption">My Pic</div></li>
+        caption = this.getSubElemTextBySelector(linkContainer, '.image-caption', 'text');
+        if (caption) {
+            return caption;
+        }
+
+        // image-caption class on any text container
+        // <li><figure><img src="./image.jpg"><figcaption>My Pic</figcaption></figure></li>
+        caption = this.getSubElemTextBySelector(linkContainer, 'figcaption', 'text');
+        if (caption) {
+            return caption;
+        }
+
+        // get all images
+        let imgElems = linkContainer.getElementsByTagName('img');
+
+        // alt or title of an img with img.riot-gallery-image-thumb class
+        // <li><img src="./image.jpg" class="riot-gallery-image-thumb" alt="My Pic"></li>
+        for (let x = 0; x < imgElems.length; x++) {
+            const imgElem = imgElems[x];
+            if (imgElem.classList.contains('riot-gallery-image-thumb')) {
+                let caption = imgElem.getAttribute('alt');
+                if (caption) {
+                    return caption;
+                }
+                caption = imgElem.getAttribute('title');
+                if (caption) {
+                    return caption;
+                }
+            }
+        }
+        // alt or title of an img with img.riot-gallery-image-thumb class
+        // <li><img src="./image.jpg" class="image-thumb" alt="My Pic"></li>
+        for (let x = 0; x < imgElems.length; x++) {
+            const imgElem = imgElems[x];
+            if (imgElem.classList.contains('image-thumb')) {
+                let caption = imgElem.getAttribute('alt');
+                if (caption) {
+                    return caption;
+                }
+                caption = imgElem.getAttribute('title');
+                if (caption) {
+                    return caption;
+                }
+            }
+        }
+        // alt or title of an img with img.riot-gallery-image-thumb class
+        // <li><img src="./image.jpg" alt="My Pic"></li>
+        for (let x = 0; x < imgElems.length; x++) {
+            const imgElem = imgElems[x];
+            let caption = imgElem.getAttribute('alt');
+            if (caption) {
+                return caption;
+            }
+            caption = imgElem.getAttribute('title');
+            if (caption) {
+                return caption;
+            }
+        }
+
+        // nothing found. return null
+        return null;
+    },
+
+    getSubElemAttrVal(elem, attr) {
+        if (!elem || !attr) {
+            return null;
+        }
+
+        let val = elem.getAttribute(attr);
+        if (val !== null && val !== false) {
+            return val;
+        }
+
+        let item = document.querySelector('[' + attr + ']');
+
+        if (!item) {
+            return null;
+        }
+
+        val = item.getAttribute(attr);
+
+        return val;
+    },
+
+    getElemSubByAttr(elem, attr) {
+        if (!elem || !attr) {
+            return null;
+        }
+
+        let val = elem.getAttribute(attr);
+        if (val !== null && val !== false) {
+            return elem;
+        }
+
+        let item = document.querySelector('[' + attr + ']');
+
+        if (!item) {
+            return null;
+        }
+
+        return item;
+    },
+
+    getSubElemAttrValBySelector(elem, selector, attr) {
+        if (!elem || !selector || !attr) {
+            return null;
+        }
+
+        let item = elem.querySelector(selector);
+        if (!item) {
+            return null;
+        }
+
+        let val = item.getAttribute(attr);
+        if (val === null || val === false) {
+            return null;
+        }
+
+        return val;
+    },
+
+    getSubElemTextBySelector(elem, selector) {
+        if (!elem || !selector) {
+            return null;
+        }
+
+        let item = elem.querySelector(selector);
+        if (!item) {
+            return null;
+        }
+
+        const text = item.innerHTML;
+        if (text === null || text === false) {
+            return null;
+        }
+
+        return text;
+    },
+
+    getSubElemBySelector(elem, selector) {
+        if (!elem || !selector) {
+            return null;
+        }
+
+        let item = elem.querySelector(selector);
+        if (!item) {
+            return null;
+        }
+
+        return item;
     },
 
     /*****************************************************************************
@@ -957,7 +1244,7 @@ RiotGalleryViewer = {
         return str;
     },
 
-    getElementTagName(elem) {
+    getElemTagName(elem) {
         if (!elem) {
             // invalid jquery element
             return null;
