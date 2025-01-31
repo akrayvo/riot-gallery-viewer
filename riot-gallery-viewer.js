@@ -862,15 +862,43 @@ RiotGalleryViewer = {
     },
 
     setGalleryImageByElem(galleryKey, elem) {
+
         const url = this.getImageUrlFromContainerElem(elem);
-        const clickElem = this.getClickElemFromContainerElem(elem);
-        if (!url || !clickElem) {
+        if (!url) {
             return false;
         }
+        
+        const clickElem = this.getClickElemFromContainerElem(elem);
+        if (clickElem) {
+
+            // make sure that the clickElem isn't already set (in this gallery or another)
+            for (let g = 0; g < this.galleries.length; g++) {
+                for (let i = 0; i < this.galleries[g].items.length; i++) {
+                    if (this.galleries[g].items[i].clickElem === clickElem) {
+                        console.log('skip element. click elem already set.');
+                        return false;
+                    }
+                }    
+            }
+
+            clickElem.galleryKey = galleryKey;
+            // current length, before adding. this will be the new key
+            clickElem.itemKey = this.galleries[galleryKey].items.length;
+            clickElem.addEventListener('click', function(event) {
+                event.preventDefault();
+                RiotGalleryViewer.elemClicked(this.galleryKey, this.itemKey);
+            }, false);
+        }
+
         const caption = this.getCaptionFromContainerElem(elem);
 
         const item = { url: url, clickElem: clickElem, caption: caption };
         this.galleries[galleryKey].items.push(item);
+        return true;
+    },
+
+    elemClicked(galleryKey, ItemKey) {
+        console.log('elem clicked',galleryKey, ItemKey);
     },
 
     /*
