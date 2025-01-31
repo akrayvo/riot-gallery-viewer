@@ -43,9 +43,9 @@ $images = array(
     <ul id="gal2"></ul>
     <hr>
     <ul id="gal3" class="riot-gallery-style-dark"></ul>
-
-    <ul class="riot-gallery-style riot-gallery-style-dark">
-        <?php /*
+    <hr>
+    <ul class="riot-gallery riot-gallery-style riot-gallery-style-dark">
+        <?php 
         foreach ($images as $image) {
             echo '<li>' .
                 '<a href="../images/' . htmlentities($image) . '.jpg" target="blank">'.
@@ -53,8 +53,9 @@ $images = array(
                 '</a>' .
                 '<div class="riot-gallery-image-caption">'.ucwords(htmlentities(str_replace(['_','-'],' ',$image))).'</div>' .
                 '</li>' . "\n";
+                break;
         }
-        */ ?>
+        ?>
     </ul>
     </div>
 
@@ -71,7 +72,7 @@ $images = array(
         RiotGalleryViewer.addImage('gal2', '../images/squirrel.jpg', '../images/squirrel_thumb.jpg', 'Squirrel');
         RiotGalleryViewer.setOption('gal2', 'doConsoleLog', true);
 
-        RiotGalleryViewer.addImagesByFile('gal3', './images-quotes.txt?x=<?php echo time(); ?>');
+        RiotGalleryViewer.addImagesByFile('gal3', './images-quotes.txt?x=<?php echo time(); ?>');/**/
         //console.log(RiotGalleryViewer.galleries);
         //RiotGalleryViewer.setOption('doConsoleLog', true);
     </script>
