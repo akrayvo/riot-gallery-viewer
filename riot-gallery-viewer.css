@@ -396,6 +396,24 @@ body.riot-gallery-viewer-open.riot-gallery-viewer-is-loading #riot-gallery-viewe
     }
 }
 
+@media screen and (max-width: 300px) {
+    body.riot-gallery-viewer-open #riot-gallery-viewer-close-con,
+    body.riot-gallery-viewer-open #riot-gallery-viewer-prev-con,
+    body.riot-gallery-viewer-open #riot-gallery-viewer-next-con
+    {
+        display:none;
+    }
+}
+
+@media screen and (max-height: 300px) {
+    body.riot-gallery-viewer-open #riot-gallery-viewer-close-con,
+    body.riot-gallery-viewer-open #riot-gallery-viewer-prev-con,
+    body.riot-gallery-viewer-open #riot-gallery-viewer-next-con
+    {
+        display:none;
+    }
+}
+
 /*
 * PURE CSS LOADING END
 */
