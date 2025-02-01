@@ -1,0 +1,8 @@
+left to right transistion
+viewer style
+all options (log, go to next)
+set up images with no container
+set up by selectors
+option - slider view
+loading
+reposition on window size change
