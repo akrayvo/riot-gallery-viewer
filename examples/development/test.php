@@ -45,6 +45,11 @@ $images = array(
     <ul id="gal3" class="riot-gallery-style-dark"></ul>
     <hr>
     <ul class="riot-gallery riot-gallery-style riot-gallery-style-dark">
+        <li data-riot-gallery-image-url="https://www.streetmachine.com.au/wp-content/uploads/2023/07/greg-eslick-hq-monaro-bonnet-up-wm-2048x1365.jpg?x=<?php echo time(); ?>">
+        <div>text here</div><br>
+        <a href="#" class="riot-gallery-image-link">load image here!</a>
+
+        </li>
         <?php 
         foreach ($images as $image) {
             echo '<li>' .
@@ -57,6 +62,34 @@ $images = array(
         }
         ?>
     </ul>
+
+    <hr>
+    <ul class="riot-gallery riot-gallery-style">
+        <li data-riot-gallery-image-url="https://www.streetmachine.com.au/wp-content/uploads/2023/07/greg-eslick-hq-monaro-bonnet-up-wm-2048x1365.jpg?x=<?php echo time(); ?>">
+        <div>text here</div><br>
+        <a href="#" class="riot-gallery-image-link">load image here!</a>
+
+        </li>
+        <li data-riot-gallery-image-url="https://www.test.com.au/zzz.jpg?x=<?php echo time(); ?>" data-riot-gallery-image-caption="It's a car, dude!">
+        <div>text here</div><br>
+        <a href="#" class="riot-gallery-image-link">load image here!</a>
+
+        </li>        
+        <?php 
+        foreach ($images as $image) {
+            echo '<li>' .
+                '<a href="../images/' . htmlentities($image) . '.jpg" target="blank">'.
+                '<img src="../images/' . htmlentities($image) . '_thumb.jpg">'.
+                '</a>' .
+                '<div class="riot-gallery-image-caption">'.ucwords(htmlentities(str_replace(['_','-'],' ',$image))).'</div>' .
+                '</li>' . "\n";
+                break;
+        }
+        ?>
+    </ul>
+
+
+
     </div>
 
 

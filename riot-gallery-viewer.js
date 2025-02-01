@@ -62,6 +62,9 @@ RiotGalleryViewer = {
     curGalKey: null,
     curItemKey:null,
 
+    loadingImageWidth: 300,
+    loadingImageHeight: 300,
+
 
     /*****************************************************************************
      *****************************************************************************
@@ -1078,14 +1081,14 @@ RiotGalleryViewer = {
         // <li><img src="./thumb.jpg" data-riot-gallery-image-url="./image.jpg"></li>
         elem = this.getElemSubByAttr(linkContainer, 'data-riot-gallery-image-url');
         if (elem) {
-            return url;
+            return elem;
         }
 
         // data-image-url set on an img
         // <li><img src="./thumb.jpg" data-image-url="./image.jpg"></li>
         elem = this.getElemSubByAttr(linkContainer, 'data-image-url');
         if (elem) {
-            return url;
+            return elem;
         }
 
         // a tag (link)
@@ -1380,6 +1383,11 @@ RiotGalleryViewer = {
      * load image that has already been downloaded (no waiting/loading)
      */
     viewLoadedImage(image, galleryKey, itemKey) {
+
+        if (this.curGalKey != galleryKey || this.curItemKey !== itemKey) {
+            return;
+        }
+
         console.log('loadAvailableImage(image, imageKey)', image, galleryKey, itemKey);
 
 
@@ -1418,10 +1426,13 @@ RiotGalleryViewer = {
 
         //this.elems.body.addClass('riot-gallery-viewer-is-transitioning-both');*/
 
+        this.elems.imageCon.classList.remove('is-loading');
+        this.elems.imageCon.classList.remove('is-error');
+
         console.log('b itemKey=', itemKey);
         this.curImgWidth = image.width;
         this.curImgHeight = image.height;
-        this.positionMainImage();
+        this.positionMainImage(false);
         //this.elems.transitionBothRight.css({ width: this.viewerWidth, height: this.viewerHeight });
         //return;
         //this.elems.image.attr('src', image.src);
@@ -1440,10 +1451,28 @@ RiotGalleryViewer = {
         //this.elems.body.removeClass('riot-gallery-viewer-is-transitioning-both');
     },
 
+    imageLoadFailed() {
+        this.positionMainImage(true);
+        this.elems.imageCon.classList.remove('is-loading');
+        this.elems.imageCon.classList.add('is-error');
+
+        this.elems.caption.innerHTML = '<i>IMAGE FAILED TO LOAD</i>';
+        this.elems.captionCon.classList.add('is-displayed');
+    },
+
+    startImageLoad() {
+        this.positionMainImage(true);
+        this.elems.imageCon.classList.add('is-loading');
+        this.elems.imageCon.classList.remove('is-error');
+        this.elems.caption.innerHTML = '';
+        this.elems.captionCon.classList.remove('is-displayed');
+    },
+            
+
     /*
      * position the main gallery view image and the close button in the top right corner
      */
-    positionMainImage() {
+    positionMainImage(isLoadingImage) {
 
 
         console.log('positionImage() {)');
@@ -1463,8 +1492,16 @@ RiotGalleryViewer = {
         //    console.log('this.viewerWidth b', this.viewerWidth);
         //}*/
 
-        let viewerWidth = this.curImgWidth;
-        let viewerHeight = this.curImgHeight;
+        let imgWidth = this.loadingImageWidth;
+        let imgHeight = this.loadingImageHeight;
+
+        if (!isLoadingImage) {
+            imgWidth = this.curImgWidth;
+            imgHeight = this.curImgHeight;
+        }
+
+        viewerWidth = imgWidth;
+        viewerHeight = imgHeight;
 
         const maxWidth = this.windowWidth - 40;
         const maxHeight = this.windowHeight - 24;
@@ -1473,12 +1510,12 @@ RiotGalleryViewer = {
 
         if (viewerWidth > maxWidth) {
             viewerWidth = maxWidth;
-            viewerHeight = this.curImgHeight / this.curImgWidth * viewerWidth;
+            viewerHeight = imgHeight / viewerWidth * viewerWidth;
         }
 
         if (viewerHeight > maxHeight) {
             viewerHeight = maxHeight;
-            viewerWidth = this.curImgWidth / this.curImgHeight * viewerHeight;
+            viewerWidth = viewerWidth / imgHeight * viewerHeight;
         }
 
         console.log('this.viewerWidth set', this.viewerWidth);
@@ -1507,6 +1544,14 @@ RiotGalleryViewer = {
         //} else {
         // this.elems.imageCon.css(cssSettings);
         //}
+
+        if (isLoadingImage) {
+            viewerLeft  = viewerLeft - 8;
+            viewerTop  = viewerTop - 8;
+            this.elems.imageCon.style.padding = '5px';
+        } else {
+            this.elems.imageCon.style.padding = '0';
+        }
 
         this.elems.imageCon.style.width = viewerWidth + 'px';
         this.elems.imageCon.style.height = viewerHeight + 'px';
@@ -1582,16 +1627,20 @@ RiotGalleryViewer = {
             this.viewLoadedImage(img, this.curGalKey, this.curItemKey);
             //this.setLoadedImage(this, newKey);
         } else {
-
-            console.log('else if (img.complete) {');
             img.galleryKey = this.curGalKey;
             img.itemKey = this.curItemKey;
+            this.startImageLoad();
             //this.startUnavailableImage(newKey);
             img.onload = function (e) {
                 console.log('img.onload this.galleryKey, this.itemKey', this.galleryKey, this.itemKey);
                 //riotGalleryInstances[this.instanceKey].completeUnavailableImage(this);
                 //riotGalleryViewerInstances[this.instanceKey].loadAvailableImage(this);
                 RiotGalleryViewer.viewLoadedImage(img, this.galleryKey, this.itemKey)
+            }
+            img.onerror = function (e) {
+                //RiotGalleryViewer.elems.imageCon.classList.remove('is-loading');
+                //RiotGalleryViewer.elems.imageCon.classList.add('is-error');
+                RiotGalleryViewer.imageLoadFailed();
             }
         }
     },

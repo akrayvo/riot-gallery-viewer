@@ -40,13 +40,48 @@ ul.riot-gallery-style {
     align-items: center;
     justify-content: center;
     display: flex;
+    flex-direction: column;
     position: relative;
-    border-radius: 8px;
+    border-radius: 10px;
     overflow: hidden;
     font-family: Verdana, Geneva, sans-serif;
     font-size: 14px;
     background-color: #BBB;
     border: 1px solid #000;
+    font-weight: bold;
+    color:#000;
+}
+
+.riot-gallery-style li a,
+.riot-gallery-style li a:link,
+.riot-gallery-style li a:visited
+{
+    color: #00E;
+}
+
+.riot-gallery-style li a:hover,
+.riot-gallery-style li a:active
+{
+    color: #66F;
+}
+
+.riot-gallery-style.riot-gallery-style-dark li {
+    background-color: #444;
+    border: 1px solid #FFF;
+    color:#FFF;
+}
+
+.riot-gallery-style.riot-gallery-style-dark li a,
+.riot-gallery-style.riot-gallery-style-dark li a:link,
+.riot-gallery-style.riot-gallery-style-dark li a:visited
+{
+    color: #88F;
+}
+
+.riot-gallery-style.riot-gallery-style-dark li a:hover,
+.riot-gallery-style.riot-gallery-style-dark li a:active
+{
+    color: #44F;
 }
 
 
@@ -58,10 +93,7 @@ ul.riot-gallery-style {
 
 
 
-.riot-gallery-style.riot-gallery-style-dark li {
-    background-color: #444;
-    border: 1px solid #FFF;
-}
+
 
 .riot-gallery-style img {
     max-width: 100%;
@@ -89,6 +121,7 @@ ul.riot-gallery-style {
     background-color: #FFF;
     background-color: rgba(255, 255, 255, 0.6);
     color: #000;
+    font-weight: bold;
 }
 
 .riot-gallery-style.riot-gallery-style-dark .riot-gallery-image-caption,
@@ -195,6 +228,10 @@ body.riot-gallery-viewer-open {
     text-align: center;
     background-color: #FFF;
     /*overflow: hidden;*/ /*put this back*/
+}
+
+#riot-gallery-viewer-image-con.is-error {
+    background-color: #F00;
 }
 
 #riot-gallery-viewer-image {
@@ -327,7 +364,12 @@ body.riot-gallery-viewer-open.riot-gallery-viewer-is-loading #riot-gallery-viewe
     display: none;
 }*/
 
-#riot-gallery-viewer-image.riot-gallery-image-loading #riot-gallery-image {
+/*#riot-gallery-viewer-image.riot-gallery-image-loading #riot-gallery-image {
+    display:none;
+}*/
+
+#riot-gallery-viewer-image-con.is-loading #riot-gallery-viewer-image,
+#riot-gallery-viewer-image-con.is-error #riot-gallery-viewer-image {
     display:none;
 }
 
@@ -343,7 +385,7 @@ body.riot-gallery-viewer-open.riot-gallery-viewer-is-loading #riot-gallery-viewe
 }
 
 /*body.riot-gallery-viewer-open.riot-gallery-viewer-is-loading #riot-gallery-viewer-loading {*/
-#riot-gallery-viewer-image.riot-gallery-image-loading {
+#riot-gallery-viewer-image-con.is-loading #riot-gallery-viewer-loading {
     display: block;
     animation: riot-gallery-viewer-loading 1s ease infinite;
 }
