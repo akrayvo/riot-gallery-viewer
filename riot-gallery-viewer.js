@@ -32,6 +32,14 @@ RiotGalleryViewer = {
 
     elems: {
         body: null,
+        bg: null,
+        caption: null,
+        captionCon: null,
+        closeCon: null,
+        image: null,
+        imageCon: null,
+        nextCon: null,
+        prevCon: null
     },
 
     // is the RiotGalleryViewer HTML (main image, background, previous/next butttons, close button, etc) loaded
@@ -44,6 +52,15 @@ RiotGalleryViewer = {
     // set on html initialization and updated on window resize
     windowWidth: 0,
     windowHeight: 0,
+
+    curImgHeight: 0,
+    curImgWidth: 0,
+
+    viewerHeight: 0,
+    viewerWidth: 0,
+
+    curGalKey: null,
+    curItemKey:null,
 
 
     /*****************************************************************************
@@ -803,11 +820,11 @@ RiotGalleryViewer = {
 
         //setGalleryImageByElem(galleryKey, elem) {
 
-        
+
 
         this.galleries[galleryKey].elem.appendChild(liElem);
 
-        
+
 
         return true;
     },
@@ -913,7 +930,7 @@ RiotGalleryViewer = {
             clickElem.itemKey = this.galleries[galleryKey].items.length;
             clickElem.addEventListener('click', function (event) {
                 event.preventDefault();
-                RiotGalleryViewer.elemClicked(this.galleryKey, this.itemKey);
+                RiotGalleryViewer.itemClicked(this.galleryKey, this.itemKey);
             }, false);*/
         }
 
@@ -939,7 +956,7 @@ RiotGalleryViewer = {
             clickElem.itemKey = this.galleries[galleryKey].items.length;
             clickElem.addEventListener('click', function (event) {
                 event.preventDefault();
-                RiotGalleryViewer.elemClicked(this.galleryKey, this.itemKey);
+                RiotGalleryViewer.itemClicked(this.galleryKey, this.itemKey);
             }, false);
         }
 
@@ -948,9 +965,11 @@ RiotGalleryViewer = {
         return true;
     },
 
-    elemClicked(galleryKey, ItemKey) {
-        console.log('elemClicked(galleryKey, ItemKey) {', galleryKey, ItemKey);
-        this.loadImage(galleryKey, ItemKey);
+    itemClicked(galleryKey, ItemKey) {
+        console.log('itemClicked(galleryKey, ItemKey) {', galleryKey, ItemKey);
+        this.curGalKey = galleryKey;
+        this.curItemKey = ItemKey;
+        this.loadImage();
     },
 
 
@@ -1482,7 +1501,7 @@ RiotGalleryViewer = {
         //if (isTransition) {
         //    this.elems.imageCon.animate(cssSettings, 1001);
         //} else {
-           // this.elems.imageCon.css(cssSettings);
+        // this.elems.imageCon.css(cssSettings);
         //}
 
         this.elems.imageCon.style.width = viewerWidth + 'px';
@@ -1516,22 +1535,22 @@ RiotGalleryViewer = {
 
     },
 
-    
+
 
     /*
      * new image displayed in the viewer
      * happens on gallery image and previous/next button click
      */
-    loadImage(galleryKey, itemKey) {
-        console.log('loadImage(newKey) {', galleryKey, itemKey);
+    loadImage() {
+        console.log('loadImage(newKey) {');
 
-        if (!this.galleries[galleryKey]) {
+        if (!this.galleries[this.curGalKey]) {
             // gallery not set. should not happen
             console.log('1240');
             return false;
         }
 
-        if (!this.galleries[galleryKey].items[itemKey]) {
+        if (!this.galleries[this.curGalKey].items[this.curItemKey]) {
             // item not set. should not happen
             console.log('1246');
             return false;
@@ -1547,7 +1566,7 @@ RiotGalleryViewer = {
             this.setWindowSize();
         }
 
-        const item = this.galleries[galleryKey].items[itemKey];
+        const item = this.galleries[this.curGalKey].items[this.curItemKey];
 
         var img = new Image();
         img.src = item.url;
@@ -1556,13 +1575,13 @@ RiotGalleryViewer = {
 
         if (img.complete) {
             console.log('if (img.complete) {');
-            this.viewLoadedImage(img, galleryKey, itemKey);
+            this.viewLoadedImage(img, this.curGalKey, this.curItemKey);
             //this.setLoadedImage(this, newKey);
         } else {
 
             console.log('else if (img.complete) {');
-            img.galleryKey = galleryKey;
-            img.itemKey = itemKey;
+            img.galleryKey = this.curGalKey;
+            img.itemKey = this.curItemKey;
             //this.startUnavailableImage(newKey);
             img.onload = function (e) {
                 console.log('img.onload this.galleryKey, this.itemKey', this.galleryKey, this.itemKey);
@@ -1588,6 +1607,25 @@ RiotGalleryViewer = {
         //this.elems.body.addClass('riot-gallery-viewer-open');
         this.elems.body.classList.add('riot-gallery-viewer-open');
         this.isViewerOpen = true;
+    },
+
+    closeViewer() {
+        console.log('closeViewer()');
+        this.elems.body.classList.remove('riot-gallery-viewer-open');
+        this.isViewerOpen = false;
+        this.resetViewerValues();
+        console.log(this);
+    },
+
+    resetViewerValues() {
+        this.curImgHeight = 0;
+        this.curImgWidth = 0;
+    
+        this.viewerHeight = 0;
+        this.viewerWidth = 0;
+
+        this.curGalKey = null;
+        this.curItemKey = null;
     },
 
     /*
@@ -1618,7 +1656,7 @@ RiotGalleryViewer = {
         console.log('loadViewerHtml() {');
 
         // skip if already loaded
-        if (this.isHtmlLoaded) {
+        if (this.isViewerHtmlLoaded) {
             return;
         }
 
@@ -1633,7 +1671,7 @@ RiotGalleryViewer = {
         const checkElem = document.getElementById('riot-gallery-viewer-bg');
         //console.log(checkElem.length);
         if (!checkElem) {
-            
+
             let divElem = null;
             let aElem = null;
             let subDivElem = null;
@@ -1646,11 +1684,15 @@ RiotGalleryViewer = {
             //this.elems.body.append(html);
             divElem = document.createElement('div');
             divElem.id = 'riot-gallery-viewer-bg';
+            divElem.addEventListener('click', function (event) {
+                event.preventDefault();
+                RiotGalleryViewer.closeClicked();
+            }, false);
             this.elems.bg = divElem;
             this.elems.body.appendChild(divElem);
 
 
-            
+
             // previous button
             //html = '<div id="riot-gallery-viewer-prev-con"><a href="#">&laquo;</a></div>';
             //this.elems.body.append(html);
@@ -1660,6 +1702,10 @@ RiotGalleryViewer = {
             aElem.innerHTML = '&laquo;';
             aElem.href = '#';
             divElem.appendChild(aElem);
+            divElem.addEventListener('click', function (event) {
+                event.preventDefault();
+                RiotGalleryViewer.prevClicked();
+            }, false);
             this.elems.prevCon = divElem;
             this.elems.body.appendChild(divElem);
 
@@ -1672,6 +1718,10 @@ RiotGalleryViewer = {
             aElem.innerHTML = '&raquo;';
             aElem.href = '#';
             divElem.appendChild(aElem);
+            divElem.addEventListener('click', function (event) {
+                event.preventDefault();
+                RiotGalleryViewer.nextClicked();
+            }, false);            
             this.elems.nextCon = divElem;
             this.elems.body.appendChild(divElem);
 
@@ -1710,6 +1760,10 @@ RiotGalleryViewer = {
             aElem = document.createElement('a');
             aElem.innerHTML = 'X';
             aElem.href = '#';
+            aElem.addEventListener('click', function (event) {
+                event.preventDefault();
+                RiotGalleryViewer.closeClicked();
+            }, false);
             divElem.appendChild(aElem);
             this.elems.closeCon = divElem;
             this.elems.body.appendChild(divElem);
@@ -1747,17 +1801,77 @@ RiotGalleryViewer = {
 */
         console.log('elements done');
 
-        this.isHtmlLoaded = true;
+        this.isViewerHtmlLoaded = true;
     },
 
 
+    closeClicked() {
+        this.closeViewer();
+    },
 
+    prevClicked() {
+        this.incrementImageAndLoad(-1);
+        /*if (this.curGalKey === null) {
+            // should not happen
+            this.curGalKey = 0;
+        }
+        if (this.curItemKey === null) {
+            // should not happen
+            this.curItemKey = 0;
+        } else {
+            this.curItemKey--;
+            if (this.curItemKey < 0)
+            {
+                this.curItemKey = this.galleries[this.curGalKey].length - 1;
+            }
+        }
+        
+        this.loadImage();*/
+    },
 
+    nextClicked() {
+        this.incrementImageAndLoad(1);
+        /*if (this.curGalKey === null) {
+            // should not happen
+            this.curGalKey = 0;
+        }
+        if (this.curItemKey === null) {
+            // should not happen
+            this.curItemKey = 0;
+        } else {
+            this.curItemKey++;
+            if (this.curItemKey >= this.galleries[this.curGalKey].length)
+            {
+                this.curItemKey = 0;
+            }
+        }
+        
+        this.loadImage();*/
+    },
 
-
-
-
-
+    incrementImageAndLoad(increment) {
+        if (this.curGalKey === null) {
+            // should not happen
+            this.curGalKey = 0;
+        }
+        if (this.curItemKey === null) {
+            // should not happen
+            this.curItemKey = 0;
+        } else {
+            this.curItemKey += increment;
+            if (this.curItemKey >= this.galleries[this.curGalKey].items.length)
+            {
+                this.curItemKey = 0;
+            }
+            else if (this.curItemKey < 0)
+            {
+                this.curItemKey = this.galleries[this.curGalKey].items.length - 1;
+            }
+        }
+        console.log(181, this.curGalKey, this.curItemKey, this.galleries[this.curGalKey].items.length);
+        
+        this.loadImage();
+    },
 
 
 
@@ -1885,7 +1999,7 @@ RiotGalleryViewer = {
 
     consoleLogInfo(info) {
         //if (this.options.doConsoleLog) {
-            console.log(' consoleLogInfo(info) {', info);
+        console.log(' consoleLogInfo(info) {', info);
         //}
     }
 
