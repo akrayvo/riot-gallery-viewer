@@ -1431,6 +1431,10 @@ RiotGalleryViewer = {
         //this.displayCaption();
         if (this.galleries[galleryKey].items[itemKey].caption) {
             this.elems.caption.innerHTML = this.galleries[galleryKey].items[itemKey].caption;
+            this.elems.captionCon.classList.add('is-displayed');
+        } else {
+            this.elems.caption.innerHTML = '';
+            this.elems.captionCon.classList.remove('is-displayed');
         }
 
         //this.elems.body.removeClass('riot-gallery-viewer-is-transitioning-both');
