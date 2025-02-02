@@ -14,20 +14,13 @@ RiotGalleryViewer = {
         initImages: [],
         items: [],
         options: null,
-        // is the gallery already in the HTML, will only be false for new galleries
-        // that require the class to build the html ()
-        //isReady: false,
         isHtmlBuilt: false,
         isLoaded: false,
         isError: false,
         errorMessages: [],
-
         imageFileUrl: null,
         imageFileUrlIsComplete: false,
-        options: {
-            // write information to the console log. needed for troubeshooting/testing/development only
-            doConsoleLog: false
-        },
+        options: {},
     },
 
     elems: {
@@ -60,10 +53,17 @@ RiotGalleryViewer = {
     viewerWidth: 0,
 
     curGalKey: null,
-    curItemKey:null,
+    curItemKey: null,
 
     loadingImageWidth: 300,
     loadingImageHeight: 300,
+
+    options: {
+        // write information to the console log. needed for troubeshooting/testing/development only
+        doConsoleLog: false,
+        // write a code trace on every console log. needed for troubeshooting/testing/development only
+        doConsoleTrace: false
+    },
 
 
     /*****************************************************************************
@@ -77,17 +77,19 @@ RiotGalleryViewer = {
     does not validate data, this is done when gallery is initialized
     */
     addImage(galleryElemId, url, thumbUrl, caption) {
-        console.log('addImage(galleryElemId, url, thumbUrl, caption) {', galleryElemId, url, thumbUrl, caption);
 
         const galleryKey = this.getGalleryKeyByElemId(galleryElemId); // , false
 
         if (galleryKey === false) {
-            console.log('addImage failed, could not find gallery', galleryElemId);
+            this.consoleLog('ERROR - addImage failed, could not find gallery', galleryElemId);
             return false;
         }
 
-        //console.log(this.galleries[galleryKey]);
-        this.addInitImage(galleryKey, url, thumbUrl, caption);
+        if (this.addInitImage(galleryKey, url, thumbUrl, caption)) {
+            this.consoleLog('image added', url);
+        } else {
+            this.consoleLog('ERROR - image added failed', url);
+        }
     },
 
 
@@ -99,28 +101,20 @@ RiotGalleryViewer = {
     */
     addImagesByFile(galleryElemId, fileUrl) {
         if (!fileUrl || typeof fileUrl !== 'string') {
-            console.log('addGalleryByString failed, no fileUrl', fileUrl);
+            this.consoleLog('addGalleryByString failed, no fileUrl', fileUrl, typeof fileUrl);
             return false;
         }
 
-        console.log('addImagesByFile(galleryElemId, fileUrl) {', galleryElemId, fileUrl);
         const galleryKey = this.getGalleryKeyByElemId(galleryElemId);
 
         if (galleryKey === false) {
-            console.log('addGalleryByString failed, could not find gallery', galleryElemId);
+            this.consoleLog('ERROR - could not add add images to failed gallery', galleryElemId);
             return false;
         }
 
-
-
-        //let gal = Object.assign({}, this.galleryTemplate);
-
-        //gal.elemId = elemId;
-
         this.galleries[galleryKey].imageFileUrl = fileUrl;
 
-        // add a new empty gallery to the galleries array. assign so that it is copied by value.
-        //this.galleries.push(gal);
+        this.consoleLog('Image list file set for adding to gallery', galleryElemId, fileUrl);
     },
 
     /*
@@ -130,10 +124,10 @@ RiotGalleryViewer = {
     */
     setOption(galleryElemId, option, value) {
 
-        const galleryKey = this.getGalleryKeyByElemId(galleryElemId);
+        /*const galleryKey = this.getGalleryKeyByElemId(galleryElemId);
 
         if (galleryKey === false) {
-            console.log('addGalleryByString failed, could not find gallery', galleryElemId);
+            this.console('addGalleryByString failed, could not find gallery', galleryElemId);
             return false;
         }
 
@@ -141,17 +135,42 @@ RiotGalleryViewer = {
             console.log('addOption failed, no value passed', option);
         }
 
-        if (option === 'doConsoleLog') {
+        if (option === 'doConsoleLog' || option === 'doConsoleTrace') {
             if (value) {
-                this.galleries[galleryKey].options.doConsoleLog = true;
+                this.galleries[galleryKey].options[option] = true;
             } else {
-                this.galleries[galleryKey].options.doConsoleLog = false;
+                this.galleries[galleryKey].options[option] = false;
             }
-            console.log('doConsoleLog set to', this.galleries[galleryKey].doConsoleLog);
+            console.log('gallery option set - ', option, this.galleries[galleryKey].options[option]);
             return true;
         }
 
-        console.log('addOption failed, invalid option passed', option);
+        console.log('addOption failed, invalid option passed', option);*/
+    },
+
+    /*
+    set global options to determine the style and behavior of the gallery
+    called by user
+    */
+    setGlobalOption(option, value) {
+
+        if (typeof value === 'undefined') {
+            this.consoleLog('setGlobalOption - ERROR - no value passed', option);
+            return false;
+        }
+
+        if (option === 'doConsoleLog' || option === 'doConsoleTrace') {
+            if (value) {
+                this.options[option] = true;
+            } else {
+                this.options[option] = false;
+            }
+            this.consoleLog('setGlobalOption - global option set',  option, this.options[option]);
+            return true;
+        }
+
+        this.consoleLog('setGlobalOption - ERROR - invalid option passed', option);
+        return false;
     },
 
     /* User Input - END
@@ -168,6 +187,9 @@ RiotGalleryViewer = {
     begin initialization
     */
     initialize() {
+
+        this.consoleLog('Riot Gallery Viewer - being initialization of loaded data')
+
         const isGalleryWithFileRemoteUrl = this.processGalleryFileRemoteUrls();
 
         if (!isGalleryWithFileRemoteUrl) {
@@ -242,9 +264,9 @@ RiotGalleryViewer = {
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
-                    console.log(xhr);
+                    //console.log(xhr);
                     RiotGalleryViewer.addGalleryImagesByText(xhr.galleryKey, xhr.responseText);
-                    console.log(RiotGalleryViewer);
+                    //console.log(RiotGalleryViewer);
                     //RiotGalleryViewer.textFilesDone.push(xhr.responseURL);
                 } else {
                     // failed
@@ -503,34 +525,34 @@ RiotGalleryViewer = {
     /*
     get the key of the galleries array. if it doesn't exist, add it
     */
-    getGalleryKeyByElemId(elemId) { // canBeNull
-
-        console.log('getGalleryKeyByElemId(elemId) {', elemId);
+    getGalleryKeyByElemId(elemId) {
 
         if (typeof elemId !== 'string') {
-            console.log('getGalleryKeyByElemId error - invalid elemId type', elemId, typeof elemId);
+            this.consoleLog('ERROR - cannot add gallery, invalid elemId type', elemId, typeof elemId);
             return false;
         }
 
         if (elemId.length < 1) {
-            console.log('getGalleryKeyByElemId error - elemId is empty', elemId, typeof elemId);
+            this.consoleLog('ERROR - cannot add gallery, elemId is empty', elemId, typeof elemId);
             return false;
         }
 
         for (let x = 0; x < this.galleries.length; x++) {
             if (this.galleries[x].elemId === elemId) {
                 if (this.isError) {
-                    console.log('addGallery error 2b - gallery already created with error', elemId);
+                    // addGallery error - gallery already created with error
                     return false;
                 }
                 return x;
             }
         }
 
-        //let gal = Object.assign({}, this.galleryTemplate);
+        // new empty gallery record
         let gal = JSON.parse(JSON.stringify(this.galleryTemplate))
 
         gal.elemId = elemId;
+
+        this.consoleLog('new gallery added',  elemId);
 
         // add a new empty gallery to the galleries array. assign so that it is copied by value.
         this.galleries.push(gal);
@@ -583,7 +605,7 @@ RiotGalleryViewer = {
     add an initImages record to a gallery record
     */
     addInitImage(galleryKey, url, thumbUrl, caption) {
-        console.log('++++++++++++ addInitImage(galleryKey, url, thumbUrl, caption) {', galleryKey, url, thumbUrl, caption);
+
         // double check that the gallery exists.
         if (!this.galleries[galleryKey]) {
             return false;
@@ -594,7 +616,7 @@ RiotGalleryViewer = {
         }
 
         this.galleries[galleryKey].initImages.push({ url: url, thumbUrl: thumbUrl, caption: caption });
-        console.log('=============', galleryKey, this.galleries[galleryKey]);
+
         return true;
     },
 
@@ -1469,7 +1491,7 @@ RiotGalleryViewer = {
         this.elems.caption.innerHTML = '';
         this.elems.captionCon.classList.remove('is-displayed');
     },
-            
+
 
     /*
      * position the main gallery view image and the close button in the top right corner
@@ -1555,8 +1577,8 @@ RiotGalleryViewer = {
         //}
 
         if (isLoadingImage) {
-            viewerLeft  = viewerLeft - 8;
-            viewerTop  = viewerTop - 8;
+            viewerLeft = viewerLeft - 8;
+            viewerTop = viewerTop - 8;
             this.elems.imageCon.style.padding = '5px';
         } else {
             this.elems.imageCon.style.padding = '0';
@@ -1682,7 +1704,7 @@ RiotGalleryViewer = {
     resetViewerValues() {
         this.curImgHeight = 0;
         this.curImgWidth = 0;
-    
+
         this.viewerHeight = 0;
         this.viewerWidth = 0;
 
@@ -1698,7 +1720,7 @@ RiotGalleryViewer = {
         console.log('setWindowSize()');
         this.windowWidth = window.innerWidth;
         this.windowHeight = window.innerHeight;
-        this.consoleLogInfo('set window size, width = ' + this.windowWidth + ' | height=' + this.windowHeight);
+        this.consoleLog('set window size, width = ' + this.windowWidth + ' | height=' + this.windowHeight);
     },
 
     /* Image Viewer Actions - END
@@ -1740,7 +1762,7 @@ RiotGalleryViewer = {
             let imgElem = null;
 
 
-            window.addEventListener('resize', function() {
+            window.addEventListener('resize', function () {
                 RiotGalleryViewer.windowResized();
             });
 
@@ -1784,7 +1806,7 @@ RiotGalleryViewer = {
             divElem.addEventListener('click', function (event) {
                 event.preventDefault();
                 RiotGalleryViewer.nextClicked();
-            }, false);            
+            }, false);
             this.elems.nextCon = divElem;
             this.elems.body.appendChild(divElem);
 
@@ -1926,17 +1948,15 @@ RiotGalleryViewer = {
             this.curItemKey = 0;
         } else {
             this.curItemKey += increment;
-            if (this.curItemKey >= this.galleries[this.curGalKey].items.length)
-            {
+            if (this.curItemKey >= this.galleries[this.curGalKey].items.length) {
                 this.curItemKey = 0;
             }
-            else if (this.curItemKey < 0)
-            {
+            else if (this.curItemKey < 0) {
                 this.curItemKey = this.galleries[this.curGalKey].items.length - 1;
             }
         }
         console.log(181, this.curGalKey, this.curItemKey, this.galleries[this.curGalKey].items.length);
-        
+
         this.loadImage();
     },
 
@@ -2078,10 +2098,49 @@ RiotGalleryViewer = {
         return elem;
     },
 
-    consoleLogInfo(info) {
-        //if (this.options.doConsoleLog) {
-        console.log(' consoleLogInfo(info) {', info);
-        //}
+    getOptionVal(option, galKey) {
+        
+        // check if set globally
+        if (this.options[option]) {
+            return true;
+        }
+
+        if (galKey === null || typeof galKey === 'undefined') {
+            if (this.curGalKey === null) {
+                // not passed or set
+                return false;
+            }
+            if (!this.galleries[galKey]) {
+                // gallery not found
+                return false;
+            }
+            galKey = this.curGalKey;
+        }
+
+        if (this.galleries[galKey].options[option]) {
+            return true;
+        }
+
+        return false;
+    },
+
+    consoleLog(val1, val2, val3, val4) {
+
+        if (this.getOptionVal('doConsoleLog')) {
+            if (typeof val4 !== 'undefined') {
+                console.log(val1, '|', val2, '|', val3, '|', vals4);
+            } else if (typeof val3 !== 'undefined') {
+                console.log(val1, '|', val2, '|', val3);
+            } else if (typeof val2 !== 'undefined') {
+                console.log(val1, '|', val2);
+            } else if (typeof val1 !== 'undefined') {
+                console.log(val1);
+            }
+        }
+
+        if (this.getOptionVal('doConsoleTrace')) {
+            console.trace();
+        }
     }
 
     /* Helper - END

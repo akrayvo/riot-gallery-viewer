@@ -96,6 +96,9 @@ $images = array(
 
     <script src="../../riot-gallery-viewer.js?x=<?php echo time(); ?>"></script>
     <script>
+        RiotGalleryViewer.setGlobalOption('doConsoleLog', true);
+        //RiotGalleryViewer.setGlobalOption('doConsoleTrace', true);
+
         RiotGalleryViewer.addImage('gal1', '../images/blue-jay.jpg', '../images/blue-jay_thumb.jpg', 'Blue Jay');
         RiotGalleryViewer.addImage('gal1', '../images/lake-7301021_640.jpg', '../images/lake-7301021_640_thumb.jpg', 'LaKe 7301021');
         RiotGalleryViewer.addImage('gal1', '../images/lake-8257272_1280.jpg', '../images/lake-8257272_1280_thumb.jpg', 'LaKe 8257272');
