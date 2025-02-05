@@ -69,12 +69,11 @@ RiotGalleryViewer = {
         xRight: null,
         xTop: null,
         padding: null,
-        transLeft: null,
         imgUrl: null,
         imgWidth: null,
         imgHeight: 0,
-        transImgPxPerInterval: null,
-        transImgCurLeft: null,
+        transPxPerInterval: null,
+        transLeft: null,
     },
 
     prevOrNext: null,
@@ -100,8 +99,8 @@ RiotGalleryViewer = {
         doConsoleLog: false,
         // write a code trace on every console log. needed for troubeshooting/testing/development only
         doConsoleTrace: false,
-        transitionMs: 2000,
-        transitionFrameMs: 500,
+        transitionMs: 1000,
+        transitionFrameMs: 5,
         imageFailedCaptionHtml: '<i>Could Not Load Image</i>'
     },
 
@@ -1713,12 +1712,7 @@ RiotGalleryViewer = {
     },*/
 
 
-    clearTransInterval() {
-        if (this.transition.isJsIntervalOn) {
-            clearInterval(this.transition.jsTnterval);
-        }
-        this.transition = this.getObjectByVal(this.transitionBlank);
-    },
+
 
     /*
      * new image displayed in the viewer
@@ -1740,7 +1734,7 @@ RiotGalleryViewer = {
         }
 
         // if transition is running, stop it
-        this.clearTransInterval();
+        this.endTransition();
 
         if (this.isViewerHtmlLoaded) {
             console.log('if (this.isViewerHtmlLoaded) {');
@@ -1814,7 +1808,8 @@ RiotGalleryViewer = {
 
         this.setImageSize(image, this.curGalKey, this.curItemKey),
 
-            console.log('imageLoadComplete');
+        console.log('imageLoadComplete');
+        
         console.log(this.imgViewCur);
         this.elems.image.src = this.imgViewCur.imgUrl;
         this.elems.imageCon.classList = '';
@@ -1826,7 +1821,7 @@ RiotGalleryViewer = {
     },
 
     transitionImage() {
-        console.log('transitionImage() {');
+       // console.log('transitionImage() {');
         //console.log(this.imgViewCur, this.imgViewPrev);
 
         if (!this.imgViewCur.width || !this.imgViewCur.height) {
@@ -1839,7 +1834,6 @@ RiotGalleryViewer = {
             console.log('// no previous image. show image. do not transition');
             // no previous image. show image. do not transition
 
-
             if (this.imgViewCur.isLoaded) {
                 // image loaded
                 console.log('if (this.isLoaded) {');
@@ -1850,22 +1844,24 @@ RiotGalleryViewer = {
                 console.log('// image NOT loaded. show spinner');
                 this.elems.imageCon.classList = 'is-loading';
             }
-            console.log('aaaaaa');
+            //console.log('aaaaaa');
             this.placeImageInPosition();
-            console.log('bbbbbb');
+            //console.log('bbbbbb');
             return;
         }
 
-        console.log('transition IT');
+        //console.log('transition IT');
 
-        const extraDistance = 20;
+        const extraDistance = -200;
 
         if (this.prevOrNext === 'prev') {
             this.transition.type = 'left';
-            this.imgViewCur.transImgCurLeft = this.windowWidth + extraDistance;
-            console.log('init this.imgViewCur.transImgCurLeft', this.imgViewCur.transImgCurLeft);
+            this.imgViewCur.transLeft = this.windowWidth + extraDistance;
+            //console.log('init this.imgViewCur.transLeft', this.imgViewCur.transLeft);
         } else if (this.prevOrNext === 'next') {
             this.transition.type = 'right';
+            this.imgViewCur.transLeft = 0 - this.imgViewCur.imgWidth - extraDistance;
+            //console.log('init this.imgViewCur.transLeft', this.imgViewCur.transLeft);
         } else {
             //could not find tranistion type. should not happen
             return;
@@ -1877,21 +1873,21 @@ RiotGalleryViewer = {
 
 
         this.transition.totFrameCount = this.options.transitionMs / this.options.transitionFrameMs;
-        console.log('this.transition.totFrameCount', this.transition.totFrameCount);
+        //console.log('this.transition.totFrameCount', this.transition.totFrameCount);
         this.transition.curFrameCount = 1;
 
-        const distancePx = this.imgViewCur.transImgCurLeft - this.imgViewCur.left;
-        console.log('set distancePx', distancePx);
-        this.imgViewCur.transImgPxPerInterval = Math.floor(distancePx / this.transition.totFrameCount);
-        console.log('set this.imgViewCur.transImgPxPerInterval', this.imgViewCur.transImgPxPerInterval, distancePx, this.transition.totFrameCount);
+        const distancePx = this.imgViewCur.left - this.imgViewCur.transLeft;
+        //console.log('set distancePx', distancePx);
+        this.imgViewCur.transPxPerInterval = distancePx / this.transition.totFrameCount;
+        //console.log('set this.imgViewCur.transPxPerInterval', this.imgViewCur.transPxPerInterval, distancePx, this.transition.totFrameCount);
 
-        this.elems.imageCon.style.left = this.imgViewCur.transImgCurLeft + 'px';
+        this.elems.imageCon.style.left = this.imgViewCur.transLeft + 'px';
         this.elems.imageCon.style.top = this.imgViewCur.top + 'px';
         this.elems.imageCon.style.width = this.imgViewCur.width + 'px';
         this.elems.imageCon.style.height = this.imgViewCur.height + 'px';
-        if (this.imgWidth) {
+        if (this.imgViewCur.imgUrl) {
             // image loaded
-            this.elems.image.src = this.imgUrl;
+            this.elems.image.src = this.imgViewCur.imgUrl;
             this.elems.imageCon.classList = '';
         } else {
             // image NOT loaded. show spinner
@@ -1918,13 +1914,13 @@ console.log(this.transition.curFrameCount, this.transition.totFrameCount);
             return;
         }
 
-        this.imgViewCur.transImgCurLeft = this.imgViewCur.transImgCurLeft + this.imgViewCur.transImgPxPerInterval;
-        console.log('this.imgViewCur.transImgCurLeft = this.imgViewCur.transImgCurLeft + this.imgViewCur.transImgPxPerInterval;', 
-            this.imgViewCur.transImgCurLeft, 
-            this.imgViewCur.transImgPxPerInterval);
+        this.imgViewCur.transLeft = this.imgViewCur.transLeft + this.imgViewCur.transPxPerInterval;
+        console.log('this.imgViewCur.transLeft = this.imgViewCur.transLeft + this.imgViewCur.transPxPerInterval;', 
+            this.imgViewCur.transLeft, 
+            this.imgViewCur.transPxPerInterval);
         this.transition.curFrameCount++;
 
-        this.elems.imageCon.style.left = this.imgViewCur.transImgCurLeft + 'px';
+        this.elems.imageCon.style.left = this.imgViewCur.transLeft + 'px';
     },
 
     endTransition() {
@@ -1967,7 +1963,7 @@ console.log(this.transition.curFrameCount, this.transition.totFrameCount);
         this.imgViewPrev = this.getImgViewBlank();
         //console.log('zzz', );
 
-        this.transition = this.getObjectByVal(this.transitionBlank);
+        this.endTransition();
 
         //this.prevOrNext = null;
 
@@ -1975,7 +1971,7 @@ console.log(this.transition.curFrameCount, this.transition.totFrameCount);
         this.curItemKey = null;*/
 
         this.elems.imageCon.classList = '';
-        this.elems.imageTransCon.classList = '';
+        //this.elems.imageTransCon.classList = '';
         this.elems.caption.innerHTML = '';
         this.elems.captionCon.classList = '';
 
@@ -1993,13 +1989,11 @@ console.log(this.transition.curFrameCount, this.transition.totFrameCount);
             xRight: null, 
             xTop: null, 
             padding: null, 
-            transLeft: null,
             imgUrl: null,
             imgWidth: null,
             imgHeight: 0,
-            transImgPxPerInterval: null,
-            transImgCurLeft: null,
-            transImgCurRight: null,
+            transPxPerInterval: null,
+            transLeft: null,
         };*/
         return this.getObjectByVal(this.imgViewBlank);
     },
