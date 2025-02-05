@@ -375,7 +375,9 @@ body.riot-gallery-viewer-open.riot-gallery-viewer-is-loading #riot-gallery-viewe
 }*/
 
 #riot-gallery-viewer-image-con.is-loading #riot-gallery-viewer-image,
-#riot-gallery-viewer-image-con.is-error #riot-gallery-viewer-image {
+#riot-gallery-viewer-image-con.is-error #riot-gallery-viewer-image,
+#riot-gallery-viewer-image-trans-con.is-loading #riot-gallery-viewer-image-trans,
+#riot-gallery-viewer-image-trans-con.is-error #riot-gallery-viewer-image-trans {
     display:none;
 }
 
