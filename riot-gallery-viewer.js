@@ -6,28 +6,23 @@
 
 RiotGalleryViewer = {
 
+    // images container
     galleries: [],
 
-    galleryTemplate: {
+    // the fields in a new gallery
+    galleryBlank: {
         elem: null,
         elemId: null,
         initImages: [],
         items: [],
         options: null,
-        // is the gallery already in the HTML, will only be false for new galleries
-        // that require the class to build the html ()
-        //isReady: false,
         isHtmlBuilt: false,
         isLoaded: false,
         isError: false,
         errorMessages: [],
-
         imageFileUrl: null,
         imageFileUrlIsComplete: false,
-        options: {
-            // write information to the console log. needed for troubeshooting/testing/development only
-            doConsoleLog: false
-        },
+        options: {},
     },
 
     elems: {
@@ -38,6 +33,8 @@ RiotGalleryViewer = {
         closeCon: null,
         image: null,
         imageCon: null,
+        imageTrans: null,
+        imageTransCon: null,
         nextCon: null,
         prevCon: null
     },
@@ -53,17 +50,63 @@ RiotGalleryViewer = {
     windowWidth: 0,
     windowHeight: 0,
 
-    curImgHeight: 0,
-    curImgWidth: 0,
+    /*imgUrl: null,
+    //imgIsLoading: false,
+    imgHeight: 0,
+    imgWidth: 0,
+*/
+    imgViewCur: null,
+    imgViewPrev: null,
 
-    viewerHeight: 0,
-    viewerWidth: 0,
+    imgViewBlank: {
+        height: null,
+        width: null,
+        left: null,
+        top: null,
+        isError: false,
+        isLoaded: null,
+        caption: false,
+        xRight: null,
+        xTop: null,
+        padding: null,
+        imgUrl: null,
+        imgWidth: null,
+        imgHeight: 0,
+        //transPxPerInterval: null,
+        transLeftStart: null,
+        transLeftEnd: null,
+        transDistancePx: null
+    },
+
+    prevOrNext: null,
 
     curGalKey: null,
-    curItemKey:null,
+    curItemKey: null,
 
-    loadingImageWidth: 300,
-    loadingImageHeight: 300,
+    loadingImgWidth: 300,
+    loadingImgHeight: 300,
+
+    transition: {},
+
+    transitionBlank: {
+        jsTnterval: null,
+        isJsIntervalOn: false,
+        type: null, // left, or right
+        totFrameCount: null,
+        //curFrameCount: 0,
+        startTimeMs: null,
+        endTimeMs: null
+    },
+
+    options: {
+        // write information to the console log. needed for troubeshooting/testing/development only
+        doConsoleLog: false,
+        // write a code trace on every console log. needed for troubeshooting/testing/development only
+        doConsoleTrace: false,
+        transitionMs: 500,
+        transitionFrameMs: 10,
+        imageFailedCaptionHtml: '<i>Could Not Load Image</i>'
+    },
 
 
     /*****************************************************************************
@@ -71,23 +114,25 @@ RiotGalleryViewer = {
      * User Input - START - User functions to build and load galleries */
 
     /*
-    add an image to a gallery
-    called by user or other function
-    gallery is created if needed
-    does not validate data, this is done when gallery is initialized
-    */
+     * add an image to a gallery
+     * called by user or other function
+     * gallery is created if needed
+     * does not validate data, validation is done when gallery is initialized
+     */
     addImage(galleryElemId, url, thumbUrl, caption) {
-        console.log('addImage(galleryElemId, url, thumbUrl, caption) {', galleryElemId, url, thumbUrl, caption);
 
         const galleryKey = this.getGalleryKeyByElemId(galleryElemId); // , false
 
         if (galleryKey === false) {
-            console.log('addImage failed, could not find gallery', galleryElemId);
+            this.consoleLog('ERROR - addImage failed, could not find gallery', galleryElemId);
             return false;
         }
 
-        //console.log(this.galleries[galleryKey]);
-        this.addInitImage(galleryKey, url, thumbUrl, caption);
+        if (this.addInitImage(galleryKey, url, thumbUrl, caption)) {
+            this.consoleLog('image added', url);
+        } else {
+            this.consoleLog('ERROR - image added failed', url);
+        }
     },
 
 
@@ -99,28 +144,20 @@ RiotGalleryViewer = {
     */
     addImagesByFile(galleryElemId, fileUrl) {
         if (!fileUrl || typeof fileUrl !== 'string') {
-            console.log('addGalleryByString failed, no fileUrl', fileUrl);
+            this.consoleLog('addGalleryByString failed, no fileUrl', fileUrl, typeof fileUrl);
             return false;
         }
 
-        console.log('addImagesByFile(galleryElemId, fileUrl) {', galleryElemId, fileUrl);
         const galleryKey = this.getGalleryKeyByElemId(galleryElemId);
 
         if (galleryKey === false) {
-            console.log('addGalleryByString failed, could not find gallery', galleryElemId);
+            this.consoleLog('ERROR - could not add add images to failed gallery', galleryElemId);
             return false;
         }
 
-
-
-        //let gal = Object.assign({}, this.galleryTemplate);
-
-        //gal.elemId = elemId;
-
         this.galleries[galleryKey].imageFileUrl = fileUrl;
 
-        // add a new empty gallery to the galleries array. assign so that it is copied by value.
-        //this.galleries.push(gal);
+        this.consoleLog('Image list file set for adding to gallery', galleryElemId, fileUrl);
     },
 
     /*
@@ -130,10 +167,10 @@ RiotGalleryViewer = {
     */
     setOption(galleryElemId, option, value) {
 
-        const galleryKey = this.getGalleryKeyByElemId(galleryElemId);
+        /*const galleryKey = this.getGalleryKeyByElemId(galleryElemId);
 
         if (galleryKey === false) {
-            console.log('addGalleryByString failed, could not find gallery', galleryElemId);
+            this.console('addGalleryByString failed, could not find gallery', galleryElemId);
             return false;
         }
 
@@ -141,17 +178,42 @@ RiotGalleryViewer = {
             console.log('addOption failed, no value passed', option);
         }
 
-        if (option === 'doConsoleLog') {
+        if (option === 'doConsoleLog' || option === 'doConsoleTrace') {
             if (value) {
-                this.galleries[galleryKey].options.doConsoleLog = true;
+                this.galleries[galleryKey].options[option] = true;
             } else {
-                this.galleries[galleryKey].options.doConsoleLog = false;
+                this.galleries[galleryKey].options[option] = false;
             }
-            console.log('doConsoleLog set to', this.galleries[galleryKey].doConsoleLog);
+            console.log('gallery option set - ', option, this.galleries[galleryKey].options[option]);
             return true;
         }
 
-        console.log('addOption failed, invalid option passed', option);
+        console.log('addOption failed, invalid option passed', option);*/
+    },
+
+    /*
+    set global options to determine the style and behavior of the gallery
+    called by user
+    */
+    setGlobalOption(option, value) {
+
+        if (typeof value === 'undefined') {
+            this.consoleLog('setGlobalOption - ERROR - no value passed', option);
+            return false;
+        }
+
+        if (option === 'doConsoleLog' || option === 'doConsoleTrace') {
+            if (value) {
+                this.options[option] = true;
+            } else {
+                this.options[option] = false;
+            }
+            this.consoleLog('setGlobalOption - global option set', option, this.options[option]);
+            return true;
+        }
+
+        this.consoleLog('setGlobalOption - ERROR - invalid option passed', option);
+        return false;
     },
 
     /* User Input - END
@@ -168,6 +230,8 @@ RiotGalleryViewer = {
     begin initialization
     */
     initialize() {
+        this.consoleLog('Riot Gallery Viewer - being initialization of loaded data');
+
         const isGalleryWithFileRemoteUrl = this.processGalleryFileRemoteUrls();
 
         if (!isGalleryWithFileRemoteUrl) {
@@ -242,9 +306,9 @@ RiotGalleryViewer = {
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
-                    console.log(xhr);
+                    //console.log(xhr);
                     RiotGalleryViewer.addGalleryImagesByText(xhr.galleryKey, xhr.responseText);
-                    console.log(RiotGalleryViewer);
+                    //console.log(RiotGalleryViewer);
                     //RiotGalleryViewer.textFilesDone.push(xhr.responseURL);
                 } else {
                     // failed
@@ -269,7 +333,7 @@ RiotGalleryViewer = {
     either send the text to a function that handles the array parsed from json or a text list
     */
     addGalleryImagesByText(galleryKey, text) {
-        console.log('addGalleryImagesByText(galleryKey, text) {', galleryKey, text);
+        //console.log('addGalleryImagesByText(galleryKey, text) {', galleryKey, text);
 
         let parsed = null;
 
@@ -300,9 +364,9 @@ RiotGalleryViewer = {
 
             for (let x = 0; x < lines.length; x++) {
                 //let line = lines[x].trim();
-                console.log('270 ------- lines[x]', lines[x]);
+                //console.log('270 ------- lines[x]', lines[x]);
                 this.addImageByString(galleryKey, lines[x]);
-                console.log('272 ------- galleries', this.galleries);
+                //console.log('272 ------- galleries', this.galleries);
                 //img = this.strLineToItem(line);
                 //if (item) {
                 //imgs.push(img);
@@ -374,7 +438,7 @@ RiotGalleryViewer = {
     process a single image from string (single line from a remote text file)
     */
     addImageByString(galleryKey, line) {
-        console.log('addImageByString(galleryKey, line) {', galleryKey, line);
+        //console.log('addImageByString(galleryKey, line) {', galleryKey, line);
 
         let url = null;
         let thumbUrl = null;
@@ -397,12 +461,12 @@ RiotGalleryViewer = {
             this.addInitImage(galleryKey, url, thumbUrl, caption);
         } else {
             // strings in quotes (with validation)
-            console.log(line);
+            //console.log(line);
             const strs = this.addImageByStringsWithQuotes(galleryKey, line);
         }
 
         if (!url) {
-            console.log('addImageByString(galleryKey, line) { ERROR - no url found', line);
+            //console.log('addImageByString(galleryKey, line) { ERROR - no url found', line);
             return false;
         }
 
@@ -450,7 +514,7 @@ RiotGalleryViewer = {
     add image to a gallery based on a quoted string ("./image1.jpg", "./image1_thumbnail.jpg", "My Image")
     */
     addImageByStringsWithQuotes(galleryKey, line) {
-        console.log('addImageByStringsWithQuotes(galleryKey, line) {', galleryKey, line);
+        //console.log('addImageByStringsWithQuotes(galleryKey, line) {', galleryKey, line);
         const tempQuoteReplace = "[~~(quote here, riotgallery)~~]";
         line = this.strReplace('\\"', tempQuoteReplace, line);
         line = line.trim();
@@ -487,7 +551,7 @@ RiotGalleryViewer = {
 
         this.addInitImage(galleryKey, url, thumbUrl, caption);
 
-        console.log('453 ------------ ', this.galleries);
+        //console.log('453 ------------ ', this.galleries);
         return true;
     },
 
@@ -503,34 +567,34 @@ RiotGalleryViewer = {
     /*
     get the key of the galleries array. if it doesn't exist, add it
     */
-    getGalleryKeyByElemId(elemId) { // canBeNull
-
-        console.log('getGalleryKeyByElemId(elemId) {', elemId);
+    getGalleryKeyByElemId(elemId) {
 
         if (typeof elemId !== 'string') {
-            console.log('getGalleryKeyByElemId error - invalid elemId type', elemId, typeof elemId);
+            this.consoleLog('ERROR - cannot add gallery, invalid elemId type', elemId, typeof elemId);
             return false;
         }
 
         if (elemId.length < 1) {
-            console.log('getGalleryKeyByElemId error - elemId is empty', elemId, typeof elemId);
+            this.consoleLog('ERROR - cannot add gallery, elemId is empty', elemId, typeof elemId);
             return false;
         }
 
         for (let x = 0; x < this.galleries.length; x++) {
             if (this.galleries[x].elemId === elemId) {
                 if (this.isError) {
-                    console.log('addGallery error 2b - gallery already created with error', elemId);
+                    // addGallery error - gallery already created with error
                     return false;
                 }
                 return x;
             }
         }
 
-        //let gal = Object.assign({}, this.galleryTemplate);
-        let gal = JSON.parse(JSON.stringify(this.galleryTemplate))
+        // new empty gallery record
+        let gal = this.getObjectByVal(this.galleryBlank);
 
         gal.elemId = elemId;
+
+        this.consoleLog('new gallery added', elemId);
 
         // add a new empty gallery to the galleries array. assign so that it is copied by value.
         this.galleries.push(gal);
@@ -566,7 +630,7 @@ RiotGalleryViewer = {
             }
         }
 
-        let gal = Object.assign({}, this.galleryTemplate);
+        let gal = this.getObjectByVal(this.galleryBlank);
 
         gal.elem = elem;
 
@@ -583,7 +647,7 @@ RiotGalleryViewer = {
     add an initImages record to a gallery record
     */
     addInitImage(galleryKey, url, thumbUrl, caption) {
-        console.log('++++++++++++ addInitImage(galleryKey, url, thumbUrl, caption) {', galleryKey, url, thumbUrl, caption);
+
         // double check that the gallery exists.
         if (!this.galleries[galleryKey]) {
             return false;
@@ -594,7 +658,7 @@ RiotGalleryViewer = {
         }
 
         this.galleries[galleryKey].initImages.push({ url: url, thumbUrl: thumbUrl, caption: caption });
-        console.log('=============', galleryKey, this.galleries[galleryKey]);
+
         return true;
     },
 
@@ -612,7 +676,7 @@ RiotGalleryViewer = {
     },
 
     buildHtmlGallery(galleryKey) {
-        console.log('buildGallery(gallery) {', galleryKey, this.galleries[galleryKey]);
+        //console.log('buildGallery(gallery) {', galleryKey, this.galleries[galleryKey]);
 
         if (!this.galleries[galleryKey]) {
             return false;
@@ -673,7 +737,7 @@ RiotGalleryViewer = {
 
 
     setGalleryElem(galleryKey) {
-        console.log('setGalleryElem(gallery) {', galleryKey);
+        //console.log('setGalleryElem(gallery) {', galleryKey);
 
         if (!this.galleries[galleryKey]) {
             return false;
@@ -727,7 +791,7 @@ RiotGalleryViewer = {
     },
 
     addGalleryLiItemsFromInitImages(galleryKey) {
-        console.log('setGalleryItemsFromInitImages(gallery) {', galleryKey);
+        //console.log('setGalleryItemsFromInitImages(gallery) {', galleryKey);
 
         if (!this.galleries[galleryKey]) {
             return false;
@@ -756,7 +820,7 @@ RiotGalleryViewer = {
     },
 
     addGalleryLiItemFromInitImage(galleryKey, initImageKey) {
-        console.log('addGalleryLiItemFromInitImage(galleryKey, initImageKey)', galleryKey, initImageKey);
+        //console.log('addGalleryLiItemFromInitImage(galleryKey, initImageKey)', galleryKey, initImageKey);
 
         if (!this.galleries[galleryKey]) {
             return false;
@@ -836,9 +900,9 @@ RiotGalleryViewer = {
      * automatically create gallery instances on ui, ol, table, and ld tags with the "riot-gallery-viewer" class
      */
     setGalleriesByClass() {
-        console.log('setGalleriesByClass() {');
+        //console.log('setGalleriesByClass() {');
         const elems = document.getElementsByClassName('riot-gallery');
-        console.log(elems);
+        //console.log(elems);
         for (let x = 0; x < elems.length; x++) {
             this.setGalleryByElem(elems[x], null);
         }
@@ -846,10 +910,10 @@ RiotGalleryViewer = {
     },
 
     setUnloadedGalleries() {
-        console.log('setUnloadedGalleries() {');
+        //console.log('setUnloadedGalleries() {');
         for (let galleryKey = 0; galleryKey < this.galleries.length; galleryKey++) {
             let gal = this.galleries[galleryKey];
-            console.log(gal);
+            //console.log(gal);
             if (!gal.isLoaded && !gal.isError && gal.elem) {
                 this.setGalleryByElem(gal.elem, galleryKey);
             }
@@ -891,7 +955,7 @@ RiotGalleryViewer = {
             this.galleries[galleryKey].errorMessages.push('no items (image containers) found');
             return false;
         }
-
+console.log('----------elems', elems);
         for (let x = 0; x < elems.length; x++) {
             this.setGalleryItemByElem(galleryKey, elems[x]);
         }
@@ -900,7 +964,7 @@ RiotGalleryViewer = {
         if (this.galleries[galleryKey].items.length < 1) {
             this.galleries[galleryKey].isError = true;
             this.galleries[galleryKey].errorMessages.push('no items found');
-            console.log('c');
+            //console.log('c');
             return false;
         }
 
@@ -910,12 +974,16 @@ RiotGalleryViewer = {
 
     setGalleryItemByElem(galleryKey, elem) {
 
+        console.log('setGalleryItemByElem(galleryKey, elem) {', galleryKey);
+
         const url = this.getImageUrlFromContainerElem(elem);
         if (!url) {
+            console.log('a');
             return false;
         }
-
+        console.log('url', url);
         const clickElem = this.getClickElemFromContainerElem(elem);
+        console.log('clickElem', clickElem);
         if (clickElem) {
 
             // make sure that the clickElem isn't already set (in this gallery or another)
@@ -938,6 +1006,7 @@ RiotGalleryViewer = {
         }
 
         const caption = this.getCaptionFromContainerElem(elem);
+        console.log('caption',caption);
 
         //const item = { url: url, clickElem: clickElem, caption: caption };
         //this.galleries[galleryKey].items.push(item);
@@ -945,6 +1014,7 @@ RiotGalleryViewer = {
     },
 
     setGalleryItem(galleryKey, url, clickElem, caption) {
+        console.log('setGalleryItem(galleryKey, url, clickElem, caption) {', galleryKey, url, clickElem, caption);
         if (!this.galleries[galleryKey]) {
             return false;
         }
@@ -968,12 +1038,7 @@ RiotGalleryViewer = {
         return true;
     },
 
-    itemClicked(galleryKey, ItemKey) {
-        console.log('itemClicked(galleryKey, ItemKey) {', galleryKey, ItemKey);
-        this.curGalKey = galleryKey;
-        this.curItemKey = ItemKey;
-        this.loadImage();
-    },
+
 
 
     /*
@@ -984,19 +1049,21 @@ RiotGalleryViewer = {
     getImageUrlFromContainerElem(linkContainer) {
         console.log('getImageUrlFromContainerElem(linkContainer) {', linkContainer);
         let url;
-        let elem;
+        //let elem;
 
         // data-riot-gallery-image-url set on container or children
         // <li data-riot-gallery-image-url="./image.jpg"><img src="./thumb.jpg"></li>
         // <li><img src="./thumb.jpg" data-riot-gallery-image-url="./image.jpg"></li>
         url = this.getSubElemAttrVal(linkContainer, 'data-riot-gallery-image-url');
         if (url) {
+            console.log('a!!!!!!!!!!!!!!!!!!!!', url);
             return url;
         }
         // data-image-url set on li container or children
         // <li data-image-url="./image.jpg"><img src="./thumb.jpg"></li>
         // <li><a href="./image.jpg" data-image-url="./image.jpg"><img src="./thumb.jpg"></a></li>
         url = this.getSubElemAttrVal(linkContainer, 'data-image-url');
+        console.log('b!!!!!!!!!!!!!!!!!!!!', url);
         if (url) {
             return url;
         }
@@ -1209,7 +1276,7 @@ RiotGalleryViewer = {
             return val;
         }
 
-        let item = document.querySelector('[' + attr + ']');
+        let item = elem.querySelector('[' + attr + ']');
 
         if (!item) {
             return null;
@@ -1230,7 +1297,7 @@ RiotGalleryViewer = {
             return elem;
         }
 
-        let item = document.querySelector('[' + attr + ']');
+        let item = elem.querySelector('[' + attr + ']');
 
         if (!item) {
             return null;
@@ -1288,216 +1355,86 @@ RiotGalleryViewer = {
         return item;
     },
 
-    /*getElem(selector, parent) {
-        return this.getElems(selector, parent, true)
-    },
-
-    getElems(selector, parent, doReturnOne) {
-        if (doReturnOne !== true) {
-            doReturnOne = false;
-        }
-
-        let returnOnError = [];
-        if (doReturnOne) {
-            returnOnError = null;
-        }
-
-        if (!parent) {
-            parent = document;
-        }
-        else if (parent !== document) {
-            if (!parent.tagName) {
-                return returnOnError;
-            }
-        }
-
-        if (!selector) {
-            return returnOnError;
-        }
-
-        const firstChar = selector.substring(0, 1);
-        const restOfString = selector.substring(1);
-        let elems = null;
-        let elem = null;
-
-        if (this.isAlphaNumeric(firstChar, false)) {
-            if (!parent) {
-                if (this.isAlphaNumeric(restOfString, true)) {
-                    // starts with alphanumberic, rest of chars are alphanumeric, dash, or underscore
-                    // it's a tag name
-                    elems = parent.getElementsByTagName(selector);
-                    if (getElems)
-                }
-            }
-        }
-
-        tag
-        .class
-        #id
-
-        
-        //let 
-        
-            
-            
-        //}
-
-       // if (firstChar) PageTransitionE
-    },
-
-    isAlphaNumeric(str, doAllowDashUnderScore) {
-
-        if (doAllowDashUnderScore !== true) {
-            doAllowDashUnderScore = false;
-        }
-
-        for (let i = 1, len = str.length; i < len; i++) {
-
-            const code = str.charCodeAt(charAt);
-
-            if (
-                (code < 47 || code > 57) && // numeric (0-9)
-                (code < 65 || code > 90) && // numeric (0-9)
-                (code < 97 || code > 122)) // numeric (0-9)
-            {
-                if (!doAllowDashUnderScore) {
-                    return false;
-                } else if (code !== 45 && code !== 137) {
-                    // // upper case (A-Z)
-                    continue;
-                }
-            }
-        }
-
-        return true;
-    },*/
-
-
-
 
     /*****************************************************************************
      ******************************************************************************
      * Image Viewer Actions - START */
 
-    /*
-     * load image that has already been downloaded (no waiting/loading)
-     */
-    viewLoadedImage(image, galleryKey, itemKey) {
-
+    setImageSize(image, galleryKey, itemKey) {
+        console.log('setImageSize(image, galleryKey, itemKey) {');
+        // image changed. don't load old one
         if (this.curGalKey != galleryKey || this.curItemKey !== itemKey) {
             return;
         }
 
-        console.log('loadAvailableImage(image, imageKey)', image, galleryKey, itemKey);
-
-
-        /*if (!this.curImgKey) {
-            console.log('a this.curImgKey=', this.curImgKey);
-            this.curImgKey = imageKey;
-            console.log('b this.curImgKey=', this.curImgKey);
-            this.curImgWidth = image.width;
-            this.curImgHeight = image.height;
-            this.elems.image.attr('src', image.src);
-            console.log("this.elems.image.attr('url', image.url);", this.elems.image, image.src);
-            this.positionMainImage();
-            //this.displayCaption();
-            this.elems.body.removeClass('riot-gallery-viewer-is-transitioning-both');
-            return;
-            // no current image, skip transition
-            // set url
-            // set dimensions
-            // show caption
-            // set curimgkey, curimgwidth, curimgheight
+        if (image) {
+            this.imgViewCur.imgWidth = image.width;
+            this.imgViewCur.imgHeight = image.height;
+            this.imgViewCur.imgUrl = image.src;
+        }/* else {
+            this.imgWidth = 0;
+            this.imgHeight = 0;
         }*/
-
-        /*const leftSrc = this.galleryImages[this.curImgKey].url;
-        const rightSrc = this.galleryImages[imageKey].url;
-
-        console.log('aaaaaaaaaaaa images', this.curImgKey, imageKey, leftSrc, rightSrc);
-
-
-        this.elems.transitionBothLeft.css("background-image", "url(" + leftSrc + ")");
-        console.log(this.elems.transitionBothLeft);
-        this.elems.transitionBothRight.css("background-image", "url(" + rightSrc + ")");
-
-        this.elems.transitionBothLeft.css({ width: this.viewerWidth + 'px', height: this.viewerHeight + 'px' });
-
-        this.curImgKey = imageKey;
-
-        //this.elems.body.addClass('riot-gallery-viewer-is-transitioning-both');*/
-
-        this.elems.imageCon.classList.remove('is-loading');
-        this.elems.imageCon.classList.remove('is-error');
-
-        console.log('b itemKey=', itemKey);
-        this.curImgWidth = image.width;
-        this.curImgHeight = image.height;
-        this.positionMainImage(false);
-        //this.elems.transitionBothRight.css({ width: this.viewerWidth, height: this.viewerHeight });
-        //return;
-        //this.elems.image.attr('src', image.src);
-        this.elems.image.src = image.src;
-        //console.log("this.elems.image.attr('url', image.url);", this.elems.image, image.src);
-        //this.positionLoaderImage();
-        //this.displayCaption();
-        if (this.galleries[galleryKey].items[itemKey].caption) {
-            this.elems.caption.innerHTML = this.galleries[galleryKey].items[itemKey].caption;
-            this.elems.captionCon.classList.add('is-displayed');
-        } else {
-            this.elems.caption.innerHTML = '';
-            this.elems.captionCon.classList.remove('is-displayed');
-        }
-
-        //this.elems.body.removeClass('riot-gallery-viewer-is-transitioning-both');
     },
+
 
     imageLoadFailed() {
-        this.positionMainImage(true);
-        this.elems.imageCon.classList.remove('is-loading');
-        this.elems.imageCon.classList.add('is-error');
+        this.imgWidth = this.imgHeight = 0;
+        this.imgUrl = null;
 
-        this.elems.caption.innerHTML = '<i>IMAGE FAILED TO LOAD</i>';
-        this.elems.captionCon.classList.add('is-displayed');
+        this.imgViewCur = this.getImgViewBlank();
+        this.imgViewCur.isError = true;
+
+        this.setImagePosition();
+        this.placeImageInPosition();
+        this.elems.imageCon.classList = 'is-error';
+
+        this.updateCaption();
+
     },
 
-    startImageLoad() {
-        this.positionMainImage(true);
-        this.elems.imageCon.classList.add('is-loading');
-        this.elems.imageCon.classList.remove('is-error');
-        this.elems.caption.innerHTML = '';
-        this.elems.captionCon.classList.remove('is-displayed');
+    updateCaption() {
+        let cap = null;
+        if (this.imgViewCur.isError) {
+            if (this.options.imageFailedCaptionHtml) {
+                cap = this.options.imageFailedCaptionHtml;
+
+            }
+        } else {
+            if (this.imgViewCur.caption) {
+                cap = this.imgViewCur.caption;
+            }
+        }
+
+
+        if (cap) {
+            this.elems.caption.innerHTML = cap;
+            this.elems.captionCon.classList.add('is-displayed');
+        } else {
+            this.elems.captionCon.classList.remove('is-displayed');
+        }
     },
-            
+
+
+    getObjectByVal(obj) {
+        return JSON.parse(JSON.stringify(obj));
+    },
 
     /*
      * position the main gallery view image and the close button in the top right corner
      */
-    positionMainImage(isLoadingImage) {
+    setImagePosition() {
+        console.log('setImagePosition() {)');
 
+        let imgWidth = this.loadingImgWidth;
+        let imgHeight = this.loadingImgHeight;
+        let isLoadingImage = true;
+        let conPadding = 0;
 
-        console.log('positionImage() {)');
-        //  console.log('this.viewerWidth a', this.viewerWidth);
-
-        /*let pos;
-        if (this.curImgWidth && this.curImgHeight) {
-            pos = this.getPositionForViewer(this.curImgWidth, this.curImgHeight);
-            console.log('this.viewerWidth b', this.viewerWidth);
-            //let spinnerSize = this.curImgWidth;
-            //if (this.curImgHeight < spinnerSize) {
-
-            //}
-            //pos = this.getPositionForViewer(this.loadingSpinnerSize, this.loadingSpinnerSize, true);
-        }// else {
-        //    pos = this.getPositionForViewer(this.defaultViewerWidth, this.defaultViewerHeight);
-        //    console.log('this.viewerWidth b', this.viewerWidth);
-        //}*/
-
-        let imgWidth = this.loadingImageWidth;
-        let imgHeight = this.loadingImageHeight;
-
-        if (!isLoadingImage) {
-            imgWidth = this.curImgWidth;
-            imgHeight = this.curImgHeight;
+        if (this.imgViewCur.imgWidth && this.imgViewCur.imgHeight) {
+            imgWidth = this.imgViewCur.imgWidth;
+            imgHeight = this.imgViewCur.imgHeight;
+            isLoadingImage = false;
         }
 
         viewerWidth = imgWidth;
@@ -1506,84 +1443,50 @@ RiotGalleryViewer = {
         const maxWidth = this.windowWidth - 40;
         const maxHeight = this.windowHeight - 24;
 
-        console.log('this.windowWidth this.windowHeight', this.windowWidth, this.windowHeight);
-
         if (viewerWidth > maxWidth) {
             viewerWidth = maxWidth;
-            viewerHeight = imgHeight / viewerWidth * viewerWidth;
+            viewerHeight = imgHeight / imgWidth * viewerWidth;
         }
 
         if (viewerHeight > maxHeight) {
             viewerHeight = maxHeight;
-            viewerWidth = viewerWidth / imgHeight * viewerHeight;
+            viewerWidth = imgWidth / imgHeight * viewerHeight;
         }
 
-        console.log('this.viewerWidth set', this.viewerWidth);
         let viewerLeft = (this.windowWidth - viewerWidth) / 2;
         let viewerTop = (this.windowHeight - viewerHeight) / 2;
 
-        /*return {
-            width: viewerWidth,
-            height: viewerHeight,
-            left: newLeft,
-            top: newTop
-        };*/
-
-        /*let cssSettings = {
-            width: viewerWidth + 'px',
-            height: viewerHeight + 'px',
-            left: newLeft + 'px',
-            top: newTop + 'px'
-        };*/
-
-
-
-        //console.log(pos);
-        //if (isTransition) {
-        //    this.elems.imageCon.animate(cssSettings, 1001);
-        //} else {
-        // this.elems.imageCon.css(cssSettings);
-        //}
-
         if (isLoadingImage) {
-            viewerLeft  = viewerLeft - 8;
-            viewerTop  = viewerTop - 8;
-            this.elems.imageCon.style.padding = '5px';
-        } else {
-            this.elems.imageCon.style.padding = '0';
-        }
+            viewerLeft = viewerLeft - 8;
+            viewerTop = viewerTop - 8;
+            //this.elems.imageCon.style.padding = '5px';
+            conPadding = 5;
 
-        this.elems.imageCon.style.width = viewerWidth + 'px';
-        this.elems.imageCon.style.height = viewerHeight + 'px';
-        this.elems.imageCon.style.left = viewerLeft + 'px';
-        this.elems.imageCon.style.top = viewerTop + 'px';
-
-        this.viewerWidth = viewerWidth;
-        this.viewerHeight = viewerHeight;
-
-        //console.log(pos);
-        let closeLeft = viewerLeft - 30;
-        let closeTop = viewerTop - 30;
-        if (closeTop < 10) {
-            closeTop = 10;
-        }
-        if (closeLeft < 30) {
-            closeLeft = 30;
-        }
-
-        //cssSettings = { right: newLeft + 'px', top: newTop + 'px' };
-        //if (isTransition) {
-        //    this.elems.closeCon.animate(cssSettings, 1001);
-        //} else {
-        //    this.elems.closeCon.css(cssSettings);
+        }// else {
+        //    this.elems.imageCon.style.padding = '0';
         //}
 
-        this.elems.closeCon.style.left = closeLeft + 'px';
-        this.elems.closeCon.style.top = closeTop + 'px';
+        //console.log(pos);
+        let xRight = viewerLeft - 30;
+        let xTop = viewerTop - 30;
+        if (xTop < 10) {
+            xTop = 10;
+        }
+        if (xRight < 30) {
+            xRight = 30;
+        }
 
+        this.imgViewCur.width = viewerWidth;
+        this.imgViewCur.height = viewerHeight;
+        this.imgViewCur.left = viewerLeft;
+        this.imgViewCur.top = viewerTop;
+        this.imgViewCur.xTop = xTop;
+        this.imgViewCur.xRight = xRight;
+        this.imgViewCur.padding = conPadding;
+
+        console.log('this.imgViewCur set ', this.imgViewCur);
 
     },
-
 
 
     /*
@@ -1591,57 +1494,279 @@ RiotGalleryViewer = {
      * happens on gallery image and previous/next button click
      */
     loadImage() {
-        console.log('loadImage(newKey) {');
+        console.log('loadImage() {');
 
         if (!this.galleries[this.curGalKey]) {
             // gallery not set. should not happen
-            console.log('1240');
+            console.log('if (!this.galleries[this.curGalKey]) {');
             return false;
         }
 
         if (!this.galleries[this.curGalKey].items[this.curItemKey]) {
-            // item not set. should not happen
-            console.log('1246');
+            console.log('if (!this.galleries[this.curGalKey].items[this.curItemKey]) {');
+            // gallery item not set. should not happen
             return false;
         }
 
-        if (!this.isViewerHtmlLoaded) {
+        // if transition is running, stop it
+        this.endTransition();
+
+        if (this.isViewerHtmlLoaded) {
+            console.log('if (this.isViewerHtmlLoaded) {');
+            this.imgViewPrev = this.getObjectByVal(this.imgViewCur);
+            this.imgViewCur = this.getImgViewBlank();
+            this.endTransition();
+        } else {
+            console.log('else if (this.isViewerHtmlLoaded) {');
             this.loadViewerHtml();
-            //this.bindViewer();
+            this.resetViewerValues();
+            console.log('a');
+        }
+        console.log(this.imgViewCur);
+        var img = new Image();
+        img.src = this.galleries[this.curGalKey].items[this.curItemKey].url;
+        this.imgViewCur.imgUrl = this.galleries[this.curGalKey].items[this.curItemKey].url;
+        if (this.galleries[this.curGalKey].items[this.curItemKey].caption) {
+            this.imgViewCur.caption = this.galleries[this.curGalKey].items[this.curItemKey].caption;
         }
 
+        //let doTransitionIn = false;
+
         if (!this.isViewerOpen) {
-            // must be done before calculating the image size (loadAvailableImage)
+            console.log('if (!this.isViewerOpen) {');
+            this.openViewer();
             this.setWindowSize();
         }
 
-        const item = this.galleries[this.curGalKey].items[this.curItemKey];
 
-        var img = new Image();
-        img.src = item.url;
-
-        this.openViewer();
 
         if (img.complete) {
             console.log('if (img.complete) {');
-            this.viewLoadedImage(img, this.curGalKey, this.curItemKey);
-            //this.setLoadedImage(this, newKey);
+            this.imgViewCur.isLoaded = true;
+            console.log('img.complete');
+            console.log(this);
+            this.setImageSize(img, this.curGalKey, this.curItemKey),
+                this.setImagePosition();
+            //this.viewLoadedImage(img, this.curGalKey, this.curItemKey);
+            this.transitionImage();
         } else {
+            console.log('else img.complete');
+            this.imgViewCur.isLoaded = false;
+
+            //this.setImageSize(null, this.curGalKey, this.curItemKey),
+            this.setImagePosition();
+            //this.viewLoadedImage(img, this.curGalKey, this.curItemKey);
+            this.transitionImage();
+            //    return;
+            ///////////////
+            //    this.viewLoadedImage(img, this.curGalKey, this.curItemKey);
+            //    return;
+            ///////
+
             img.galleryKey = this.curGalKey;
             img.itemKey = this.curItemKey;
-            this.startImageLoad();
-            //this.startUnavailableImage(newKey);
+            //    this.startImageLoad();
             img.onload = function (e) {
-                console.log('img.onload this.galleryKey, this.itemKey', this.galleryKey, this.itemKey);
-                //riotGalleryInstances[this.instanceKey].completeUnavailableImage(this);
-                //riotGalleryViewerInstances[this.instanceKey].loadAvailableImage(this);
-                RiotGalleryViewer.viewLoadedImage(img, this.galleryKey, this.itemKey)
+                console.log('loaded img.onload = function (e) {');
+                //if (this.galleryKey === RiotGalleryViewer.curGalKey && this.itemKey === RiotGalleryViewer.curItemKey) {
+                    RiotGalleryViewer.imageLoadComplete(img, this.galleryKey, this.itemKey);
+
+                //}
+                console.log('loaded 3');
             }
             img.onerror = function (e) {
-                //RiotGalleryViewer.elems.imageCon.classList.remove('is-loading');
-                //RiotGalleryViewer.elems.imageCon.classList.add('is-error');
+                console.log('errored img.onerror = function (e) {');
                 RiotGalleryViewer.imageLoadFailed();
             }
+        }
+
+        this.updateCaption();
+        
+    },
+
+    imageLoadComplete(image, galleryKey, itemKey) {
+        console.log('loaded img.onload = function (e) {');
+        if (galleryKey !== this.curGalKey || itemKey !== this.curItemKey) {
+            // current image has already changed. do nothing.
+            return false;
+        }
+        this.setImageSize(image, this.curGalKey, this.curItemKey),
+
+        console.log('imageLoadComplete');
+
+        console.log(this.imgViewCur);
+        this.elems.image.src = this.imgViewCur.imgUrl;
+        this.imgViewCur.isLoaded = true;
+        this.imgViewCur.imgUrl;
+        this.elems.imageCon.classList = '';
+
+        //RiotGalleryViewer.viewLoadedImage(img, this.galleryKey, this.itemKey);
+        this.setImagePosition();
+        this.placeImageInPosition();
+        console.log(this);
+    },
+
+    transitionImage() {
+        // console.log('transitionImage() {');
+        //console.log(this.imgViewCur, this.imgViewPrev);
+
+        if (!this.imgViewCur.width || !this.imgViewCur.height) {
+            console.log('// position not set, should not happen');
+            // position not set, should not happen
+            return false;
+        }
+
+        if (!this.prevOrNext) {
+            console.log('// no previous image. show image. do not transition');
+            // no previous image. show image. do not transition
+
+            if (this.imgViewCur.isLoaded) {
+                // image loaded
+                console.log('if (this.isLoaded) {');
+                this.elems.image.src = this.imgViewCur.imgUrl;
+                this.elems.imageCon.classList = '';
+            } else {
+                // image NOT loaded. show spinner
+                console.log('// image NOT loaded. show spinner');
+                this.elems.imageCon.classList = 'is-loading';
+            }
+            //console.log('aaaaaa');
+            this.placeImageInPosition();
+            //console.log('bbbbbb');
+            return;
+        }
+
+        //console.log('transition IT');
+
+        const extraDistance = 40;
+
+        if (this.prevOrNext === 'prev') {
+            this.transition.type = 'left';
+            this.imgViewCur.transLeftStart = this.windowWidth + extraDistance;
+            this.imgViewPrev.transLeftEnd = 0 - this.imgViewPrev.imgWidth - extraDistance;
+            //console.log('init this.imgViewCur.transLeftStart', this.imgViewCur.transLeftStart);
+        } else if (this.prevOrNext === 'next') {
+            this.transition.type = 'right';
+            this.imgViewCur.transLeftStart = 0 - this.imgViewCur.imgWidth - extraDistance;
+            this.imgViewPrev.transLeftEnd = this.windowWidth + extraDistance;
+            //console.log('init this.imgViewCur.transLeftStart', this.imgViewCur.transLeftStart);
+        } else {
+            //could not find tranistion type. should not happen
+            return;
+        }
+
+        //this.transition.totFrameCount = this.options.transitionMs / this.options.transitionFrameMs;
+        //console.log('this.transition.totFrameCount', this.transition.totFrameCount);
+        //this.transition.curFrameCount = 1;
+
+        //const distancePx = this.imgViewCur.left - this.imgViewCur.transLeftStart;
+        //console.log('set distancePx', distancePx);
+        //this.imgViewCur.transPxPerInterval = distancePx / this.transition.totFrameCount;
+        //console.log('set this.imgViewCur.transPxPerInterval', this.imgViewCur.transPxPerInterval, distancePx, this.transition.totFrameCount);
+
+        this.elems.imageCon.style.left = this.imgViewCur.transLeftStart + 'px';
+        this.elems.imageCon.style.top = this.imgViewCur.top + 'px';
+        this.elems.imageCon.style.width = this.imgViewCur.width + 'px';
+        this.elems.imageCon.style.height = this.imgViewCur.height + 'px';
+
+        this.imgViewCur.transDistancePx = this.imgViewCur.transLeftStart - this.imgViewCur.left;
+
+        if (this.imgViewCur.isLoaded) {
+            // image loaded
+            this.elems.image.src = this.imgViewCur.imgUrl;
+            this.elems.imageCon.classList = '';
+        } else if (this.imgViewCur.isError) {
+            // image loaded
+            this.elems.imageCon.classList = 'is-error';
+        } else {
+            // image NOT loaded. show spinner
+            this.elems.imageCon.classList = 'is-loading';
+        }
+
+        this.elems.imageTransCon.style.left = this.imgViewPrev.left + 'px';
+        this.elems.imageTransCon.style.top = this.imgViewPrev.top + 'px';
+        this.elems.imageTransCon.style.width = this.imgViewPrev.width + 'px';
+        this.elems.imageTransCon.style.height = this.imgViewPrev.height + 'px';
+
+        this.imgViewPrev.transDistancePx = this.imgViewCur.left - this.imgViewPrev.transLeftEnd;
+
+        if (this.imgViewPrev.isLoaded) {
+            // image loaded
+            this.elems.imageTrans.src = this.imgViewPrev.imgUrl;
+            this.elems.imageTransCon.classList = 'is-displayed';
+        } else if (this.imgViewPrev.isError) {
+            // image loaded
+            this.elems.imageTransCon.classList = 'is-displayed is-error';
+        } else {
+            // image NOT loaded. show spinner
+            this.elems.imageTransCon.classList = 'is-displayed is-loading';
+        }
+
+
+        
+        this.transition.isJsIntervalOn = true;
+        this.transition.startTimeMs = this.getCurMs();
+        this.transition.endTimeMs = this.transition.startTimeMs + this.options.transitionMs;
+        this.transition.jsTnterval = setInterval(function () {
+            RiotGalleryViewer.transitionFrame();
+        }, this.options.transitionFrameMs);
+
+    },
+
+    getCurMs() {
+        const d = new Date();
+        return d.getTime();
+    },
+
+    transitionFrame() {
+        console.log('transitionFrame() {');
+
+        //console.log(this.transition, this.imgViewCur);
+
+        //console.log(this.transition.curFrameCount, this.transition.totFrameCount);
+        //if (this.transition.curFrameCount >= this.transition.totFrameCount || !this.transition.totFrameCount) {
+        const curMs = this.getCurMs();
+
+        //start = 10
+        //transition 1000
+        //end
+
+        if (!this.transition.endTimeMs) {
+            console.log('if (!this.transition.endTimeMs) {');
+        }
+
+        if (curMs > this.transition.endTimeMs) {
+            console.log('if (this.transition.endTimeMs > curMs) {');
+        }
+
+        if (!this.transition.endTimeMs || curMs > this.transition.endTimeMs) {
+            this.endTransition();
+            this.elems.imageCon.style.left = this.imgViewCur.left + 'px';
+            this.elems.imageTransCon.style.left = this.imgViewPrev.left + 'px';
+            return;
+        }
+
+        const timeSinceTransStart = curMs - this.transition.startTimeMs;
+        const percentDone = timeSinceTransStart / this.options.transitionMs;
+        //console.log('percentDone', percentDone);
+
+
+        let newLeft = ((1 - percentDone) * this.imgViewCur.transDistancePx) + this.imgViewCur.left;
+        //console.log(newLeft, this.imgViewCur.transDistancePx, this.imgViewCur.left);
+        this.elems.imageCon.style.left = newLeft + 'px';
+
+        newLeft = ((1 - percentDone) * this.imgViewPrev.transDistancePx) + this.imgViewPrev.transLeftEnd;
+        //console.log('newLeft', newLeft, this.imgViewPrev.transDistancePx, this.imgViewPrev.left);
+        this.elems.imageTransCon.style.left = newLeft + 'px';
+    },
+
+    endTransition() {
+        if (this.transition.isJsIntervalOn) {
+            clearInterval(this.transition.jsTnterval);
+        }
+        this.transition = this.getObjectByVal(this.transitionBlank);
+        if (this.elems.imageTransCon) {
+            this.elems.imageTransCon.classList = '';
         }
     },
 
@@ -1671,14 +1796,21 @@ RiotGalleryViewer = {
     },
 
     resetViewerValues() {
-        this.curImgHeight = 0;
-        this.curImgWidth = 0;
-    
-        this.viewerHeight = 0;
-        this.viewerWidth = 0;
 
-        this.curGalKey = null;
-        this.curItemKey = null;
+        this.imgViewCur = this.getImgViewBlank();
+        this.imgViewPrev = this.getImgViewBlank();
+
+        this.endTransition();
+
+        this.elems.imageCon.classList = '';
+        //this.elems.imageTransCon.classList = '';
+        this.elems.caption.innerHTML = '';
+        this.elems.captionCon.classList = '';
+
+    },
+
+    getImgViewBlank() {
+        return this.getObjectByVal(this.imgViewBlank);
     },
 
     /*
@@ -1686,10 +1818,9 @@ RiotGalleryViewer = {
      * run on page load and window resize.
      */
     setWindowSize() {
-        console.log('setWindowSize()');
         this.windowWidth = window.innerWidth;
         this.windowHeight = window.innerHeight;
-        this.consoleLogInfo('set window size, width = ' + this.windowWidth + ' | height=' + this.windowHeight);
+        this.consoleLog('set window dimensions', this.windowWidth, this.windowHeight);
     },
 
     /* Image Viewer Actions - END
@@ -1731,6 +1862,9 @@ RiotGalleryViewer = {
             let imgElem = null;
 
 
+            window.addEventListener('resize', function () {
+                RiotGalleryViewer.windowResized();
+            });
 
             // background
             //html = '<div id="riot-gallery-viewer-bg"></div>';
@@ -1743,8 +1877,6 @@ RiotGalleryViewer = {
             }, false);
             this.elems.bg = divElem;
             this.elems.body.appendChild(divElem);
-
-
 
             // previous button
             //html = '<div id="riot-gallery-viewer-prev-con"><a href="#">&laquo;</a></div>';
@@ -1774,7 +1906,7 @@ RiotGalleryViewer = {
             divElem.addEventListener('click', function (event) {
                 event.preventDefault();
                 RiotGalleryViewer.nextClicked();
-            }, false);            
+            }, false);
             this.elems.nextCon = divElem;
             this.elems.body.appendChild(divElem);
 
@@ -1796,6 +1928,10 @@ RiotGalleryViewer = {
             subDivElem = document.createElement('div');
             subDivElem.id = 'riot-gallery-viewer-loading';
             divElem.appendChild(subDivElem);
+            divElem.addEventListener('click', function (event) {
+                event.preventDefault();
+                RiotGalleryViewer.nextClicked();
+            }, false);
             this.elems.imageCon = divElem;
             this.elems.body.appendChild(divElem);
 
@@ -1803,7 +1939,9 @@ RiotGalleryViewer = {
             divElem.id = 'riot-gallery-viewer-image-trans-con';
             imgElem = document.createElement('img');
             imgElem.id = 'riot-gallery-viewer-image-trans';
+            this.elems.imageTrans = imgElem;
             divElem.appendChild(imgElem);
+            this.elems.imageTransCon = divElem;
             this.elems.body.appendChild(divElem);
 
             //html = '<div id="riot-gallery-viewer-close-con"><a href="#">X</a></div>';
@@ -1835,23 +1973,6 @@ RiotGalleryViewer = {
             console.log('load html complete');
         }
 
-        /*this.elems.bg = $('#riot-gallery-viewer-bg');
-        this.elems.prevCon = $('#riot-gallery-viewer-prev-con');
-        this.elems.nextCon = $('#riot-gallery-viewer-next-con');
-
-        this.elems.imageCon = $('#riot-gallery-viewer-image-con');
-        this.elems.image = $('#riot-gallery-viewer-image');
-        this.elems.loading = $('#riot-gallery-viewer-loading');
-
-        this.elems.closeCon = $('#riot-gallery-viewer-close-con');
-
-        this.elems.captionCon = $('#riot-gallery-viewer-caption-con');
-        this.elems.caption = $('#riot-gallery-viewer-caption');
-
-        this.elems.transitionBothCon = $('#riot-gallery-viewer-transition-both-con');
-        this.elems.transitionBothLeft = $('#riot-gallery-viewer-transition-both-left');
-        this.elems.transitionBothRight = $('#riot-gallery-viewer-transition-both-right');
-*/
         console.log('elements done');
 
         this.isViewerHtmlLoaded = true;
@@ -1862,47 +1983,39 @@ RiotGalleryViewer = {
         this.closeViewer();
     },
 
+    itemClicked(galleryKey, ItemKey) {
+        this.consoleLog('item clicked', galleryKey, ItemKey);
+        this.curGalKey = galleryKey;
+        this.curItemKey = ItemKey;
+        this.prevOrNext = null;
+        console.log('prevOrNext', this.prevOrNext);
+        this.loadImage();
+    },
+
     prevClicked() {
+        this.prevOrNext = 'prev';
         this.incrementImageAndLoad(-1);
-        /*if (this.curGalKey === null) {
-            // should not happen
-            this.curGalKey = 0;
-        }
-        if (this.curItemKey === null) {
-            // should not happen
-            this.curItemKey = 0;
-        } else {
-            this.curItemKey--;
-            if (this.curItemKey < 0)
-            {
-                this.curItemKey = this.galleries[this.curGalKey].length - 1;
-            }
-        }
-        
-        this.loadImage();*/
+
     },
 
     nextClicked() {
+        this.prevOrNext = 'next';
         this.incrementImageAndLoad(1);
-        /*if (this.curGalKey === null) {
-            // should not happen
-            this.curGalKey = 0;
-        }
-        if (this.curItemKey === null) {
-            // should not happen
-            this.curItemKey = 0;
-        } else {
-            this.curItemKey++;
-            if (this.curItemKey >= this.galleries[this.curGalKey].length)
-            {
-                this.curItemKey = 0;
-            }
-        }
-        
-        this.loadImage();*/
+
     },
 
     incrementImageAndLoad(increment) {
+        if (!increment) {
+            // should not happen
+            return;
+        }
+
+        /*if (increment > 0) {
+            this.prevOrNext = 'next';
+        } else {
+            this.prevOrNext = 'prev';
+        }*/
+
         if (this.curGalKey === null) {
             // should not happen
             this.curGalKey = 0;
@@ -1912,18 +2025,39 @@ RiotGalleryViewer = {
             this.curItemKey = 0;
         } else {
             this.curItemKey += increment;
-            if (this.curItemKey >= this.galleries[this.curGalKey].items.length)
-            {
+            if (this.curItemKey >= this.galleries[this.curGalKey].items.length) {
                 this.curItemKey = 0;
             }
-            else if (this.curItemKey < 0)
-            {
+            else if (this.curItemKey < 0) {
                 this.curItemKey = this.galleries[this.curGalKey].items.length - 1;
             }
         }
-        console.log(181, this.curGalKey, this.curItemKey, this.galleries[this.curGalKey].items.length);
-        
+        //console.log(181, this.curGalKey, this.curItemKey, this.galleries[this.curGalKey].items.length);
+
         this.loadImage();
+    },
+
+    windowResized() {
+        if (!this.isViewerOpen) {
+            return;
+        }
+        this.setWindowSize();
+        this.setImagePosition();
+        this.placeImageInPosition();
+    },
+
+    placeImageInPosition() {
+        console.log('placeImageInPosition()');
+        //this.endTransition();
+
+
+        this.elems.imageCon.style.top = this.imgViewCur.top + 'px';
+        this.elems.imageCon.style.width = this.imgViewCur.width + 'px';
+        this.elems.imageCon.style.height = this.imgViewCur.height + 'px';
+
+        if (!this.transition.isJsIntervalOn) {
+            this.elems.imageCon.style.left = this.imgViewCur.left + 'px';
+        }
     },
 
 
@@ -2050,10 +2184,49 @@ RiotGalleryViewer = {
         return elem;
     },
 
-    consoleLogInfo(info) {
-        //if (this.options.doConsoleLog) {
-        console.log(' consoleLogInfo(info) {', info);
-        //}
+    getOptionVal(option, galKey) {
+
+        // check if set globally
+        if (this.options[option]) {
+            return true;
+        }
+
+        if (galKey === null || typeof galKey === 'undefined') {
+            if (this.curGalKey === null) {
+                // not passed or set
+                return false;
+            }
+            if (!this.galleries[galKey]) {
+                // gallery not found
+                return false;
+            }
+            galKey = this.curGalKey;
+        }
+
+        if (this.galleries[galKey].options[option]) {
+            return true;
+        }
+
+        return false;
+    },
+
+    consoleLog(val1, val2, val3, val4) {
+
+        if (this.getOptionVal('doConsoleLog')) {
+            if (typeof val4 !== 'undefined') {
+                console.log(val1, '|', val2, '|', val3, '|', vals4);
+            } else if (typeof val3 !== 'undefined') {
+                console.log(val1, '|', val2, '|', val3);
+            } else if (typeof val2 !== 'undefined') {
+                console.log(val1, '|', val2);
+            } else if (typeof val1 !== 'undefined') {
+                console.log(val1);
+            }
+        }
+
+        if (this.getOptionVal('doConsoleTrace')) {
+            console.trace();
+        }
     }
 
     /* Helper - END

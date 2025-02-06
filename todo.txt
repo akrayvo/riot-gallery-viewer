@@ -6,3 +6,7 @@ set up by selectors
 option - slider view
 loading
 reposition on window size change
+
+
+
+

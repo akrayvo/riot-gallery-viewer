@@ -214,6 +214,7 @@ body.riot-gallery-viewer-open {
 
 /********* main image *******************/
 
+#riot-gallery-viewer-image-trans-con,
 #riot-gallery-viewer-image-con {
     max-width: 100%;
     position: fixed;
@@ -230,10 +231,12 @@ body.riot-gallery-viewer-open {
     /*overflow: hidden;*/ /*put this back*/
 }
 
+#riot-gallery-viewer-image-trans-con.is-error,
 #riot-gallery-viewer-image-con.is-error {
     background-color: #F00;
 }
 
+#riot-gallery-viewer-image-trans,
 #riot-gallery-viewer-image {
     width: 100%;
     height: 100%;
@@ -241,6 +244,8 @@ body.riot-gallery-viewer-open {
     position: relative;
     z-index: 2;
 }
+
+
 
 
 /********* prev next *******************/
@@ -343,7 +348,8 @@ body.riot-gallery-viewer-open {
 body.riot-gallery-viewer-open #riot-gallery-viewer-bg,
 body.riot-gallery-viewer-open #riot-gallery-viewer-image-con,
 body.riot-gallery-viewer-open #riot-gallery-viewer-close-con,
-body.riot-gallery-viewer-open #riot-gallery-viewer-caption-con.is-displayed {
+body.riot-gallery-viewer-open #riot-gallery-viewer-caption-con.is-displayed,
+body.riot-gallery-viewer-open #riot-gallery-viewer-image-trans-con.is-displayed {
     display: block;
 }
 
@@ -369,7 +375,9 @@ body.riot-gallery-viewer-open.riot-gallery-viewer-is-loading #riot-gallery-viewe
 }*/
 
 #riot-gallery-viewer-image-con.is-loading #riot-gallery-viewer-image,
-#riot-gallery-viewer-image-con.is-error #riot-gallery-viewer-image {
+#riot-gallery-viewer-image-con.is-error #riot-gallery-viewer-image,
+#riot-gallery-viewer-image-trans-con.is-loading #riot-gallery-viewer-image-trans,
+#riot-gallery-viewer-image-trans-con.is-error #riot-gallery-viewer-image-trans {
     display:none;
 }
 
@@ -393,6 +401,24 @@ body.riot-gallery-viewer-open.riot-gallery-viewer-is-loading #riot-gallery-viewe
 @keyframes riot-gallery-viewer-loading {
     to {
         transform: rotate(1turn);
+    }
+}
+
+@media screen and (max-width: 280px) {
+    body.riot-gallery-viewer-open #riot-gallery-viewer-close-con,
+    body.riot-gallery-viewer-open #riot-gallery-viewer-prev-con,
+    body.riot-gallery-viewer-open #riot-gallery-viewer-next-con
+    {
+        display:none;
+    }
+}
+
+@media screen and (max-height: 280px) {
+    body.riot-gallery-viewer-open #riot-gallery-viewer-close-con,
+    body.riot-gallery-viewer-open #riot-gallery-viewer-prev-con,
+    body.riot-gallery-viewer-open #riot-gallery-viewer-next-con
+    {
+        display:none;
     }
 }
 
