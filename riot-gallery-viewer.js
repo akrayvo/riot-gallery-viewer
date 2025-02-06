@@ -333,7 +333,7 @@ RiotGalleryViewer = {
     either send the text to a function that handles the array parsed from json or a text list
     */
     addGalleryImagesByText(galleryKey, text) {
-        console.log('addGalleryImagesByText(galleryKey, text) {', galleryKey, text);
+        //console.log('addGalleryImagesByText(galleryKey, text) {', galleryKey, text);
 
         let parsed = null;
 
@@ -364,9 +364,9 @@ RiotGalleryViewer = {
 
             for (let x = 0; x < lines.length; x++) {
                 //let line = lines[x].trim();
-                console.log('270 ------- lines[x]', lines[x]);
+                //console.log('270 ------- lines[x]', lines[x]);
                 this.addImageByString(galleryKey, lines[x]);
-                console.log('272 ------- galleries', this.galleries);
+                //console.log('272 ------- galleries', this.galleries);
                 //img = this.strLineToItem(line);
                 //if (item) {
                 //imgs.push(img);
@@ -438,7 +438,7 @@ RiotGalleryViewer = {
     process a single image from string (single line from a remote text file)
     */
     addImageByString(galleryKey, line) {
-        console.log('addImageByString(galleryKey, line) {', galleryKey, line);
+        //console.log('addImageByString(galleryKey, line) {', galleryKey, line);
 
         let url = null;
         let thumbUrl = null;
@@ -461,12 +461,12 @@ RiotGalleryViewer = {
             this.addInitImage(galleryKey, url, thumbUrl, caption);
         } else {
             // strings in quotes (with validation)
-            console.log(line);
+            //console.log(line);
             const strs = this.addImageByStringsWithQuotes(galleryKey, line);
         }
 
         if (!url) {
-            console.log('addImageByString(galleryKey, line) { ERROR - no url found', line);
+            //console.log('addImageByString(galleryKey, line) { ERROR - no url found', line);
             return false;
         }
 
@@ -514,7 +514,7 @@ RiotGalleryViewer = {
     add image to a gallery based on a quoted string ("./image1.jpg", "./image1_thumbnail.jpg", "My Image")
     */
     addImageByStringsWithQuotes(galleryKey, line) {
-        console.log('addImageByStringsWithQuotes(galleryKey, line) {', galleryKey, line);
+        //console.log('addImageByStringsWithQuotes(galleryKey, line) {', galleryKey, line);
         const tempQuoteReplace = "[~~(quote here, riotgallery)~~]";
         line = this.strReplace('\\"', tempQuoteReplace, line);
         line = line.trim();
@@ -551,7 +551,7 @@ RiotGalleryViewer = {
 
         this.addInitImage(galleryKey, url, thumbUrl, caption);
 
-        console.log('453 ------------ ', this.galleries);
+        //console.log('453 ------------ ', this.galleries);
         return true;
     },
 
@@ -676,7 +676,7 @@ RiotGalleryViewer = {
     },
 
     buildHtmlGallery(galleryKey) {
-        console.log('buildGallery(gallery) {', galleryKey, this.galleries[galleryKey]);
+        //console.log('buildGallery(gallery) {', galleryKey, this.galleries[galleryKey]);
 
         if (!this.galleries[galleryKey]) {
             return false;
@@ -737,7 +737,7 @@ RiotGalleryViewer = {
 
 
     setGalleryElem(galleryKey) {
-        console.log('setGalleryElem(gallery) {', galleryKey);
+        //console.log('setGalleryElem(gallery) {', galleryKey);
 
         if (!this.galleries[galleryKey]) {
             return false;
@@ -791,7 +791,7 @@ RiotGalleryViewer = {
     },
 
     addGalleryLiItemsFromInitImages(galleryKey) {
-        console.log('setGalleryItemsFromInitImages(gallery) {', galleryKey);
+        //console.log('setGalleryItemsFromInitImages(gallery) {', galleryKey);
 
         if (!this.galleries[galleryKey]) {
             return false;
@@ -820,7 +820,7 @@ RiotGalleryViewer = {
     },
 
     addGalleryLiItemFromInitImage(galleryKey, initImageKey) {
-        console.log('addGalleryLiItemFromInitImage(galleryKey, initImageKey)', galleryKey, initImageKey);
+        //console.log('addGalleryLiItemFromInitImage(galleryKey, initImageKey)', galleryKey, initImageKey);
 
         if (!this.galleries[galleryKey]) {
             return false;
@@ -900,9 +900,9 @@ RiotGalleryViewer = {
      * automatically create gallery instances on ui, ol, table, and ld tags with the "riot-gallery-viewer" class
      */
     setGalleriesByClass() {
-        console.log('setGalleriesByClass() {');
+        //console.log('setGalleriesByClass() {');
         const elems = document.getElementsByClassName('riot-gallery');
-        console.log(elems);
+        //console.log(elems);
         for (let x = 0; x < elems.length; x++) {
             this.setGalleryByElem(elems[x], null);
         }
@@ -910,10 +910,10 @@ RiotGalleryViewer = {
     },
 
     setUnloadedGalleries() {
-        console.log('setUnloadedGalleries() {');
+        //console.log('setUnloadedGalleries() {');
         for (let galleryKey = 0; galleryKey < this.galleries.length; galleryKey++) {
             let gal = this.galleries[galleryKey];
-            console.log(gal);
+            //console.log(gal);
             if (!gal.isLoaded && !gal.isError && gal.elem) {
                 this.setGalleryByElem(gal.elem, galleryKey);
             }
@@ -955,7 +955,7 @@ RiotGalleryViewer = {
             this.galleries[galleryKey].errorMessages.push('no items (image containers) found');
             return false;
         }
-
+console.log('----------elems', elems);
         for (let x = 0; x < elems.length; x++) {
             this.setGalleryItemByElem(galleryKey, elems[x]);
         }
@@ -964,7 +964,7 @@ RiotGalleryViewer = {
         if (this.galleries[galleryKey].items.length < 1) {
             this.galleries[galleryKey].isError = true;
             this.galleries[galleryKey].errorMessages.push('no items found');
-            console.log('c');
+            //console.log('c');
             return false;
         }
 
@@ -974,12 +974,16 @@ RiotGalleryViewer = {
 
     setGalleryItemByElem(galleryKey, elem) {
 
+        console.log('setGalleryItemByElem(galleryKey, elem) {', galleryKey);
+
         const url = this.getImageUrlFromContainerElem(elem);
         if (!url) {
+            console.log('a');
             return false;
         }
-
+        console.log('url', url);
         const clickElem = this.getClickElemFromContainerElem(elem);
+        console.log('clickElem', clickElem);
         if (clickElem) {
 
             // make sure that the clickElem isn't already set (in this gallery or another)
@@ -1002,6 +1006,7 @@ RiotGalleryViewer = {
         }
 
         const caption = this.getCaptionFromContainerElem(elem);
+        console.log('caption',caption);
 
         //const item = { url: url, clickElem: clickElem, caption: caption };
         //this.galleries[galleryKey].items.push(item);
@@ -1009,6 +1014,7 @@ RiotGalleryViewer = {
     },
 
     setGalleryItem(galleryKey, url, clickElem, caption) {
+        console.log('setGalleryItem(galleryKey, url, clickElem, caption) {', galleryKey, url, clickElem, caption);
         if (!this.galleries[galleryKey]) {
             return false;
         }
@@ -1043,19 +1049,21 @@ RiotGalleryViewer = {
     getImageUrlFromContainerElem(linkContainer) {
         console.log('getImageUrlFromContainerElem(linkContainer) {', linkContainer);
         let url;
-        let elem;
+        //let elem;
 
         // data-riot-gallery-image-url set on container or children
         // <li data-riot-gallery-image-url="./image.jpg"><img src="./thumb.jpg"></li>
         // <li><img src="./thumb.jpg" data-riot-gallery-image-url="./image.jpg"></li>
         url = this.getSubElemAttrVal(linkContainer, 'data-riot-gallery-image-url');
         if (url) {
+            console.log('a!!!!!!!!!!!!!!!!!!!!', url);
             return url;
         }
         // data-image-url set on li container or children
         // <li data-image-url="./image.jpg"><img src="./thumb.jpg"></li>
         // <li><a href="./image.jpg" data-image-url="./image.jpg"><img src="./thumb.jpg"></a></li>
         url = this.getSubElemAttrVal(linkContainer, 'data-image-url');
+        console.log('b!!!!!!!!!!!!!!!!!!!!', url);
         if (url) {
             return url;
         }
@@ -1268,7 +1276,7 @@ RiotGalleryViewer = {
             return val;
         }
 
-        let item = document.querySelector('[' + attr + ']');
+        let item = elem.querySelector('[' + attr + ']');
 
         if (!item) {
             return null;
@@ -1289,7 +1297,7 @@ RiotGalleryViewer = {
             return elem;
         }
 
-        let item = document.querySelector('[' + attr + ']');
+        let item = elem.querySelector('[' + attr + ']');
 
         if (!item) {
             return null;
@@ -1518,6 +1526,9 @@ RiotGalleryViewer = {
         var img = new Image();
         img.src = this.galleries[this.curGalKey].items[this.curItemKey].url;
         this.imgViewCur.imgUrl = this.galleries[this.curGalKey].items[this.curItemKey].url;
+        if (this.galleries[this.curGalKey].items[this.curItemKey].caption) {
+            this.imgViewCur.caption = this.galleries[this.curGalKey].items[this.curItemKey].caption;
+        }
 
         //let doTransitionIn = false;
 
@@ -1526,6 +1537,8 @@ RiotGalleryViewer = {
             this.openViewer();
             this.setWindowSize();
         }
+
+
 
         if (img.complete) {
             console.log('if (img.complete) {');
@@ -1555,10 +1568,10 @@ RiotGalleryViewer = {
             //    this.startImageLoad();
             img.onload = function (e) {
                 console.log('loaded img.onload = function (e) {');
-                if (this.galleryKey === RiotGalleryViewer.curGalKey && this.itemKey === RiotGalleryViewer.curItemKey) {
-                    RiotGalleryViewer.imageLoadComplete(img);
+                //if (this.galleryKey === RiotGalleryViewer.curGalKey && this.itemKey === RiotGalleryViewer.curItemKey) {
+                    RiotGalleryViewer.imageLoadComplete(img, this.galleryKey, this.itemKey);
 
-                }
+                //}
                 console.log('loaded 3');
             }
             img.onerror = function (e) {
@@ -1566,16 +1579,25 @@ RiotGalleryViewer = {
                 RiotGalleryViewer.imageLoadFailed();
             }
         }
+
+        this.updateCaption();
+        
     },
 
-    imageLoadComplete(image) {
-
+    imageLoadComplete(image, galleryKey, itemKey) {
+        console.log('loaded img.onload = function (e) {');
+        if (galleryKey !== this.curGalKey || itemKey !== this.curItemKey) {
+            // current image has already changed. do nothing.
+            return false;
+        }
         this.setImageSize(image, this.curGalKey, this.curItemKey),
 
-            console.log('imageLoadComplete');
+        console.log('imageLoadComplete');
 
         console.log(this.imgViewCur);
         this.elems.image.src = this.imgViewCur.imgUrl;
+        this.imgViewCur.isLoaded = true;
+        this.imgViewCur.imgUrl;
         this.elems.imageCon.classList = '';
 
         //RiotGalleryViewer.viewLoadedImage(img, this.galleryKey, this.itemKey);
@@ -1726,7 +1748,7 @@ RiotGalleryViewer = {
 
         const timeSinceTransStart = curMs - this.transition.startTimeMs;
         const percentDone = timeSinceTransStart / this.options.transitionMs;
-        console.log('percentDone', percentDone);
+        //console.log('percentDone', percentDone);
 
 
         let newLeft = ((1 - percentDone) * this.imgViewCur.transDistancePx) + this.imgViewCur.left;

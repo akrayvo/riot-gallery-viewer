@@ -35,7 +35,7 @@ $images = array(
 <body>
 <div id="page-content">
     <h1>Riot Gallery Viewer - Test</h1>
-
+<?php /**/ ?>
     <ul id="gal1"></ul>
 
 <hr>
@@ -65,23 +65,23 @@ $images = array(
 
     <hr>
     <ul class="riot-gallery riot-gallery-style">
-        <li data-riot-gallery-image-url="https://www.streetmachine.com.au/wp-content/uploads/2023/07/greg-eslick-hq-monaro-bonnet-up-wm-2048x1365.jpg?x=<?php echo time(); ?>">
+        <li data-riot-gallery-image-url="https://www.streetmachine.com.au/wp-content/uploads/2023/07/greg-eslick-hq-monaro-bonnet-up-wm-2048x1365.jpg?x=<?php echo time(); ?>" data-riot-gallery-image-caption="It's a car, dude!">
         <div>text here</div><br>
         <a href="#" class="riot-gallery-image-link">load image here!</a>
 
         </li>
-        <li data-riot-gallery-image-url="https://www.test.com.au/zzz.jpg?x=<?php echo time(); ?>" data-riot-gallery-image-caption="It's a car, dude!">
+        <li data-riot-gallery-image-url="https://www.test.com.au/zzz.jpg?x=<?php echo time(); ?>" data-riot-gallery-image-caption="Hope this works!">
         <div>text here</div><br>
         <a href="#" class="riot-gallery-image-link">load image here!</a>
 
         </li>        
         <?php 
         foreach ($images as $image) {
-            echo '<li>' .
-                '<a href="../images/' . htmlentities($image) . '.jpg" target="blank">'.
+            echo '<li data-image-url="../images/' . htmlentities($image) . '.jpg">' .
+                '<a href="../images/' . htmlentities($image) . '.jpg" target="_blank" data-riot-gallery-image-caption="Bluey Jayey">'.
                 '<img src="../images/' . htmlentities($image) . '_thumb.jpg">'.
                 '</a>' .
-                '<div class="riot-gallery-image-caption">'.ucwords(htmlentities(str_replace(['_','-'],' ',$image))).'</div>' .
+                '<div class="riot-gallery-image-caption">'.ucwords(htmlentities(str_replace(['_','-'],' ',$image))).' zzzz</div>' .
                 '</li>' . "\n";
                 break;
         }
@@ -95,7 +95,7 @@ $images = array(
 
 
     <script src="../../riot-gallery-viewer.js?x=<?php echo time(); ?>"></script>
-    <script>
+    <script>/**/
         RiotGalleryViewer.setGlobalOption('doConsoleLog', true);
         //RiotGalleryViewer.setGlobalOption('doConsoleTrace', true);
 
@@ -108,9 +108,10 @@ $images = array(
         RiotGalleryViewer.addImage('gal2', '../images/squirrel.jpg', '../images/squirrel_thumb.jpg', 'Squirrel');
         RiotGalleryViewer.setOption('gal2', 'doConsoleLog', true);
 
-        RiotGalleryViewer.addImagesByFile('gal3', './images-quotes.txt?x=<?php echo time(); ?>');/**/
+        RiotGalleryViewer.addImagesByFile('gal3', './images-quotes.txt?x=<?php echo time(); ?>');
         //console.log(RiotGalleryViewer.galleries);
         //RiotGalleryViewer.setOption('doConsoleLog', true);
+        
     </script>
 
 </body>
