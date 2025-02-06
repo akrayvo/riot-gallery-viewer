@@ -50,13 +50,16 @@ RiotGalleryViewer = {
     windowWidth: 0,
     windowHeight: 0,
 
-    /*imgUrl: null,
-    //imgIsLoading: false,
-    imgHeight: 0,
-    imgWidth: 0,
-*/
+    curGalKey: null,
+    curItemKey: null,
+
+    loadingImgWidth: 300,
+    loadingImgHeight: 300,
+
     imgViewCur: null,
     imgViewPrev: null,
+
+    transitionType: null,
 
     imgViewBlank: {
         height: null,
@@ -66,25 +69,16 @@ RiotGalleryViewer = {
         isError: false,
         isLoaded: null,
         caption: false,
-        xRight: null,
-        xTop: null,
+        closeLeft: null,
+        closeTop: null,
         padding: null,
         imgUrl: null,
         imgWidth: null,
         imgHeight: 0,
-        //transPxPerInterval: null,
         transLeftStart: null,
         transLeftEnd: null,
         transDistancePx: null
     },
-
-    prevOrNext: null,
-
-    curGalKey: null,
-    curItemKey: null,
-
-    loadingImgWidth: 300,
-    loadingImgHeight: 300,
 
     transition: {},
 
@@ -95,7 +89,9 @@ RiotGalleryViewer = {
         totFrameCount: null,
         //curFrameCount: 0,
         startTimeMs: null,
-        endTimeMs: null
+        endTimeMs: null,
+        closeLeftDistance: null,
+        closeTopDistance: null,
     },
 
     options: {
@@ -1467,21 +1463,21 @@ console.log('----------elems', elems);
         //}
 
         //console.log(pos);
-        let xRight = viewerLeft - 30;
-        let xTop = viewerTop - 30;
-        if (xTop < 10) {
-            xTop = 10;
+        let closeLeft = viewerLeft + viewerWidth - 25;
+        let closeTop = viewerTop - 35;
+        if (closeTop < 10) {
+            closeTop = 10;
         }
-        if (xRight < 30) {
-            xRight = 30;
+        if (this.windowWidth - closeLeft < 30) {
+            closeLeft = this.windowWidth - 30;
         }
 
         this.imgViewCur.width = viewerWidth;
         this.imgViewCur.height = viewerHeight;
         this.imgViewCur.left = viewerLeft;
         this.imgViewCur.top = viewerTop;
-        this.imgViewCur.xTop = xTop;
-        this.imgViewCur.xRight = xRight;
+        this.imgViewCur.closeTop = closeTop;
+        this.imgViewCur.closeLeft = closeLeft;
         this.imgViewCur.padding = conPadding;
 
         console.log('this.imgViewCur set ', this.imgViewCur);
@@ -1511,31 +1507,39 @@ console.log('----------elems', elems);
         // if transition is running, stop it
         this.endTransition();
 
+        //if (!this.isViewerOpen) {
+        //    this.resetViewerValues();
+        //}
+
         if (this.isViewerHtmlLoaded) {
             console.log('if (this.isViewerHtmlLoaded) {');
             this.imgViewPrev = this.getObjectByVal(this.imgViewCur);
             this.imgViewCur = this.getImgViewBlank();
-            this.endTransition();
+            //this.endTransition();
+            this.resetViewerValues();
         } else {
             console.log('else if (this.isViewerHtmlLoaded) {');
             this.loadViewerHtml();
-            this.resetViewerValues();
+            
             console.log('a');
         }
+
+
+        //let doTransitionIn = false;
+
+        if (!this.isViewerOpen) {
+            this.resetViewerValues();
+            console.log('if (!this.isViewerOpen) {');
+            this.openViewer();
+            this.setWindowSize();
+        }
+
         console.log(this.imgViewCur);
         var img = new Image();
         img.src = this.galleries[this.curGalKey].items[this.curItemKey].url;
         this.imgViewCur.imgUrl = this.galleries[this.curGalKey].items[this.curItemKey].url;
         if (this.galleries[this.curGalKey].items[this.curItemKey].caption) {
             this.imgViewCur.caption = this.galleries[this.curGalKey].items[this.curItemKey].caption;
-        }
-
-        //let doTransitionIn = false;
-
-        if (!this.isViewerOpen) {
-            console.log('if (!this.isViewerOpen) {');
-            this.openViewer();
-            this.setWindowSize();
         }
 
 
@@ -1554,7 +1558,7 @@ console.log('----------elems', elems);
             this.imgViewCur.isLoaded = false;
 
             //this.setImageSize(null, this.curGalKey, this.curItemKey),
-            this.setImagePosition();
+            
             //this.viewLoadedImage(img, this.curGalKey, this.curItemKey);
             this.transitionImage();
             //    return;
@@ -1590,7 +1594,7 @@ console.log('----------elems', elems);
             // current image has already changed. do nothing.
             return false;
         }
-        this.setImageSize(image, this.curGalKey, this.curItemKey),
+        this.setImageSize(image, galleryKey, itemKey),
 
         console.log('imageLoadComplete');
 
@@ -1612,11 +1616,14 @@ console.log('----------elems', elems);
 
         if (!this.imgViewCur.width || !this.imgViewCur.height) {
             console.log('// position not set, should not happen');
+            console.trace();
             // position not set, should not happen
             return false;
         }
 
-        if (!this.prevOrNext) {
+        this.setImagePosition();
+
+        if (!this.transitionType) {
             console.log('// no previous image. show image. do not transition');
             // no previous image. show image. do not transition
 
@@ -1640,12 +1647,12 @@ console.log('----------elems', elems);
 
         const extraDistance = 40;
 
-        if (this.prevOrNext === 'prev') {
+        if (this.transitionType === 'prev') {
             this.transition.type = 'left';
             this.imgViewCur.transLeftStart = this.windowWidth + extraDistance;
             this.imgViewPrev.transLeftEnd = 0 - this.imgViewPrev.imgWidth - extraDistance;
             //console.log('init this.imgViewCur.transLeftStart', this.imgViewCur.transLeftStart);
-        } else if (this.prevOrNext === 'next') {
+        } else if (this.transitionType === 'next') {
             this.transition.type = 'right';
             this.imgViewCur.transLeftStart = 0 - this.imgViewCur.imgWidth - extraDistance;
             this.imgViewPrev.transLeftEnd = this.windowWidth + extraDistance;
@@ -1702,6 +1709,11 @@ console.log('----------elems', elems);
             this.elems.imageTransCon.classList = 'is-displayed is-loading';
         }
 
+        this.elems.closeCon.style.left = this.imgViewPrev.closeLeft + 'px';
+        this.elems.closeCon.style.top = this.imgViewPrev.closeTop + 'px';
+
+        this.transition.closeLeftDistance = this.imgViewPrev.closeLeft - this.imgViewCur.closeLeft;
+        this.transition.closeTopDistance = this.imgViewPrev.closeTop - this.imgViewCur.closeTop;
 
         
         this.transition.isJsIntervalOn = true;
@@ -1743,6 +1755,9 @@ console.log('----------elems', elems);
             this.endTransition();
             this.elems.imageCon.style.left = this.imgViewCur.left + 'px';
             this.elems.imageTransCon.style.left = this.imgViewPrev.left + 'px';
+            this.elems.imageTransCon.classList = '';
+            this.elems.closeCon.style.left = this.imgViewCur.closeLeft + 'px';
+            this.elems.closeCon.style.top = this.imgViewCur.closeTop + 'px';
             return;
         }
 
@@ -1758,6 +1773,11 @@ console.log('----------elems', elems);
         newLeft = ((1 - percentDone) * this.imgViewPrev.transDistancePx) + this.imgViewPrev.transLeftEnd;
         //console.log('newLeft', newLeft, this.imgViewPrev.transDistancePx, this.imgViewPrev.left);
         this.elems.imageTransCon.style.left = newLeft + 'px';
+
+        newLeft = ((1 - percentDone) * (1 - percentDone) * this.transition.closeLeftDistance) + this.imgViewCur.closeLeft;
+        this.elems.closeCon.style.left = newLeft + 'px';
+        let newTop = ((1 - percentDone) * (1 - percentDone) * this.transition.closeTopDistance) + this.imgViewCur.closeTop;
+        this.elems.closeCon.style.top = newTop + 'px';
     },
 
     endTransition() {
@@ -1802,10 +1822,12 @@ console.log('----------elems', elems);
 
         this.endTransition();
 
-        this.elems.imageCon.classList = '';
-        //this.elems.imageTransCon.classList = '';
-        this.elems.caption.innerHTML = '';
-        this.elems.captionCon.classList = '';
+        if (this.elems.imageCon) {
+            this.elems.imageCon.classList = '';
+            //this.elems.imageTransCon.classList = '';
+            this.elems.caption.innerHTML = '';
+            this.elems.captionCon.classList = '';
+        }
 
     },
 
@@ -1987,19 +2009,19 @@ console.log('----------elems', elems);
         this.consoleLog('item clicked', galleryKey, ItemKey);
         this.curGalKey = galleryKey;
         this.curItemKey = ItemKey;
-        this.prevOrNext = null;
-        console.log('prevOrNext', this.prevOrNext);
+        this.transitionType = null;
+        console.log('transitionType', this.transitionType);
         this.loadImage();
     },
 
     prevClicked() {
-        this.prevOrNext = 'prev';
+        this.transitionType = 'prev';
         this.incrementImageAndLoad(-1);
 
     },
 
     nextClicked() {
-        this.prevOrNext = 'next';
+        this.transitionType = 'next';
         this.incrementImageAndLoad(1);
 
     },
@@ -2011,9 +2033,9 @@ console.log('----------elems', elems);
         }
 
         /*if (increment > 0) {
-            this.prevOrNext = 'next';
+            this.transitionType = 'next';
         } else {
-            this.prevOrNext = 'prev';
+            this.transitionType = 'prev';
         }*/
 
         if (this.curGalKey === null) {
@@ -2058,6 +2080,9 @@ console.log('----------elems', elems);
         if (!this.transition.isJsIntervalOn) {
             this.elems.imageCon.style.left = this.imgViewCur.left + 'px';
         }
+        
+        this.elems.closeCon.style.left = this.imgViewCur.closeLeft + 'px';
+        this.elems.closeCon.style.top = this.imgViewCur.closeTop + 'px';
     },
 
 
