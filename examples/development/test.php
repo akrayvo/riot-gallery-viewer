@@ -62,7 +62,7 @@ $images = array(
         }
         ?>
     </ul>
-
+<!-- 
     <hr>
     <ul class="riot-gallery riot-gallery-style">
         <li data-riot-gallery-image-url="https://www.streetmachine.com.au/wp-content/uploads/2023/07/greg-eslick-hq-monaro-bonnet-up-wm-2048x1365.jpg?x=<?php echo time(); ?>" data-riot-gallery-image-caption="It's a car, dude!">
@@ -76,17 +76,17 @@ $images = array(
 
         </li>        
         <?php 
-        foreach ($images as $image) {
-            echo '<li data-image-url="../images/' . htmlentities($image) . '.jpg">' .
-                '<a href="../images/' . htmlentities($image) . '.jpg" target="_blank" data-riot-gallery-image-caption="Bluey Jayey">'.
-                '<img src="../images/' . htmlentities($image) . '_thumb.jpg">'.
-                '</a>' .
-                '<div class="riot-gallery-image-caption">'.ucwords(htmlentities(str_replace(['_','-'],' ',$image))).' zzzz</div>' .
-                '</li>' . "\n";
-                break;
-        }
+        // foreach ($images as $image) {
+        //     echo '<li data-image-url="../images/' . htmlentities($image) . '.jpg">' .
+        //         '<a href="../images/' . htmlentities($image) . '.jpg" target="_blank" data-riot-gallery-image-caption="Bluey Jayey">'.
+        //         '<img src="../images/' . htmlentities($image) . '_thumb.jpg">'.
+        //         '</a>' .
+        //         '<div class="riot-gallery-image-caption">'.ucwords(htmlentities(str_replace(['_','-'],' ',$image))).' zzzz</div>' .
+        //         '</li>' . "\n";
+        //         break;
+        // }
         ?>
-    </ul>
+    </ul> -->
 
 
 
@@ -96,19 +96,19 @@ $images = array(
 
     <script src="../../riot-gallery-viewer.js?x=<?php echo time(); ?>"></script>
     <script>/**/
-        RiotGalleryViewer.setGlobalOption('doConsoleLog', true);
+        RiotGalleryViewer.setOption('doConsoleLog', true);
         //RiotGalleryViewer.setGlobalOption('doConsoleTrace', true);
 
-        RiotGalleryViewer.addImage('gal1', '../images/blue-jay.jpg', '../images/blue-jay_thumb.jpg', 'Blue Jay');
-        RiotGalleryViewer.addImage('gal1', '../images/lake-7301021_640.jpg', '../images/lake-7301021_640_thumb.jpg', 'LaKe 7301021');
-        RiotGalleryViewer.addImage('gal1', '../images/lake-8257272_1280.jpg', '../images/lake-8257272_1280_thumb.jpg', 'LaKe 8257272');
-        RiotGalleryViewer.setOption('gal1', 'doConsoleLog', true);
+        // RiotGalleryViewer.addImage('gal1', '../images/blue-jay.jpg', '../images/blue-jay_thumb.jpg', 'Blue Jay');
+        // RiotGalleryViewer.addImage('gal1', '../images/lake-7301021_640.jpg', '../images/lake-7301021_640_thumb.jpg', 'LaKe 7301021');
+        // RiotGalleryViewer.addImage('gal1', '../images/lake-8257272_1280.jpg', '../images/lake-8257272_1280_thumb.jpg', 'LaKe 8257272');
+        // RiotGalleryViewer.setOption('gal1', 'doConsoleLog', true);
 
-        RiotGalleryViewer.addImage('gal2', '../images/mountains-8451480_640.jpg', '../images/mountains-8451480_640_thumb.jpg', 'Mountains');
-        RiotGalleryViewer.addImage('gal2', '../images/squirrel.jpg', '../images/squirrel_thumb.jpg', 'Squirrel');
-        RiotGalleryViewer.setOption('gal2', 'doConsoleLog', true);
+        // RiotGalleryViewer.addImage('gal2', '../images/mountains-8451480_640.jpg', '../images/mountains-8451480_640_thumb.jpg', 'Mountains');
+        // RiotGalleryViewer.addImage('gal2', '../images/squirrel.jpg', '../images/squirrel_thumb.jpg', 'Squirrel');
+        // RiotGalleryViewer.setOption('gal2', 'doConsoleLog', true);
 
-        RiotGalleryViewer.addImagesByFile('gal3', './images-quotes.txt?x=<?php echo time(); ?>');
+        // RiotGalleryViewer.addImagesByFile('gal3', './images-quotes.txt?x=<?php echo time(); ?>');
         //console.log(RiotGalleryViewer.galleries);
         //RiotGalleryViewer.setOption('doConsoleLog', true);
         
