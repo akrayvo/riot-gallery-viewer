@@ -177,9 +177,14 @@ body.riot-gallery-viewer-open {
 
 #riot-gallery-viewer-close-con {
     display: block;
-    position: fixed;
+    /*position: fixed;*/
+    position: absolute;
     /* 2147483647 - 0 */
     z-index: 2147483647;
+    display: block;
+}
+
+#riot-gallery-viewer-close-con.is-hidden {
     display: none;
 }
 
@@ -404,7 +409,7 @@ body.riot-gallery-viewer-open.riot-gallery-viewer-is-loading #riot-gallery-viewe
     }
 }
 
-@media screen and (max-width: 280px) {
+@media screen and (max-width: 340px) {
     body.riot-gallery-viewer-open #riot-gallery-viewer-close-con,
     body.riot-gallery-viewer-open #riot-gallery-viewer-prev-con,
     body.riot-gallery-viewer-open #riot-gallery-viewer-next-con
@@ -413,7 +418,7 @@ body.riot-gallery-viewer-open.riot-gallery-viewer-is-loading #riot-gallery-viewe
     }
 }
 
-@media screen and (max-height: 280px) {
+@media screen and (max-height: 300px) {
     body.riot-gallery-viewer-open #riot-gallery-viewer-close-con,
     body.riot-gallery-viewer-open #riot-gallery-viewer-prev-con,
     body.riot-gallery-viewer-open #riot-gallery-viewer-next-con
