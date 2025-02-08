@@ -81,7 +81,7 @@ RiotGalleryViewer = {
         //isError: false,
         //isLoaded: null,
         //caption: false,
-        closeLeft: null,
+        closeRight: null,
         closeTop: null,
         padding: null,
         //imgUrl: null,
@@ -102,8 +102,8 @@ RiotGalleryViewer = {
             //curFrameCount: 0,
             startTimeMs: null,
             endTimeMs: null,
-            closeLeftDistance: null,
-            closeTopDistance: null,
+            //closeLeftDistance: null,
+            //closeTopDistance: null,
         },
 
     options: {
@@ -111,12 +111,14 @@ RiotGalleryViewer = {
         doConsoleLog: false,
         // write a code trace on every console log. needed for troubeshooting/testing/development only
         doConsoleTrace: false,
-        transitionMs: 10000,
+        transitionMs: 3000,
         transitionFrameMs: 30,
         imageFailedCaptionHtml: '<i>Could Not Load Image</i>',
         loadingSpinnderSize: 300
     },
 
+    closeConDefaultLeft: -38,
+    closeConDefaultTop: -38,
 
     //     /*****************************************************************************
     //      *****************************************************************************
@@ -1745,21 +1747,25 @@ console.log(cap);
         //}
 
         //console.log(pos);
-        let closeLeft = viewerLeft + viewerWidth - 25;
-        let closeTop = viewerTop - 35;
-        if (closeTop < 10) {
-            closeTop = 10;
+        let closeRight= -38;
+        let closeTop = -38;
+        if (viewerTop < 36) {
+            closeTop = closeTop + (36-viewerTop);
         }
-        if (this.windowWidth - closeLeft < 30) {
-            closeLeft = this.windowWidth - 30;
+        if (viewerLeft < 96) {
+            closeRight = closeRight + (96-viewerLeft);
         }
+
+
+
+
 
         this.viewItemCur.width = viewerWidth;
         this.viewItemCur.height = viewerHeight;
         this.viewItemCur.left = viewerLeft;
         this.viewItemCur.top = viewerTop;
         this.viewItemCur.closeTop = closeTop;
-        this.viewItemCur.closeLeft = closeLeft;
+        this.viewItemCur.closeRight = closeRight;
         this.viewItemCur.padding = conPadding;
 
         //console.log('zzzzzzzzzzzzzzzzzzzz ', imgWidth, imgHeight);
@@ -1815,7 +1821,7 @@ console.log(cap);
 
         this.elems.imageCon.style.padding = this.viewItemCur.padding + 'px';
 
-        this.elems.closeCon.style.left = this.viewItemCur.closeLeft + 'px';
+        this.elems.closeCon.style.right = this.viewItemCur.closeRight + 'px';
         this.elems.closeCon.style.top = this.viewItemCur.closeTop + 'px';
 
         console.log('this.viewItemCur', this.viewItemCur);
@@ -1871,6 +1877,8 @@ console.log(cap);
         this.viewItemCur.transDistancePx = this.viewItemCur.transLeftStart - this.viewItemCur.left;
         console.log('sssssssss', this.viewItemCur.transLeftStart, this.viewItemCur.left);
 
+
+
         this.elems.imageTransCon.style.left = this.viewItemPrev.left + 'px';
         this.elems.imageTransCon.style.top = this.viewItemPrev.top + 'px';
         this.elems.imageTransCon.style.width = this.viewItemPrev.width + 'px';
@@ -1878,8 +1886,8 @@ console.log(cap);
 
         this.viewItemPrev.transDistancePx = this.viewItemCur.left - this.viewItemPrev.transLeftEnd;
 
-        this.transition.closeLeftDistance = this.viewItemPrev.closeLeft - this.viewItemCur.closeLeft;
-        this.transition.closeTopDistance = this.viewItemPrev.closeTop - this.viewItemCur.closeTop;
+        //this.transition.closeLeftDistance = this.viewItemPrev.closeLeft - this.viewItemCur.closeLeft;
+        //this.transition.closeTopDistance = this.viewItemPrev.closeTop - this.viewItemCur.closeTop;
 
         this.transition.isTransitioning = true;
         this.transition.startTimeMs = this.getCurMs();
@@ -2064,12 +2072,12 @@ console.log(cap);
         //console.log('newLeft', newLeft, this.viewItemPrev.transDistancePx, this.viewItemPrev.left);
         this.elems.imageTransCon.style.left = newLeft + 'px';
         
-        newLeft = ((1 - percentDone) * this.transition.closeLeftDistance) + this.viewItemCur.closeLeft;
-        this.elems.closeCon.style.left = newLeft + 'px';
+        //newLeft = ((1 - percentDone) * this.transition.closeLeftDistance) + this.viewItemCur.closeLeft;
+        //this.elems.closeCon.style.left = newLeft + 'px';
         //console.log('newLeft = ((1 - percentDone) * this.transition.closeLeftDistance) + this.viewItemCur.closeLeft;', 
         //    newLeft, percentDone, this.transition.closeLeftDistance, this.viewItemCur.closeLeft);
-        let newTop = ((1 - percentDone) * this.transition.closeTopDistance) + this.viewItemCur.closeTop;
-        this.elems.closeCon.style.top = newTop + 'px';
+        //let newTop = ((1 - percentDone) * this.transition.closeTopDistance) + this.viewItemCur.closeTop;
+        //this.elems.closeCon.style.top = newTop + 'px';
     },
 
     endTransition() {
@@ -2233,6 +2241,7 @@ console.log(cap);
             this.elems.body.appendChild(divElem);
 
             /*html = '<div id="riot-gallery-viewer-image-con">' +
+                '<div id="riot-gallery-viewer-close-con"><a href="#">X</a></div>'+
                 '<img id="riot-gallery-viewer-image">' +
                 '<div id="riot-gallery-viewer-loading"></div>' +
                 '<div id="riot-gallery-viewer-transition-both-con">' +
@@ -2243,6 +2252,22 @@ console.log(cap);
             this.elems.body.append(html);*/
             divElem = document.createElement('div');
             divElem.id = 'riot-gallery-viewer-image-con';
+            //
+            //this.elems.body.append(html);
+            ////
+            subDivElem = document.createElement('div');
+            subDivElem.id = 'riot-gallery-viewer-close-con';
+            aElem = document.createElement('a');
+            aElem.innerHTML = 'X';
+            aElem.href = '#';
+            aElem.addEventListener('click', function (event) {
+                event.preventDefault();
+                RiotGalleryViewer.closeClicked();
+            }, false);
+            subDivElem.appendChild(aElem);
+            this.elems.closeCon = subDivElem;
+            divElem.appendChild(subDivElem);
+            ////
             imgElem = document.createElement('img');
             imgElem.id = 'riot-gallery-viewer-image';
             this.elems.image = imgElem;
@@ -2255,6 +2280,7 @@ console.log(cap);
                 RiotGalleryViewer.nextClicked();
             }, false);
             this.elems.imageCon = divElem;
+            ////
             this.elems.body.appendChild(divElem);
 
             divElem = document.createElement('div');
@@ -2266,20 +2292,7 @@ console.log(cap);
             this.elems.imageTransCon = divElem;
             this.elems.body.appendChild(divElem);
 
-            //html = '<div id="riot-gallery-viewer-close-con"><a href="#">X</a></div>';
-            //this.elems.body.append(html);
-            divElem = document.createElement('div');
-            divElem.id = 'riot-gallery-viewer-close-con';
-            aElem = document.createElement('a');
-            aElem.innerHTML = 'X';
-            aElem.href = '#';
-            aElem.addEventListener('click', function (event) {
-                event.preventDefault();
-                RiotGalleryViewer.closeClicked();
-            }, false);
-            divElem.appendChild(aElem);
-            this.elems.closeCon = divElem;
-            this.elems.body.appendChild(divElem);
+
 
             //html = '<div id="riot-gallery-viewer-caption-con"><div id="riot-gallery-viewer-caption"></div</div>';
             //this.elems.body.append(html);
