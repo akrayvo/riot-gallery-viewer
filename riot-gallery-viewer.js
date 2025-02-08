@@ -50,23 +50,13 @@ RiotGalleryViewer = {
     // is the RiotGalleryViewer HTML (main image, background, previous/next butttons, close button, etc) loaded
     isViewerHtmlLoaded: false,
 
-    //     // is the RiotGalleryViewer currently open
-    //     isViewerOpen: false,
+    // is the RiotGalleryViewer currently open
+    isViewerOpen: false,
 
-    //     // width and height of browser window
-    //     // set on html initialization and updated on window resize
-    //     windowWidth: 0,
-    //     windowHeight: 0,
-
-    //     //curGalKey: null,
-    //     //curItemKey: null,
-
-    //     loadingImgWidth: 300,
-    //     loadingImgHeight: 300,
-
-
-    //     // "prev" or "next"
-    //     //transitionType: null,
+    // width and height of browser window
+    // set on html initialization and updated on window resize
+    windowWidth: 0,
+    windowHeight: 0,
 
     viewItemCur: null,
     viewItemPrev: null,
@@ -78,15 +68,9 @@ RiotGalleryViewer = {
         width: null,
         left: null,
         top: null,
-        //isError: false,
-        //isLoaded: null,
-        //caption: false,
         closeRight: null,
         closeTop: null,
         padding: null,
-        //imgUrl: null,
-        //imgWidth: null,
-        //imgHeight: 0,
         transLeftStart: null,
         transLeftEnd: null,
         transDistancePx: null
@@ -98,12 +82,8 @@ RiotGalleryViewer = {
             jsTnterval: null,
             isTransitioning: false,
             type: null, // left, or right
-            //totFrameCount: null,
-            //curFrameCount: 0,
             startTimeMs: null,
             endTimeMs: null,
-            //closeLeftDistance: null,
-            //closeTopDistance: null,
         },
 
     options: {
@@ -1353,65 +1333,9 @@ RiotGalleryViewer = {
     },
 
 
-    //     /*****************************************************************************
-    //      ******************************************************************************
-    //      * Image Viewer Actions - START */
-
-    //     setImageSize(image, galKey, itemKey) {
-    //         console.log('setImageSize(image, galleryKey, itemKey) {');
-
-    //         if (!this.getGalItem(galKey, itemKey)) {
-    //             // should not happen
-    //             return;
-    //         }
-
-    //         this.galleries[galKey].items[itemKey].imgWidth = image.width;
-    //         this.galleries[galKey].items[itemKey].imgHeight = image.imgHeight;
-
-    //         // image changed. don't load old one
-    //         /*if (this.viewItemCur.galKey != galKey || this.viewItemCur.itemKey !== itemKey) {
-    //             return;
-    //         }
-
-    //         if (image) {
-    //             this.viewItemCur.imgWidth = image.width;
-    //             this.viewItemCur.imgHeight = image.height;
-    //             this.viewItemCur.imgUrl = image.src;
-    //         }*//* else {
-    //             this.imgWidth = 0;
-    //             this.imgHeight = 0;
-    //         }*/
-    //     },
-
-
-    //     imageLoadFailed(galKey, itemKey) {
-    //         //this.imgWidth = this.imgHeight = 0;
-    //         //this.imgUrl = null;
-
-    //         //this.viewItemCur = null; //this.getViewItemBlank();
-    //         //this.viewItemCur.isError = true;
-
-    //         if (!this.getGalItem(galKey, itemKey)) {
-    //             // should not happen
-    //             return;
-    //         }
-
-    //         this.galleries[galKey].items[itemKey].isError = null;
-    //         this.galleries[galKey].items[itemKey].width = null;
-    //         this.galleries[galKey].items[itemKey].height = null;
-
-    //         if (this.viewItemCur.galKey !== galKey || this.viewItemCur.itemKey !== itemKey) {
-    //             // moved on to another image. do not update viewer.
-    //             return;
-    //         }
-
-    //         this.setImagePosition();
-    //         this.placeImageInPosition();
-    //         this.elems.imageCon.classList = 'is-error';
-
-    //         this.updateCaption();
-
-    //     },
+    /*****************************************************************************
+     ******************************************************************************
+     * Image Viewer Actions - START */
 
     updateCaption() {
         const item = this.getCurGalItem();
@@ -1426,8 +1350,7 @@ RiotGalleryViewer = {
                 console.log(cap);
             }
         }
-        console.log(item);
-console.log(cap);
+
         if (cap) {
             this.elems.caption.innerHTML = cap;
             this.elems.captionCon.classList.add('is-displayed');
@@ -1444,74 +1367,6 @@ console.log(cap);
         }
         return JSON.parse(JSON.stringify(obj));
     },
-
-    //     /*
-    //      * position the main gallery view image and the close button in the top right corner
-    //      */
-    //     setImagePosition() {
-    //         console.log('setImagePosition() {)');
-
-    //         let imgWidth = this.loadingImgWidth;
-    //         let imgHeight = this.loadingImgHeight;
-    //         let isLoadingImage = true;
-    //         let conPadding = 0;
-
-    //         if (this.viewItemCur.imgWidth && this.viewItemCur.imgHeight) {
-    //             imgWidth = this.viewItemCur.imgWidth;
-    //             imgHeight = this.viewItemCur.imgHeight;
-    //             isLoadingImage = false;
-    //         }
-
-    //         viewerWidth = imgWidth;
-    //         viewerHeight = imgHeight;
-
-    //         const maxWidth = this.windowWidth - 40;
-    //         const maxHeight = this.windowHeight - 24;
-
-    //         if (viewerWidth > maxWidth) {
-    //             viewerWidth = maxWidth;
-    //             viewerHeight = imgHeight / imgWidth * viewerWidth;
-    //         }
-
-    //         if (viewerHeight > maxHeight) {
-    //             viewerHeight = maxHeight;
-    //             viewerWidth = imgWidth / imgHeight * viewerHeight;
-    //         }
-
-    //         let viewerLeft = (this.windowWidth - viewerWidth) / 2;
-    //         let viewerTop = (this.windowHeight - viewerHeight) / 2;
-
-    //         if (isLoadingImage) {
-    //             viewerLeft = viewerLeft - 8;
-    //             viewerTop = viewerTop - 8;
-    //             //this.elems.imageCon.style.padding = '5px';
-    //             conPadding = 5;
-
-    //         }// else {
-    //         //    this.elems.imageCon.style.padding = '0';
-    //         //}
-
-    //         //console.log(pos);
-    //         let closeLeft = viewerLeft + viewerWidth - 25;
-    //         let closeTop = viewerTop - 35;
-    //         if (closeTop < 10) {
-    //             closeTop = 10;
-    //         }
-    //         if (this.windowWidth - closeLeft < 30) {
-    //             closeLeft = this.windowWidth - 30;
-    //         }
-
-    //         this.viewItemCur.width = viewerWidth;
-    //         this.viewItemCur.height = viewerHeight;
-    //         this.viewItemCur.left = viewerLeft;
-    //         this.viewItemCur.top = viewerTop;
-    //         this.viewItemCur.closeTop = closeTop;
-    //         this.viewItemCur.closeLeft = closeLeft;
-    //         this.viewItemCur.padding = conPadding;
-
-    //         console.log('this.viewItemCur set ', this.viewItemCur);
-
-    //     },
 
     getCurGalItem() {
         if (this.viewItemCur === null) {
@@ -1563,19 +1418,6 @@ console.log(cap);
 
         this.viewItemPrev = this.getObjByVal(this.viewItemCur);
         this.viewItemCur = this.getViewItemBlank(galKey, itemKey); // , transType
-        console.log('this.viewItemCur', this.viewItemCur);
-
-        //this.viewItemCur.galKey = galKey;
-        //this.viewItemCur.itemKey = itemKey;
-
-        //this.viewItemCur.type = transType;
-
-
-
-        //if (!this.isViewerOpen) {
-        //    this.resetViewerValues();
-        //}
-
 
         if (!this.isViewerOpen) {
             if (!this.isViewerHtmlLoaded) {
@@ -1587,24 +1429,7 @@ console.log(cap);
             this.setWindowSize();
         }
 
-        // if (this.isViewerHtmlLoaded) {
-        //     console.log('if (this.isViewerHtmlLoaded) {');
-
-        //     //this.endTransition();
-        //     this.resetViewerValues();
-        // } else {
-        //     console.log('else if (this.isViewerHtmlLoaded) {');
-
-
-        //     console.log('a');
-
-        // }
-
-        //let doTransitionIn = false;
-
-
-        console.log(this.viewItemCur);
-
+        
         if (!galItem.isLoaded) {
             var img = new Image();
             img.src = galItem.url;
@@ -1633,53 +1458,6 @@ console.log(cap);
         this.setImage();
         this.calculateImgViewPlacement();
         this.transitionImage(transType);
-
-        //this.viewItemCur.imgUrl = this.galleries[this.viewItemCur.galKey].items[this.viewItemCur.itemKey].url;
-        //if (this.galleries[this.viewItemCur.galKey].items[this.viewItemCur.itemKey].caption) {
-        //    this.viewItemCur.caption = this.galleries[this.viewItemCur.galKey].items[this.viewItemCur.itemKey].caption;
-        //}
-
-
-
-        /*if (img.complete) {
-            console.log('if (img.complete) {');
-            this.galleries[galKey].items[itemKey].isLoaded = true;
-            console.log('img.complete');
-            console.log(this);
-            //this.setImageSize(img, galKey, itemKey),
-            this.setImagePosition();
-            //this.viewLoadedImage(img, this.viewItemCur.galKey, this.viewItemCur.itemKey);
-            this.transitionImage();
-        } else {
-            console.log('else img.complete');
-            this.viewItemCur.isLoaded = false;
-
-            //this.setImageSize(null, this.viewItemCur.galKey, this.viewItemCur.itemKey),
-            
-            //this.viewLoadedImage(img, this.viewItemCur.galKey, this.viewItemCur.itemKey);
-            this.transitionImage();
-            //    return;
-            ///////////////
-            //    this.viewLoadedImage(img, this.viewItemCur.galKey, this.viewItemCur.itemKey);
-            //    return;
-            ///////
-
-            img.galleryKey = this.viewItemCur.galKey;
-            img.itemKey = this.viewItemCur.itemKey;
-            //    this.startImageLoad();
-            img.onload = function (e) {
-                console.log('loaded img.onload = function (e) {');
-                //if (this.galleryKey === RiotGalleryViewer.viewItemCur.galKey && this.itemKey === RiotGalleryViewer.viewItemCur.itemKey) {
-                    RiotGalleryViewer.imageLoadComplete(img, this.galleryKey, this.itemKey);
-
-                //}
-                console.log('loaded 3');
-            }
-            img.onerror = function (e) {
-                console.log('errored img.onerror = function (e) {');
-                RiotGalleryViewer.imageLoadFailed(this.galleryKey, this.itemKey);
-            }
-        }*/
 
         this.updateCaption();
 
@@ -1752,12 +1530,9 @@ console.log(cap);
         if (viewerTop < 36) {
             closeTop = closeTop + (36-viewerTop);
         }
-        if (viewerLeft < 96) {
-            closeRight = closeRight + (96-viewerLeft);
+        if (viewerLeft < 98) {
+            closeRight = closeRight + (98-viewerLeft);
         }
-
-
-
 
 
         this.viewItemCur.width = viewerWidth;
@@ -1767,33 +1542,7 @@ console.log(cap);
         this.viewItemCur.closeTop = closeTop;
         this.viewItemCur.closeRight = closeRight;
         this.viewItemCur.padding = conPadding;
-
-        //console.log('zzzzzzzzzzzzzzzzzzzz ', imgWidth, imgHeight);
-
-        //console.log('this.viewItemCur set ', this.viewItemCur);
     },
-
-    /*imageLoadComplete(image, galleryKey, itemKey) {
-        console.log('loaded img.onload = function (e) {');
-        if (galleryKey !== this.viewItemCur.galKey || itemKey !== this.viewItemCur.itemKey) {
-            // current image has already changed. do nothing.
-            return false;
-        }
-        this.setImageSize(image, galleryKey, itemKey),
-
-        console.log('imageLoadComplete');
-
-        console.log(this.viewItemCur);
-        this.elems.image.src = this.viewItemCur.imgUrl;
-        this.viewItemCur.isLoaded = true;
-        this.viewItemCur.imgUrl;
-        this.elems.imageCon.classList = '';
-
-        //RiotGalleryViewer.viewLoadedImage(img, this.galleryKey, this.itemKey);
-        this.setImagePosition();
-        this.placeImageInPosition();
-        console.log(this);
-    },*/
 
     setImage() {
         const item = this.getCurGalItem();
@@ -1831,9 +1580,6 @@ console.log(cap);
     },
 
     transitionImage(transType) {
-        // console.log('transitionImage() {');
-        // console.log(this.viewItemCur, this.viewItemPrev);
-        // const item = this.gaviewItemCur[]
 
         if (!this.viewItemPrev) {
             this.placeImage();
@@ -1854,7 +1600,6 @@ console.log(cap);
             } else {
                 this.viewItemPrev.transLeftEnd = 0 - this.options.loadingSpinnderSize - extraDistance;
             }
-            //console.log('init this.viewItemCur.transLeftStart', this.viewItemCur.transLeftStart);
         } else { // if (this.transitionType === 'next') {
             //this.transition.type = 'right';
             console.log('////////AAAAAAAAA');
@@ -1866,7 +1611,6 @@ console.log(cap);
             }
             console.log(item, prevItem);
             this.viewItemPrev.transLeftEnd = this.windowWidth + extraDistance;
-            //console.log('init this.viewItemCur.transLeftStart', this.viewItemCur.transLeftStart);
         }
 
         this.elems.imageCon.style.left = this.viewItemCur.transLeftStart + 'px';
@@ -1876,7 +1620,6 @@ console.log(cap);
 
         this.viewItemCur.transDistancePx = this.viewItemCur.transLeftStart - this.viewItemCur.left;
         console.log('sssssssss', this.viewItemCur.transLeftStart, this.viewItemCur.left);
-
 
 
         this.elems.imageTransCon.style.left = this.viewItemPrev.left + 'px';
@@ -1912,119 +1655,6 @@ console.log(cap);
 
 
 
-
-
-/*
-        const item = this.getCurGalItem();
-
-        let imgWidth = this.options.loadingSpinnderSize;
-        let imgHeight = this.options.loadingSpinnderSize;
-
-        if (item.width && item.height && !item.isError && item.isLoaded) {
-            imgWidth = item.width;
-            imgHeight = item.height;
-        }
-
-        if (!this.transitionType) {
-            console.log('// no previous image. show image. do not transition');
-            // no previous image. show image. do not transition
-
-            if (this.viewItemCur.isLoaded) {
-                // image loaded
-                console.log('if (this.isLoaded) {');
-                this.elems.image.src = this.viewItemCur.imgUrl;
-                this.elems.imageCon.classList = '';
-            } else {
-                // image NOT loaded. show spinner
-                console.log('// image NOT loaded. show spinner');
-                this.elems.imageCon.classList = 'is-loading';
-            }
-            //console.log('aaaaaa');
-            this.placeImageInPosition();
-            //console.log('bbbbbb');
-            return;
-        }
-
-        //console.log('transition IT');
-
-        const extraDistance = 40;
-
-        if (this.transitionType === 'prev') {
-            this.transition.type = 'left';
-            this.viewItemCur.transLeftStart = this.windowWidth + extraDistance;
-            this.viewItemPrev.transLeftEnd = 0 - this.viewItemPrev.imgWidth - extraDistance;
-            //console.log('init this.viewItemCur.transLeftStart', this.viewItemCur.transLeftStart);
-        } else { // if (this.transitionType === 'next') {
-            this.transition.type = 'right';
-            this.viewItemCur.transLeftStart = 0 - this.viewItemCur.imgWidth - extraDistance;
-            this.viewItemPrev.transLeftEnd = this.windowWidth + extraDistance;
-            //console.log('init this.viewItemCur.transLeftStart', this.viewItemCur.transLeftStart);
-        } /*else {
-            //could not find tranistion type. should not happen
-            return;
-        }* /
-
-        //this.transition.totFrameCount = this.options.transitionMs / this.options.transitionFrameMs;
-        //console.log('this.transition.totFrameCount', this.transition.totFrameCount);
-        //this.transition.curFrameCount = 1;
-
-        //const distancePx = this.viewItemCur.left - this.viewItemCur.transLeftStart;
-        //console.log('set distancePx', distancePx);
-        //this.viewItemCur.transPxPerInterval = distancePx / this.transition.totFrameCount;
-        //console.log('set this.viewItemCur.transPxPerInterval', this.viewItemCur.transPxPerInterval, distancePx, this.transition.totFrameCount);
-
-        this.elems.imageCon.style.left = this.viewItemCur.transLeftStart + 'px';
-        this.elems.imageCon.style.top = this.viewItemCur.top + 'px';
-        this.elems.imageCon.style.width = this.viewItemCur.width + 'px';
-        this.elems.imageCon.style.height = this.viewItemCur.height + 'px';
-
-        this.viewItemCur.transDistancePx = this.viewItemCur.transLeftStart - this.viewItemCur.left;
-
-        if (this.viewItemCur.isLoaded) {
-            // image loaded
-            this.elems.image.src = this.viewItemCur.imgUrl;
-            this.elems.imageCon.classList = '';
-        } else if (this.viewItemCur.isError) {
-            // image loaded
-            this.elems.imageCon.classList = 'is-error';
-        } else {
-            // image NOT loaded. show spinner
-            this.elems.imageCon.classList = 'is-loading';
-        }
-
-        this.elems.imageTransCon.style.left = this.viewItemPrev.left + 'px';
-        this.elems.imageTransCon.style.top = this.viewItemPrev.top + 'px';
-        this.elems.imageTransCon.style.width = this.viewItemPrev.width + 'px';
-        this.elems.imageTransCon.style.height = this.viewItemPrev.height + 'px';
-
-        this.viewItemPrev.transDistancePx = this.viewItemCur.left - this.viewItemPrev.transLeftEnd;
-
-        if (this.viewItemPrev.isLoaded) {
-            // image loaded
-            this.elems.imageTrans.src = this.viewItemPrev.imgUrl;
-            this.elems.imageTransCon.classList = 'is-displayed';
-        } else if (this.viewItemPrev.isError) {
-            // image loaded
-            this.elems.imageTransCon.classList = 'is-displayed is-error';
-        } else {
-            // image NOT loaded. show spinner
-            this.elems.imageTransCon.classList = 'is-displayed is-loading';
-        }
-
-        this.elems.closeCon.style.left = this.viewItemPrev.closeLeft + 'px';
-        this.elems.closeCon.style.top = this.viewItemPrev.closeTop + 'px';
-
-        this.transition.closeLeftDistance = this.viewItemPrev.closeLeft - this.viewItemCur.closeLeft;
-        this.transition.closeTopDistance = this.viewItemPrev.closeTop - this.viewItemCur.closeTop;
-
-
-        this.transition.isTransitioning = true;
-        this.transition.startTimeMs = this.getCurMs();
-        this.transition.endTimeMs = this.transition.startTimeMs + this.options.transitionMs;
-        this.transition.jsTnterval = setInterval(function () {
-            RiotGalleryViewer.transitionFrame();
-        }, this.options.transitionFrameMs);
-*/ 
     },
 
     getCurMs() {
@@ -2033,25 +1663,6 @@ console.log(cap);
     },
 
     transitionFrame() {
-        //console.log('transitionFrame() {');
-
-        //console.log(this.transition, this.viewItemCur);
-
-        //console.log(this.transition.curFrameCount, this.transition.totFrameCount);
-        //if (this.transition.curFrameCount >= this.transition.totFrameCount || !this.transition.totFrameCount) {
-        const curMs = this.getCurMs();
-
-        //start = 10
-        //transition 1000
-        //end
-
-        /*if (!this.transition.endTimeMs) {
-            console.log('if (!this.transition.endTimeMs) {');
-        }
-
-        if (curMs > this.transition.endTimeMs) {
-            console.log('if (this.transition.endTimeMs > curMs) {');
-        }*/
 
         if (!this.transition.endTimeMs || curMs > this.transition.endTimeMs) {
             this.endTransition();
@@ -2061,23 +1672,12 @@ console.log(cap);
 
         const timeSinceTransStart = curMs - this.transition.startTimeMs;
         const percentDone = timeSinceTransStart / this.options.transitionMs;
-        //console.log('percentDone', percentDone);
-
 
         let newLeft = ((1 - percentDone) * this.viewItemCur.transDistancePx) + this.viewItemCur.left;
-        //console.log(newLeft, this.viewItemCur.transDistancePx, this.viewItemCur.left);
         this.elems.imageCon.style.left = newLeft + 'px';
 
         newLeft = ((1 - percentDone) * this.viewItemPrev.transDistancePx) + this.viewItemPrev.transLeftEnd;
-        //console.log('newLeft', newLeft, this.viewItemPrev.transDistancePx, this.viewItemPrev.left);
         this.elems.imageTransCon.style.left = newLeft + 'px';
-        
-        //newLeft = ((1 - percentDone) * this.transition.closeLeftDistance) + this.viewItemCur.closeLeft;
-        //this.elems.closeCon.style.left = newLeft + 'px';
-        //console.log('newLeft = ((1 - percentDone) * this.transition.closeLeftDistance) + this.viewItemCur.closeLeft;', 
-        //    newLeft, percentDone, this.transition.closeLeftDistance, this.viewItemCur.closeLeft);
-        //let newTop = ((1 - percentDone) * this.transition.closeTopDistance) + this.viewItemCur.closeTop;
-        //this.elems.closeCon.style.top = newTop + 'px';
     },
 
     endTransition() {
@@ -2120,11 +1720,6 @@ console.log(cap);
 
     resetViewerValues() {
 
-        //this.viewItemCur = this.getViewItemBlank();
-        //this.viewItemPrev = this.getViewItemBlank();
-
-        //this.endTransition();
-
         if (this.elems.imageCon) {
             this.elems.imageCon.classList = '';
             //this.elems.imageTransCon.classList = '';
@@ -2143,7 +1738,6 @@ console.log(cap);
         console.log(item);
         item.galKey = galKey;
         item.itemKey = itemKey;
-        //item.transType = transType;
         return item;
     },
 
@@ -2154,15 +1748,11 @@ console.log(cap);
     setWindowSize() {
         this.windowWidth = window.innerWidth;
         this.windowHeight = window.innerHeight;
-        //this.consoleLog('set window dimensions', this.windowWidth, this.windowHeight);
     },
 
     //     /* Image Viewer Actions - END
     //     *****************************************************************************
     //     *****************************************************************************/
-
-
-
 
 
 
@@ -2293,7 +1883,6 @@ console.log(cap);
             this.elems.body.appendChild(divElem);
 
 
-
             //html = '<div id="riot-gallery-viewer-caption-con"><div id="riot-gallery-viewer-caption"></div</div>';
             //this.elems.body.append(html);
             divElem = document.createElement('div');
@@ -2318,25 +1907,16 @@ console.log(cap);
         this.closeViewer();
     },
 
-    itemClicked(galKey, itemKey) {
-        /*this.consoleLog('item clicked', galleryKey, itemKey);
-        this.viewItemCur.galKey = galleryKey;
-        this.viewItemCur.itemKey = itemKey;
-        this.transitionType = null;
-        console.log('transitionType', this.transitionType);*/
+    itemClicked(galKey, itemKey) {/
         this.loadImage(galKey, itemKey, null);
     },
 
     prevClicked() {
-        //this.transitionType = 'prev';
         this.incrementImageAndLoad(-1, 'prev');
-
     },
 
     nextClicked() {
-        //this.transitionType = 'next';
         this.incrementImageAndLoad(1, 'next');
-
     },
 
     incrementImageAndLoad(increment, transType) {
@@ -2345,11 +1925,6 @@ console.log(cap);
             return;
         }
 
-        /*if (increment > 0) {
-            this.transitionType = 'next';
-        } else {
-            this.transitionType = 'prev';
-        }*/
         let itemKey = this.viewItemCur.itemKey;
         let galKey = this.viewItemCur.galKey;
 
@@ -2370,7 +1945,6 @@ console.log(cap);
                 itemKey = this.galleries[galKey].items.length - 1;
             }
         }
-        //console.log(181, this.viewItemCur.galKey, this.viewItemCur.itemKey, this.galleries[this.viewItemCur.galKey].items.length);
 
         this.loadImage(galKey, itemKey, transType);
     },
@@ -2386,24 +1960,6 @@ console.log(cap);
         this.endTransition();
         this.placeImage();
     },
-
-    //     placeImageInPosition() {
-    //         console.log('placeImageInPosition()');
-    //         //this.endTransition();
-
-
-    //         this.elems.imageCon.style.top = this.viewItemCur.top + 'px';
-    //         this.elems.imageCon.style.width = this.viewItemCur.width + 'px';
-    //         this.elems.imageCon.style.height = this.viewItemCur.height + 'px';
-
-    //         if (!this.transition.isTransitioning) {
-    //             this.elems.imageCon.style.left = this.viewItemCur.left + 'px';
-    //         }
-
-    //         this.elems.closeCon.style.left = this.viewItemCur.closeLeft + 'px';
-    //         this.elems.closeCon.style.top = this.viewItemCur.closeTop + 'px';
-    //     },
-
 
 
     //     /*****************************************************************************
