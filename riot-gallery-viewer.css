@@ -1,0 +1,140 @@
+/********************************************************************************************
+ * styles for the viewer (main image, caption, previous/next buttons, background, close button, etc)
+ * also includes (optional) gallery styling
+ ********************************************************************************************/
+
+
+/*
+**********************************************************************
+* Gallery Styles - START
+* optional styles for the gallery, can be set using the riot-gallery-style class
+* this can be skipped and the user can set up they own styles 
+*/
+
+ul.riot-gallery-style {
+    display: flex;
+    align-items: stretch;
+    flex-direction: row;
+    flex-wrap: wrap;
+    list-style-type: none;
+    margin: 0;
+    padding: 4px;
+    width: 100%;
+    min-width:170px;
+    box-sizing: border-box;
+    background-color: #FFF;
+}
+
+.riot-gallery-style.riot-gallery-style-dark {
+    background-color: #000;
+}
+
+.riot-gallery-style li {
+    width:240px;
+    max-width:100%;
+    min-width:140px;
+    min-height: 180px;
+    box-sizing: border-box;
+    padding: 10px;
+    margin: 6px 6px;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    font-family: Verdana, Geneva, sans-serif;
+    font-size: 14px;
+    background-color: #BBB;
+    border: 1px solid #000;
+    font-weight: bold;
+    color:#000;
+}
+
+.riot-gallery-style li a,
+.riot-gallery-style li a:link,
+.riot-gallery-style li a:visited
+{
+    color: #00E;
+}
+
+.riot-gallery-style li a:hover,
+.riot-gallery-style li a:active
+{
+    color: #66F;
+}
+
+.riot-gallery-style.riot-gallery-style-dark li {
+    background-color: #444;
+    border: 1px solid #FFF;
+    color:#FFF;
+}
+
+.riot-gallery-style.riot-gallery-style-dark li a,
+.riot-gallery-style.riot-gallery-style-dark li a:link,
+.riot-gallery-style.riot-gallery-style-dark li a:visited
+{
+    color: #88F;
+}
+
+.riot-gallery-style.riot-gallery-style-dark li a:hover,
+.riot-gallery-style.riot-gallery-style-dark li a:active
+{
+    color: #44F;
+}
+
+
+@media screen and (max-width: 492px) {
+    .riot-gallery-style li {
+        width: calc(100% - 12px);
+    }
+}
+
+
+
+
+
+.riot-gallery-style img {
+    max-width: 100%;
+    box-sizing: border-box;
+    display: block;
+}
+
+.riot-gallery-style figure {
+    margin: 0;
+    padding: 0;
+}
+
+.riot-gallery-style .riot-gallery-image-caption,
+.riot-gallery-style .image-caption,
+.riot-gallery-style figcaption {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    padding: 4px 8px;
+    
+    text-shadow: 1px 1px 3px #FFF;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    background-color: #FFF;
+    background-color: rgba(255, 255, 255, 0.6);
+    color: #000;
+    font-weight: bold;
+}
+
+.riot-gallery-style.riot-gallery-style-dark .riot-gallery-image-caption,
+.riot-gallery-style.riot-gallery-style-dark .image-caption,
+.riot-gallery-style.riot-gallery-style-dark figcaption {
+    background-color: #000;
+    background-color: rgba(0, 0, 0, 0.6);
+    text-shadow: 1px 1px 3px #000;
+    color: #FFF;
+}
+
+/*
+* Gallery Styles - END
+**********************************************************************
+**********************************************************************
+*/
