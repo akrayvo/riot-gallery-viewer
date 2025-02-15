@@ -48,6 +48,51 @@ RiotGalleryViewer = {
         height: null
     },
 
+    viewers: [],
+    viewerCurKey: null,
+    viewerPrevKey: null,
+
+    viewerBlank: {
+        galKey: null,
+        itemKey: null,
+        height: null,
+        width: null,
+        left: null,
+        top: null,
+        closeRight: null,
+        closeTop: null,
+        padding: null,
+        transition: {}, // cssVar: [cssValStart, cssValEnd]
+        //transLeftPx: null,
+        //transLeftEnd: null,
+        //transLeftLtGt: null, // check whether to stop tranitioning (greater than or less than)
+    },
+
+    // is the RiotGalleryViewer HTML (main image, background, previous/next butttons, close button, etc) loaded
+    isViewerHtmlLoaded: false,
+
+    // is the RiotGalleryViewer currently open
+    isViewerOpen: false,
+
+
+    // blank image.
+    blankImageSrc: 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=',
+
+    // javascript HTML elements. saved rather than repeatedly running selectors
+    elems: {
+        body: null,
+        bg: null,
+        caption: null,
+        captionCon: null,
+        closeCons: [],
+        images: [],
+        imageCons: [],
+        //imageTrans: null,
+        //imageTransCon: null,
+        nextCon: null,
+        prevCon: null
+    },
+
     options: {
         // write information to the console log. needed for troubeshooting/testing/development only
         doConsoleLog: false,
@@ -58,6 +103,9 @@ RiotGalleryViewer = {
         imageFailedCaptionHtml: '<i>Could Not Load Image</i>',
         defaultImgSize: 300
     },
+
+    windowWidth: null,
+    windowHeight: null,
 
     /*****************************************************************************
      *****************************************************************************
@@ -504,13 +552,241 @@ RiotGalleryViewer = {
      *****************************************************************************
      * event handling (click and other) - START */
 
-     itemClicked(galKey, itemKey) {
+    itemClicked(galKey, itemKey) {
         this.loadImage(galKey, itemKey, null);
     }, 
 
     /* event handling (click and other) - END
      *****************************************************************************
      *****************************************************************************/
+
+
+
+    /*****************************************************************************
+     *****************************************************************************
+     * load HTML viewer - START */
+
+    /*
+     * load html (image container, previous/next buttons, caption ,etc)
+     * set element selector values (this.elems)
+     */
+    loadViewerHtml() {
+        // skip if already loaded
+        if (this.isViewerHtmlLoaded) {
+            return;
+        }
+
+        // body and window selectors added.
+        // body needed for appending html and setting classes
+        this.elems.body = document.body;
+
+        // make sure the gallery html isn't already loaded 
+        // will not happen if mulitple galleries are on the same page and one has already been loaded
+        const checkElem = document.getElementById('riot-gallery-viewer-bg');
+        if (!checkElem) {
+
+            let divElem = null;
+            let aElem = null;
+            let subDivElem = null;
+            let imgElem = null;
+
+            window.addEventListener('resize', function () {
+                RiotGalleryViewer.windowResized();
+            });
+
+            // background
+            // <div id="riot-gallery-viewer-bg"></div>
+            divElem = document.createElement('div');
+            divElem.id = 'riot-gallery-viewer-bg';
+            divElem.addEventListener('click', function (event) {
+                event.preventDefault();
+                RiotGalleryViewer.closeClicked();
+            }, false);
+            this.elems.bg = divElem;
+            this.elems.body.appendChild(divElem);
+
+            // previous button
+            // <div id="riot-gallery-viewer-prev-con"><a href="#">&laquo;</a></div>
+            divElem = document.createElement('div');
+            divElem.id = 'riot-gallery-viewer-prev-con';
+            aElem = document.createElement('a');
+            aElem.innerHTML = '&laquo;';
+            aElem.href = '#';
+            divElem.appendChild(aElem);
+            divElem.addEventListener('click', function (event) {
+                event.preventDefault();
+                RiotGalleryViewer.prevClicked();
+            }, false);
+            this.elems.prevCon = divElem;
+            this.elems.body.appendChild(divElem);
+
+            // next button
+            // <div id="riot-gallery-viewer-next-con"><a href="#">&raquo;</a></div>
+            divElem = document.createElement('div');
+            divElem.id = 'riot-gallery-viewer-next-con';
+            aElem = document.createElement('a');
+            aElem.innerHTML = '&raquo;';
+            aElem.href = '#';
+            divElem.appendChild(aElem);
+            divElem.addEventListener('click', function (event) {
+                event.preventDefault();
+                RiotGalleryViewer.nextClicked();
+            }, false);
+            this.elems.nextCon = divElem;
+            this.elems.body.appendChild(divElem);
+
+            // main image containers
+            // multiple containers so we can transition
+            // <div id="riot-gallery-viewer-image#-con">
+            //      <div id="riot-gallery-viewer-close#-con">X</div>
+            //      <img id="riot-gallery-viewer-image#" src="">
+            //      <div id="riot-gallery-viewer-loading#"></div>
+            // </div>
+            this.elems.closeCons = [];
+            this.elems.images = [];
+            this.elems.imageCons = [];
+            for (let x = 0; x < 2; x++) {
+                divElem = document.createElement('div');
+                divElem.id = 'riot-gallery-viewer-image-con' + x;
+                divElem.classList = 'riot-gallery-viewer-image-con';
+                ////
+                subDivElem = document.createElement('div');
+                subDivElem.id = 'riot-gallery-viewer-close-con' + x;
+                subDivElem.classList = 'riot-gallery-viewer-close-con';
+                aElem = document.createElement('a');
+                aElem.innerHTML = 'X';
+                aElem.href = '#';
+                aElem.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    RiotGalleryViewer.closeClicked();
+                }, false);
+                subDivElem.appendChild(aElem);
+                this.elems.closeCons[x] = subDivElem;
+                divElem.appendChild(subDivElem);
+                ////
+                imgElem = document.createElement('img');
+                imgElem.id = 'riot-gallery-viewer-image' + x;
+                imgElem.classList = 'riot-gallery-viewer-image';
+                imgElem.src = this.blankImageSrc;
+                this.elems.images[x] = imgElem;
+                divElem.appendChild(imgElem);
+                subDivElem = document.createElement('div');
+                subDivElem.id = 'riot-gallery-viewer-loading' + x;
+                subDivElem.classList = 'riot-gallery-viewer-loading';
+                divElem.appendChild(subDivElem);
+                divElem.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    RiotGalleryViewer.nextClicked();
+                }, false);
+                this.elems.imageCons[x] = divElem;
+                ////
+                this.elems.body.appendChild(divElem);
+            }
+
+            // caption container
+            // <div id="riot-gallery-viewer-caption-con"><div id="riot-gallery-viewer-caption"></div></div>
+            divElem = document.createElement('div');
+            divElem.id = 'riot-gallery-viewer-caption-con';
+            subDivElem = document.createElement('div');
+            subDivElem.id = 'riot-gallery-viewer-caption';
+            this.elems.caption = subDivElem;
+            divElem.appendChild(subDivElem);
+            this.elems.captionCon = divElem;
+            this.elems.body.appendChild(divElem);
+
+            this.consoleLog('load html complete');
+        }
+
+        this.isViewerHtmlLoaded = true;
+    },
+
+    /* load HTML viewer - END
+     *****************************************************************************
+     *****************************************************************************/
+
+
+
+    /*****************************************************************************
+     *****************************************************************************
+     * Item/image display - START */
+
+    /*
+     * new image displayed in the viewer
+     * happens on gallery image and previous/next button click
+     */
+    loadImage(galKey, itemKey, transType) {
+        const galItem = this.getGalItem(galKey, itemKey);
+
+        if (!galItem) {
+            // item/image not found. should not happen
+            return;
+        }
+
+        // if transition is running, stop it
+        this.endTransition();
+
+
+        //this.viewItemCur ++;
+        //if (this.viewItemCur > 2) {
+        //    this.viewItemCur = 1;
+        //}
+
+        if (!this.isViewerOpen) {
+            if (!this.isViewerHtmlLoaded) {
+                this.loadViewerHtml();
+            }
+            this.openViewer();
+            this.setWindowSize();
+            //this.viewItemPrev = this.getByVal(this.viewItemBlank);
+        } else {
+            //this.viewItemPrev = this.getByVal(this.viewItemCur);
+        }
+    },
+
+    /*
+     * open the viewer if it is not already open
+     */
+    openViewer() {
+        if (this.isViewerOpen) {
+            return;
+        }
+
+        this.elems.body.classList.add('riot-gallery-viewer-open');
+        this.isViewerOpen = true;
+    },
+
+    closeViewer() {
+        console.log('closeViewer()');
+        this.elems.body.classList.remove('riot-gallery-viewer-open');
+        this.isViewerOpen = false;
+        //this.resetViewerValues();
+    },    
+
+    endTransition() {
+        /*if (!this.transition) {
+            return;
+        }
+        if (this.transition.isTransitioning) {
+            clearInterval(this.transition.jsTnterval);
+        }
+        this.transition = this.getByVal(this.transitionBlank);*/
+    },
+
+    /*
+     * set the dimensions of the browser window
+     * run on page load and window resize.
+     */
+    setWindowSize() {
+        this.windowWidth = window.innerWidth;
+        this.windowHeight = window.innerHeight;
+    },    
+
+    /* Item/image display - END
+     *****************************************************************************
+     *****************************************************************************/        
+
+
+
 
 
     /*****************************************************************************
@@ -617,6 +893,8 @@ RiotGalleryViewer = {
      *****************************************************************************
      *****************************************************************************/    
 
+
+
     /*****************************************************************************
      *****************************************************************************
      * Misc - START */
@@ -630,6 +908,32 @@ RiotGalleryViewer = {
         }
 
         return null;
+    },
+
+    getGalItem(galKey, itemKey) {
+
+        if (!this.isGalItem(galKey, itemKey)) {
+            return null;
+        }
+
+        return this.galleries[galKey].items[itemKey];
+    },
+
+    isGalItem(galKey, itemKey) {
+
+        if (galKey === null || itemKey === null) {
+            return false;
+        }
+
+        if (!this.galleries[galKey]) {
+            return false;
+        }
+
+        if (!this.galleries[galKey].items[itemKey]) {
+            return false;
+        }
+
+        return true;
     },
 
     /*
