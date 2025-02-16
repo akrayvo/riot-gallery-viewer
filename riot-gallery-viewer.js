@@ -109,8 +109,8 @@ RiotGalleryViewer = {
         doConsoleLog: false,
         // write a code trace on every console log. needed for troubeshooting/testing/development only
         doConsoleTrace: false,
-        transitionMs: 5000,
-        transitionFrameMs: 20,
+        transitionMs: 400,
+        transitionFrameMs: 10,
         imageFailedCaptionHtml: '<i>Could Not Load Image</i>',
         defaultImgSize: 300,
         trainsitionType: 'slidefade', // "slide", "fade", "slidefade"
@@ -892,14 +892,17 @@ RiotGalleryViewer = {
                         RiotGalleryViewer.calculateViewerPlacement();
                         RiotGalleryViewer.placeImgInPosition();
                         //RiotGalleryViewer.placeImage(this.galKey, this.itemKey);
+                        RiotGalleryViewer.updateCaption();
                     }
                 }
             }
 
         }
         //console.log('j1');
-        RiotGalleryViewer.calculateViewerPlacement(transType);
-        RiotGalleryViewer.placeImgInPosition();
+        this.calculateViewerPlacement(transType);
+        this.placeImgInPosition();
+        this.updateCaption();
+        
     },
 
     /*
@@ -1321,6 +1324,22 @@ console.log(this.elems.imageCons);
         this.updateImgClassesAndSrc();
 
         //this.elems.images[curK].src = item.url;
+    },
+
+    updateCaption() {
+        const item = this.getCurGalItem();
+        //imageFailedCaptionHtml
+        if (item.isError && this.options.imageFailedCaptionHtml) {
+            this.elems.caption.innerHTML = this.options.imageFailedCaptionHtml;
+            this.elems.captionCon.classList = 'is-displayed';
+        }
+        else if (item.caption) {
+            this.elems.caption.innerHTML = item.caption;
+            this.elems.captionCon.classList = 'is-displayed';
+        } else {
+            this.elems.caption.innerHTML = '';
+            this.elems.captionCon.classList = '';
+        }
     },
 
     /* Item/image display - END
