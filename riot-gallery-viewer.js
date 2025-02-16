@@ -109,10 +109,11 @@ RiotGalleryViewer = {
         doConsoleLog: false,
         // write a code trace on every console log. needed for troubeshooting/testing/development only
         doConsoleTrace: false,
-        transitionMs: 500,
+        transitionMs: 5000,
         transitionFrameMs: 20,
         imageFailedCaptionHtml: '<i>Could Not Load Image</i>',
-        defaultImgSize: 300
+        defaultImgSize: 300,
+        trainsitionType: 'slidefade', // "slide", "fade", "slidefade"
     },
 
     windowWidth: null,
@@ -1004,14 +1005,26 @@ RiotGalleryViewer = {
                 //console.log(prop, viewer.transition[prop]);
                 //hasTransition = true;
                 if (prop === 'left') {
+                    let newLeft = '';
                     if (this.viewerPrevKey !== null) {
                         const prevViewer = this.viewers[this.viewerPrevKey];
-                        let newLeft = (percentToStart * prevViewer.left) + (percentToEnd * prevViewer.transition[prop]);
+                        newLeft = (percentToStart * prevViewer.left) + (percentToEnd * prevViewer.transition[prop]);
                         this.elems.imageCons[this.viewerPrevKey].style.left = newLeft + 'px';
                     }
                     newLeft = (percentToStart * viewer.transition[prop]) + (percentToEnd * viewer.left);
                     //console.log('newLeft = (percentToStart * viewer.transition[prop]) + (percentToEnd * viewer.left);', newLeft, percentToStart, viewer.transition[prop], percentToEnd, viewer.left);
                     this.elems.imageCons[k].style.left = newLeft + 'px';
+                }
+                if (prop === 'opacity') {
+                    let newOpacity = '';
+                    if (this.viewerPrevKey !== null) {
+                        const prevViewer = this.viewers[this.viewerPrevKey];
+                        newOpacity = (percentToStart * 1) + (percentToEnd * 0);
+                        this.elems.imageCons[this.viewerPrevKey].style.opacity = newOpacity;
+                    }
+                    newOpacity = (percentToStart * 0) + (percentToEnd * 1);
+                    //console.log('newLeft = (percentToStart * viewer.transition[prop]) + (percentToEnd * viewer.left);', newLeft, percentToStart, viewer.transition[prop], percentToEnd, viewer.left);
+                    this.elems.imageCons[k].style.opacity = newOpacity;
                 }
             }
         }
@@ -1111,19 +1124,36 @@ RiotGalleryViewer = {
         const transExtraDistance = 4;
         const closeXWidth = 40;
 
-        const prevK = this.viewerPrevKey;
-        //console.log('--------1167', this.viewerPrevKey);
-        if (prevK !== null && transType!== null) {
-            if (transType === 'prev') {
-                this.viewers[curK].transition = { left: (this.windowWidth + transExtraDistance) };
-                this.viewers[prevK].transition = { left: -(this.viewers[prevK].width + transExtraDistance + closeXWidth) };
-            } else if (transType === 'next') {
-                this.viewers[curK].transition = { left: -(this.viewers[prevK].width + transExtraDistance + closeXWidth) };
-                this.viewers[prevK].transition = { left: (this.windowWidth + transExtraDistance) };
+        
+        if (transType!== null) {
+            const prevK = this.viewerPrevKey;
+            this.viewers[curK].transition = {};
+            if (prevK !== null) {
+                this.viewers[prevK].transition = {};
+            }
+            //console.log('--------1167', this.viewerPrevKey);
+            if (prevK !== null) {
+                if (this.options.trainsitionType === 'slide' || this.options.trainsitionType === 'slidefade') {
+                    if (transType === 'prev') {
+                        this.viewers[curK].transition.left = (this.windowWidth + transExtraDistance);
+                        this.viewers[prevK].transition.left = -(this.viewers[prevK].width + transExtraDistance + closeXWidth);
+                    } else if (transType === 'next') {
+                        this.viewers[curK].transition.left = -(this.viewers[prevK].width + transExtraDistance + closeXWidth);
+                        this.viewers[prevK].transition.left = (this.windowWidth + transExtraDistance);
+                    }
+                }
+                
+            }
+
+            if (this.options.trainsitionType === 'fade' || this.options.trainsitionType === 'slidefade') {
+                this.viewers[curK].transition.opacity = 0;
+                if (prevK !== null) {
+                    this.viewers[prevK].transition.opacity = 0
+                }
             }
         }
 
-        //console.log(this.viewers);
+        console.log(this.viewers);
 
         //console.log('-=-=-=-=--=-=-=-=-=--=-=-=--=-=-');
 
