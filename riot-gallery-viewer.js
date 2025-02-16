@@ -567,6 +567,10 @@ RiotGalleryViewer = {
         this.loadImage(galKey, itemKey, null);
     }, 
 
+    closeClicked() {
+        this.closeViewer();
+    },
+
     /* event handling (click and other) - END
      *****************************************************************************
      *****************************************************************************/
@@ -611,6 +615,7 @@ RiotGalleryViewer = {
             divElem.id = 'riot-gallery-viewer-bg';
             divElem.addEventListener('click', function (event) {
                 event.preventDefault();
+                event.stopPropagation();
                 RiotGalleryViewer.closeClicked();
             }, false);
             this.elems.bg = divElem;
@@ -626,6 +631,7 @@ RiotGalleryViewer = {
             divElem.appendChild(aElem);
             divElem.addEventListener('click', function (event) {
                 event.preventDefault();
+                event.stopPropagation();
                 RiotGalleryViewer.prevClicked();
             }, false);
             this.elems.prevCon = divElem;
@@ -641,6 +647,7 @@ RiotGalleryViewer = {
             divElem.appendChild(aElem);
             divElem.addEventListener('click', function (event) {
                 event.preventDefault();
+                event.stopPropagation();
                 RiotGalleryViewer.nextClicked();
             }, false);
             this.elems.nextCon = divElem;
@@ -669,6 +676,7 @@ RiotGalleryViewer = {
                 aElem.href = '#';
                 aElem.addEventListener('click', function (event) {
                     event.preventDefault();
+                    event.stopPropagation();
                     RiotGalleryViewer.closeClicked();
                 }, false);
                 subDivElem.appendChild(aElem);
@@ -687,6 +695,7 @@ RiotGalleryViewer = {
                 divElem.appendChild(subDivElem);
                 divElem.addEventListener('click', function (event) {
                     event.preventDefault();
+                    event.stopPropagation();
                     RiotGalleryViewer.nextClicked();
                 }, false);
                 this.elems.imageCons[x] = divElem;
