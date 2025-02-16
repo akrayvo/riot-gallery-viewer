@@ -51,13 +51,12 @@ $images = array(
                 '<a href="../images/z' . htmlentities($image) . '.jpg" target="blank">'.
                 '<img src="../images/' . htmlentities($image) . '_thumb.jpg">'.
                 '</a>' .
-                '<div class="riot-gallery-image-caption">this image is broken.</div>' .
+                '            <div class="riot-gallery-image-caption">this image will no load dude.</div>'.
                 '</li>' . "\n";
             break;
         } ?>
         <li data-riot-gallery-image-url="https://www.streetmachine.com.au/wp-content/uploads/2023/07/greg-eslick-hq-monaro-bonnet-up-wm-2048x1365.jpg?x=<?php echo time(); ?>">
             <a href="#">test</a>
-            <div class="riot-gallery-image-caption">this image will take a second to load.</div>
         </li>
     </ul>
 
