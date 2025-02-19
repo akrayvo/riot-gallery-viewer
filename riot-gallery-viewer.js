@@ -114,7 +114,12 @@ RiotGalleryViewer = {
         imageFailedCaptionHtml: '<i>Could Not Load Image</i>',
         defaultImgSize: 300,
         trainsitionType: 'slidefade', // "slide", "fade", "slidefade"
+        useMaterialIcons: true,
     },
+
+    materialIconsCssUrl: 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined',
+
+    isMaterialIconsLoadComplete: false,
 
     windowWidth: null,
     windowHeight: null,
@@ -776,7 +781,110 @@ RiotGalleryViewer = {
             this.consoleLog('load html complete');
         }
 
-        this.isViewerHtmlLoaded = true;
+        console.log('this.options.useMaterialIcons', this.options.useMaterialIcons);
+        if (this.options.useMaterialIcons) {
+            this.loadMaterialIcons();
+        }
+    },
+
+    areMaterialIconsLoaded() 
+    {
+        console.log('areMaterialIconsLoaded()');
+        divElem = document.createElement('div');
+        divElem.style.position = "fixed";
+        spanElem = document.createElement('span');
+        spanElem.classList = 'material-symbols-outlined';
+        spanElem.innerHTML = 'arrow_back_ios_new';
+        divElem.appendChild(spanElem);
+        this.elems.body.appendChild(divElem);
+        const w = divElem.offsetWidth;
+        document.body.removeChild(divElem);
+        
+        if (w < 50) {
+            this.consoleLog('material icons are already available.');
+            return true;
+        }
+        return false;
+    },
+
+    loadMaterialIcons() {
+        console.log('loadMaterialIcons() {');
+        if (this.isMaterialIconsLoadComplete) {
+            console.log('// already loaded 1');
+            this.addMaterialIconsToHtml();
+            return;
+        }
+        if (this.areMaterialIconsLoaded()) {
+            // already loaded
+            console.log('// already loaded 2');
+            this.addMaterialIconsToHtml();
+            return;
+        }
+
+        console.log('keep goin');
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.type = 'text/css';
+        styleLink.href = this.materialIconsCssUrl;
+
+        styleLink.onload = function () {
+            RiotGalleryViewer.consoleLog('Material Icons are loaded');
+            RiotGalleryViewer.isMaterialIconsLoadComplete = true;
+            RiotGalleryViewer.addMaterialIconsToHtml();
+        };
+
+        styleLink.onerror = function () {
+            RiotGalleryViewer.consoleLog('Could not load Material Icons');
+        };
+
+        document.head.appendChild(styleLink);
+    },
+
+    addMaterialIconsToHtml() {
+
+        let closeElems = document.getElementsByClassName('riot-gallery-viewer-close-con');
+        for (let x = 0; x < closeElems.length; x++) {
+            let closeAs = closeElems[x].getElementsByTagName('a');
+            for (let x = 0; x < closeAs.length; x++) {
+                let spanElem = document.createElement('span');
+                spanElem.classList = 'material-symbols-outlined';
+                spanElem.innerHTML = 'close';
+                closeAs[x].innerHTML = '';
+                closeAs[x].appendChild(spanElem);
+            }
+        }
+
+        let prevElem = document.getElementById('riot-gallery-viewer-prev-con');
+        if (prevElem) {
+            let prevAs = prevElem.getElementsByTagName('a');
+            for (let x = 0; x < prevAs.length; x++) {
+                let spanElem = document.createElement('span');
+                spanElem.classList = 'material-symbols-outlined';
+                spanElem.innerHTML = 'arrow_back_ios_new';
+                prevAs[x].innerHTML = '';
+                prevAs[x].appendChild(spanElem);
+            }
+        }
+
+        let nextElem = document.getElementById('riot-gallery-viewer-next-con');
+        if (nextElem) {
+            let nextAs = nextElem.getElementsByTagName('a');
+            for (let x = 0; x < nextAs.length; x++) {
+                let spanElem = document.createElement('span');
+                spanElem.classList = 'material-symbols-outlined';
+                spanElem.innerHTML = 'arrow_forward_ios';
+                nextAs[x].innerHTML = '';
+                nextAs[x].appendChild(spanElem);
+            }
+        }
+
+
+        //document.querySelector('.riot-gallery-viewer-close-con a').innerHTML = 'c';
+        //document.querySelector('#riot-gallery-viewer-prev-con a').innerHTML = 'p';
+        //document.querySelector('#riot-gallery-viewer-next-con a').innerHTML = 'n';
+        //<span class="material-symbols-outlined">close</span>
+        //<span class="material-symbols-outlined">arrow_forward_ios</span>
+        //<span class="material-symbols-outlined">arrow_back_ios_new</span>
     },
 
     /* load HTML viewer - END
@@ -902,7 +1010,7 @@ RiotGalleryViewer = {
         this.calculateViewerPlacement(transType);
         this.placeImgInPosition();
         this.updateCaption();
-        
+
     },
 
     /*
@@ -921,7 +1029,17 @@ RiotGalleryViewer = {
         console.log('closeViewer()');
         this.elems.body.classList.remove('riot-gallery-viewer-open');
         this.isViewerOpen = false;
-        //this.resetViewerValues();
+        this.resetViewerValues();
+    },
+
+    resetViewerValues() {
+        console.log('resetViewerValues() {');
+        for (let x = 0; x < this.elems.imageCons.length; x++) {
+            this.elems.images[x].src = this.blankImageSrc;
+            this.elems.imageCons[x].classList.remove('is-displayed');
+        }
+        this.viewerCurKey = null;
+        this.viewerPrevKey = null;
     },
 
     updateGalItem(galKey, itemKey, img, isError) {
@@ -999,7 +1117,7 @@ RiotGalleryViewer = {
 
         /*let newLeft = (percentToStart * this.viewItemCur.transLeftPx) + (percentToEnd * this.viewItemCur.left);
         this.elems.imageCon.style.left = newLeft + 'px';
-
+ 
         newLeft = (percentToEnd * this.viewItemPrev.transLeftPx) + (percentToStart * this.viewItemPrev.left);
         this.elems.imageTransCon.style.left = newLeft + 'px';*/
         for (var prop in viewer.transition) {
@@ -1127,8 +1245,8 @@ RiotGalleryViewer = {
         const transExtraDistance = 4;
         const closeXWidth = 40;
 
-        
-        if (transType!== null) {
+
+        if (transType !== null) {
             const prevK = this.viewerPrevKey;
             this.viewers[curK].transition = {};
             if (prevK !== null) {
@@ -1145,7 +1263,7 @@ RiotGalleryViewer = {
                         this.viewers[prevK].transition.left = (this.windowWidth + transExtraDistance);
                     }
                 }
-                
+
             }
 
             if (this.options.trainsitionType === 'fade' || this.options.trainsitionType === 'slidefade') {
@@ -1319,7 +1437,7 @@ RiotGalleryViewer = {
         this.elems.closeCons[curK].style.right = viewer.closeRight + 'px';
         this.elems.closeCons[curK].style.top = viewer.closeTop + 'px';
 
-console.log(this.elems.imageCons);
+        console.log(this.elems.imageCons);
 
         this.updateImgClassesAndSrc();
 
