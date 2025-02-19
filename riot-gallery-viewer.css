@@ -181,19 +181,21 @@ body.riot-gallery-viewer-open {
     display: block;
 }
 
+.riot-gallery-viewer-close-con a span {
+    vertical-align: middle;
+}
+
 .riot-gallery-viewer-close-con.is-hidden {
     display: none;
 }
 
-.riot-gallery-viewer-close-con a:active,
+.riot-gallery-viewer-close-con a,
 .riot-gallery-viewer-close-con a:link,
 .riot-gallery-viewer-close-con a:hover,
 .riot-gallery-viewer-close-con a:active,
 .riot-gallery-viewer-close-con a:visited {
     display: inline-block;
     /*margin: 10px;*/
-    background-color: #FFF;
-    color: #444;
     border: 3px solid #000;
     padding: 4px 8px;
     text-decoration: none;
@@ -206,6 +208,13 @@ body.riot-gallery-viewer-open {
     -ms-user-select: none;
     /* IE 10 and IE 11 */
     user-select: none;
+}
+
+.riot-gallery-viewer-close-con a,
+.riot-gallery-viewer-close-con a:link,
+.riot-gallery-viewer-close-con a:visited {
+    background-color: #FFF;
+    color: #444;
 }
 
 .riot-gallery-viewer-close-con a:hover,
