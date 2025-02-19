@@ -119,7 +119,7 @@ RiotGalleryViewer = {
 
     materialIconsCssUrl: 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined',
 
-    areMaterialIconsLoaded: false,
+    isMaterialIconsLoadComplete: false,
 
     windowWidth: null,
     windowHeight: null,
@@ -787,12 +787,36 @@ RiotGalleryViewer = {
         }
     },
 
+    areMaterialIconsLoaded() 
+    {
+        console.log('areMaterialIconsLoaded()');
+        divElem = document.createElement('div');
+        divElem.style.position = "fixed";
+        spanElem = document.createElement('span');
+        spanElem.classList = 'material-symbols-outlined';
+        spanElem.innerHTML = 'arrow_back_ios_new';
+        divElem.appendChild(spanElem);
+        this.elems.body.appendChild(divElem);
+        const w = divElem.offsetWidth;
+        document.body.removeChild(divElem);
+        
+        if (w < 50) {
+            this.consoleLog('material icons are already available.');
+            return true;
+        }
+        return false;
+    },
 
     loadMaterialIcons() {
         console.log('loadMaterialIcons() {');
-        if (this.areMaterialIconsLoaded) {
+        if (this.isMaterialIconsLoadComplete) {
+            console.log('// already loaded 1');
+            this.addMaterialIconsToHtml();
+            return;
+        }
+        if (this.areMaterialIconsLoaded()) {
             // already loaded
-            console.log('// already loaded');
+            console.log('// already loaded 2');
             this.addMaterialIconsToHtml();
             return;
         }
@@ -805,7 +829,7 @@ RiotGalleryViewer = {
 
         styleLink.onload = function () {
             RiotGalleryViewer.consoleLog('Material Icons are loaded');
-            RiotGalleryViewer.areMaterialIconsLoaded = true;
+            RiotGalleryViewer.isMaterialIconsLoadComplete = true;
             RiotGalleryViewer.addMaterialIconsToHtml();
         };
 

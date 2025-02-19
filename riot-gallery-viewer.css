@@ -366,6 +366,18 @@ body.riot-gallery-viewer-open #riot-gallery-viewer-next-con {
     display: flex;
 }
 
+/*
+* MATERIAL ICONS TEST ELEMENT
+*/
+#riot-gallery-mi-test {
+    position: fixed;
+    left: 0;
+    top: 0;
+    opacity:0;
+    padding:0;
+    margin:0;
+}
+
 
 /*
 * PURE CSS LOADING SPINNER
