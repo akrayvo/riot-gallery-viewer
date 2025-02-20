@@ -107,7 +107,7 @@ RiotGalleryViewer = {
         startX: null,
         //startY: null,
         startTime: null
-      },
+    },
 
 
     options: {
@@ -115,12 +115,16 @@ RiotGalleryViewer = {
         doConsoleLog: false,
         // write a code trace on every console log. needed for troubeshooting/testing/development only
         doConsoleTrace: false,
-        transitionMs: 400,
-        transitionFrameMs: 10,
+        transitionSeconds: 400,
+        transitionFrameSeconds: 10,
         imageFailedCaptionHtml: '<i>Could Not Load Image</i>',
         defaultImgSize: 300,
         trainsitionType: 'slidefade', // "slide", "fade", "slidefade"
         useMaterialIcons: true,
+        doTouchSwipe: true,
+        swipeMinPx: 200,
+        swipeMinPercent: 50,
+        swipeMaxSeconds: 500
     },
 
     materialIconsCssUrl: 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined',
@@ -1402,6 +1406,30 @@ RiotGalleryViewer = {
                 RiotGalleryViewer.windowResized();
             });
 
+            if (this.options.doTouchSwipe) {
+                window.addEventListener("touchstart", function (event) {
+                    if (!RiotGalleryViewer.isViewerOpen) {
+                        return;
+                    }
+                    //event.preventDefault();
+                    //event.stopPropagation();
+                    console.log('-----------------img touchstart');
+                    RiotGalleryViewer.slideSwipeStartEvent(event);
+                });
+                window.addEventListener("touchend", function (event) {
+                    if (!RiotGalleryViewer.isViewerOpen) {
+                        return;
+                    }
+                    //event.preventDefault();
+                    //event.stopPropagation();
+                    console.log('--------------------img touchend');
+                    RiotGalleryViewer.slideSwipeEndEvent(event);
+                });
+            }
+
+
+
+
             // background
             // <div id="riot-gallery-viewer-bg"></div>
             divElem = document.createElement('div');
@@ -1503,7 +1531,7 @@ RiotGalleryViewer = {
                     //RiotGalleryViewer.slideSwipeStartEvent(event);
                 });
 
-                divElem.addEventListener("touchstart", function (event) {
+                /*divElem.addEventListener("touchstart", function (event) {
                     event.preventDefault();
                     event.stopPropagation();
                     console.log('-----------------img touchstart');
@@ -1513,8 +1541,8 @@ RiotGalleryViewer = {
                     event.preventDefault();
                     event.stopPropagation();
                     console.log('--------------------img touchend');
-                    rRiotGalleryViewer.slideSwipeEndEvent(event);
-                });
+                    RiotGalleryViewer.slideSwipeEndEvent(event);
+                });*/
                 this.elems.imageCons[x] = divElem;
                 ////
                 this.elems.body.appendChild(divElem);
@@ -1658,7 +1686,7 @@ RiotGalleryViewer = {
 
         if (!x) {
             this.swipeInfoReset();
-            this.consoleLogInfo('slideSwipeStartEvent - no position found, stop swipe action;');
+            this.consoleLog('slideSwipeStartEvent - no position found, stop swipe action;');
             return;
         }
 
@@ -1666,30 +1694,34 @@ RiotGalleryViewer = {
         //this.swipeInfo.startY = y;
         this.swipeInfo.startTime = this.getCurMs();
 
-        this.consoleLogInfo('slideSwipeStartEvent - position = ' + x);
+        this.consoleLog('slideSwipeStartEvent - position = ' + x);
     },
 
-      /*
-      * Touchscreen swipe ended
-      * make sure the time and position is valid
-      * go to the next or previous slide
-      */
-      slideSwipeEndEvent(event) {
+    /*
+    * Touchscreen swipe ended
+    * make sure the time and position is valid
+    * go to the next or previous slide
+    */
+    slideSwipeEndEvent(event) {
 
         if (!this.swipeInfo.startX || !this.swipeInfo.startTime) {
             this.swipeInfoReset();
-            this.consoleLogInfo('slideSwipeEndEvent - end swipe with no start swipe, stop swipe action');
+            this.consoleLog('slideSwipeEndEvent - end swipe with no start swipe, stop swipe action');
             return;
         }
 
-        const timeDif = this.getCurMs() - this.swipeInfo.startTime;
-
-        if (timeDif > this.options.swipeMaxSeconds * 1000) {
-            this.swipeInfoReset();
-            // too much time passed bewteen start and end. either event missed or very slow slide.
-            this.consoleLogInfo('slideSwipeEndEvent - slide time too long, stop swipe action, max seconds = '
-                + this.options.swipeMaxSeconds + ', seconds taken = ' + (timeDif / 1000));
-            return;
+        if (this.options.swipeMaxSeconds) {
+            const timeDif = this.getCurMs() - this.swipeInfo.startTime;
+            console.log('this.options.swipeMaxSeconds', this.options.swipeMaxSeconds);
+            console.log('timeDif', timeDif);
+            console.log('if (timeDif > this.options.swipeMaxSeconds * 1000) {', (timeDif > this.options.swipeMaxSeconds * 1000), timeDif, this.options.swipeMaxSeconds);
+            if (timeDif > this.options.swipeMaxSeconds * 1000) {
+                this.swipeInfoReset();
+                // too much time passed bewteen start and end. either event missed or very slow slide.
+                this.consoleLog('slideSwipeEndEvent - slide time too long, stop swipe action, max seconds = '
+                    + this.options.swipeMaxSeconds + ', seconds taken = ' + (timeDif / 1000));
+                return;
+            }
         }
 
         const temp = this.getSwipeXYFromEvent(event);
@@ -1698,47 +1730,59 @@ RiotGalleryViewer = {
 
         if (!x) {
             this.swipeInfoReset();
-            this.consoleLogInfo('slideSwipeEndEvent - no position found, stop swipe action');
+            this.consoleLog('slideSwipeEndEvent - no position found, stop swipe action');
             return;
         }
 
         const xDif = Math.abs(x - this.swipeInfo.startX);
         //const yDif = Math.abs(y - this.swipeInfo.startY);
 
-        this.consoleLogInfo('slideSwipeEndEvent - x=' + xDif + 'px, time=' + timeDif + 'MS');
+        //this.consoleLog('slideSwipeEndEvent - x=' + xDif + 'px, time=' + timeDif + 'MS');
 
-
-        if (xDif < this.options.swipeMinPx) {
-            this.consoleLogInfo('slideSwipeEndEvent - xDif=' + xDif + ', < ' + this.options.swipeMinPx + ', check percednt');
-
-            const windowWidth = this.elems.main.width();
-            const widthPercent = xDif / windowWidth * 100;
-
-            if (widthPercent < this.options.swipeMinPercent) {
-                this.swipeInfoReset();
-                this.consoleLogInfo('slideSwipeEndEvent - xDif=' + xDif + ', windowWidth=' + windowWidth +
-                    ', percent=' + (Math.round(widthPercent * 100) / 100) + '%, < 20%, stop swipe action');
-                return;
+        let swipeDistinceSuccess = false;
+        if (this.options.swipeMinPx) {
+            console.log('if (xDif >= this.options.swipeMinPx) {', (xDif >= this.options.swipeMinPx), xDif, this.options.swipeMinPx);
+            if (xDif >= this.options.swipeMinPx) {
+                swipeDistinceSuccess = true;
             }
         }
 
-        this.stopInterval()
-        if (x > this.swipeInfo.startX) {
-            this.consoleLogInfo('slideSwipeEndEvent - previous');
-            this.incrementSlideNumber(-1);
-        } else {
-            this.consoleLogInfo('slideSwipeEndEvent - next');
-            this.incrementSlideNumber();
+        if (!swipeDistinceSuccess && this.options.swipeMinPercent) {
+            this.consoleLog('slideSwipeEndEvent - xDif=' + xDif + ', < ' + this.options.swipeMinPx + ', check percednt');
+
+            const widthPercent = xDif / window.innerWidth * 100;
+            console.log('if (widthPercent >= this.options.swipeMinPercent)', (widthPercent >= this.options.swipeMinPercent), widthPercent, this.options.swipeMinPercent);
+            if (widthPercent >= this.options.swipeMinPercent) {
+                swipeDistinceSuccess = true;
+            }
         }
-        this.goToSlide();
+
+        if (!this.options.swipeMinPercent && this.options.swipeMinPx && !swipeDistinceSuccess) {
+            this.swipeInfoReset();
+            this.consoleLog('swipe distance was insufficient. Do not go to next image.');
+            return;
+        }
+
+
+        //this.endTransition()
+        if (x < this.swipeInfo.startX) {
+            this.consoleLog('slideSwipeEndEvent - previous');
+            //this.incrementSlideNumber(-1);
+            this.incrementImageAndLoad(-1, 'prev');
+        } else {
+            this.consoleLog('slideSwipeEndEvent - next');
+            //this.incrementSlideNumber(1);
+            this.incrementImageAndLoad(1, 'next');
+        }
+        //this.goToSlide();
     },
-    
+
     swipeInfoReset() {
         this.swipeInfo.startX = null;
         //this.swipeInfo.startY = null;
         this.swipeInfo.startTime = null;
     },
-    
+
     getSwipeXYFromEvent(event) {
         if (event.TouchList) {
             if (event.TouchList[0]) {
@@ -1845,6 +1889,10 @@ RiotGalleryViewer = {
                     //console.log('e1');
                     //console.log('IMAGE LOADED');
                     RiotGalleryViewer.updateGalItem(this.galKey, this.itemKey, img, false);
+                    if (!RiotGalleryViewer.isViewerOpen || RiotGalleryViewer.galKey === null || RiotGalleryViewer.itemKey === null)
+                    {
+                        return false;
+                    }
                     const viewer = RiotGalleryViewer.getViewerCur();
                     if (viewer.galKey === this.galKey && viewer.itemKey === this.itemKey) {
                         // image has not changed since start of image load
@@ -2274,10 +2322,10 @@ RiotGalleryViewer = {
                 this.tranition = this.getByVal(this.transitionBlank);
                 this.transition.isTransitioning = true;
                 this.transition.startTimeMs = this.getCurMs();
-                this.transition.endTimeMs = this.transition.startTimeMs + this.options.transitionMs;
+                this.transition.endTimeMs = this.transition.startTimeMs + (this.options.transitionSeconds * 1000);
                 this.transition.jsTnterval = setInterval(function () {
                     RiotGalleryViewer.transitionFrame();
-                }, this.options.transitionFrameMs);
+                }, this.options.transitionFrameSeconds * 1000);
                 //console.log('77777777777 viewer', viewer);
                 //console.log('a');
                 if (viewer.transition.hasOwnProperty('left')) {
