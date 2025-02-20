@@ -1,0 +1,11 @@
+../images/tutankhamun-1038544_1280.jpg  ../images/tutankhamun-1038544_1280.jpg Tut
+../images/blue-jay.jpg  ../images/blue-jay_thumb.jpg "Blue Jay"
+../images/lake-7301021_640.jpg  ../images/lake-7301021_640.jpg "Lake 1"
+'../images/lake-8257272_1280.jpg'  ../images/lake-8257272_1280.jpg ""Should Be In Quotes!""
+../images/mountains-8451480_640.jpg  ../images/mountains-8451480_640.jpg Mountains
+../images/party-lights-5232873_1280.jpg  ../images/party-lights-5232873_1280.jpg "Party Lights"
+"../images/pennsylvania-landscape.jpg"  ../images/pennsylvania-landscape.jpg "PA Landscape"
+../images/pet-8274536_640.jpg  ../images/pet-8274536_640.jpg "Pets"
+../images/port-au-prince-haiti.jpg  ../images/port-au-prince-haiti.jpg 'Port Au Prince Haiti'
+../images/squirrel.jpg  "../images/squirrel.jpg" Squirrel
+../images/waterfall-8445292_1280.jpg  ../images/waterfall-8445292_1280.jpg Waterfall

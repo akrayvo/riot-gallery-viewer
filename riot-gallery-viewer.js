@@ -125,6 +125,88 @@ RiotGalleryViewer = {
     windowHeight: null,
 
     /*****************************************************************************
+         *****************************************************************************
+         * User Input - START - User functions to build and load galleries */
+
+    /*
+     * add an image to a gallery
+     * called by user or other function
+     * gallery is created if needed
+     * does not validate data, validation is done when gallery is initialized
+     */
+    addImage(galleryElemId, url, thumbUrl, caption) {
+
+        const galleryKey = this.getGalleryKeyByElemId(galleryElemId); // , false
+
+        if (galleryKey === false) {
+            this.consoleLog('ERROR - addImage failed, could not find gallery', galleryElemId);
+            return false;
+        }
+
+        if (this.addInitImage(galleryKey, url, thumbUrl, caption)) {
+            this.consoleLog('image added', url);
+        } else {
+            this.consoleLog('ERROR - image added failed', url);
+        }
+    },
+
+
+
+    /*
+    add a gallery from a file (remote url)
+    called by user
+    gallery is created if needed
+    */
+    addImagesByFile(galleryElemId, fileUrl) {
+        if (!fileUrl || typeof fileUrl !== 'string') {
+            this.consoleLog('addGalleryByString failed, no fileUrl', fileUrl, typeof fileUrl);
+            return false;
+        }
+
+        const galleryKey = this.getGalleryKeyByElemId(galleryElemId);
+
+        if (galleryKey === false) {
+            this.consoleLog('ERROR - could not add add images to failed gallery', galleryElemId);
+            return false;
+        }
+
+        this.galleries[galleryKey].imageFileUrl = fileUrl;
+
+        this.consoleLog('Image list file set for adding to gallery', galleryElemId, fileUrl);
+    },
+
+    /*
+    set global options to determine the style and behavior of the gallery
+    called by user
+    */
+    setOption(option, value) {
+
+        if (typeof value === 'undefined') {
+            this.consoleLog('setOption - ERROR - no value passed', option);
+            return false;
+        }
+
+        if (option === 'doConsoleLog' || option === 'doConsoleTrace') {
+            if (value) {
+                this.options[option] = true;
+            } else {
+                this.options[option] = false;
+            }
+            this.consoleLog('setOption - global option set', option, this.options[option]);
+            return true;
+        }
+
+        this.consoleLog('setOption - ERROR - invalid option passed', option);
+        return false;
+    },
+
+    /* User Input - END
+     *****************************************************************************
+     *****************************************************************************/
+
+
+
+    /*****************************************************************************
      *****************************************************************************
      * Initialization - START - code to run after page load to initialize the galleries */
 
@@ -135,12 +217,12 @@ RiotGalleryViewer = {
     initialize() {
         this.consoleLog('Riot Gallery Viewer - begin initialization of loaded data');
 
-        //const isGalleryWithFileRemoteUrl = this.processGalleryFileRemoteUrls();
-        const isGalleryWithFileRemoteUrl = false;
+        const isGalleryWithFileRemoteUrl = this.processGalleryFileRemoteUrls();
+        //const isGalleryWithFileRemoteUrl = false;
 
         // if there are no remote urls process now
         if (!isGalleryWithFileRemoteUrl) {
-            // checks that remote files are process. if so continue initializtion
+            // checks that remote files are processed. if so continue initializtion
             this.initializeRemoteComplete();
         }
     },
@@ -158,7 +240,7 @@ RiotGalleryViewer = {
                 return;
             }
         }
-        // this.buildHtmlGalleries();
+        this.buildHtmlGalleries();
         this.setGalleriesByClass();
         console.log(this.galleries);
     },
@@ -167,6 +249,647 @@ RiotGalleryViewer = {
      *****************************************************************************
      *****************************************************************************/
 
+
+
+    /*****************************************************************************
+     *****************************************************************************
+    * Get images from remote text files - START - either a list or json */
+
+    /*
+    process remote urls (files with lists of images for galleries)
+    calls function that runs the individual urls
+    return whether or not there is a file to process exists.
+    */
+    processGalleryFileRemoteUrls() {
+        let isGalleryWithFileRemoteUrl = false;
+        for (let x = 0; x < this.galleries.length; x++) {
+            if (this.galleries[x].imageFileUrl) {
+                this.processGalleryFileRemoteUrl(x);
+                isGalleryWithFileRemoteUrl = true;
+            }
+        }
+        return isGalleryWithFileRemoteUrl;
+    },
+
+    /*
+    process a remote url (file with lists of images for a gallery)
+    send text to a function that processes images or set error
+    call function that checks if all urls are complete. if so, initialization continues
+    */
+    processGalleryFileRemoteUrl(galleryKey) {
+        // double check that the url exists.
+        if (!this.galleries[galleryKey]) {
+            return false;
+        }
+        if (!this.galleries[galleryKey].imageFileUrl) {
+            return false;
+        }
+
+        const xhr = this.createXHR();
+
+        xhr.open('GET', this.galleries[galleryKey].imageFileUrl, true);
+
+        xhr.galleryKey = galleryKey;
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    //console.log(xhr);
+                    RiotGalleryViewer.addGalleryImagesByText(xhr.galleryKey, xhr.responseText);
+                    //console.log(RiotGalleryViewer);
+                    //RiotGalleryViewer.textFilesDone.push(xhr.responseURL);
+                } else {
+                    // failed
+                    RiotGalleryViewer.galleries[xhr.galleryKey].isError = true;
+                    RiotGalleryViewer.galleries[xhr.galleryKey].errorMessages.push('could not read file: ' + xhr.responseURL);
+
+                    console.log('addGalleryByFile failed. could not read file', xhr.galleryKey, xhr.responseURL, xhr);
+                    //RiotGalleryViewer.textFilesDone.push(xhr.responseURL);
+                }
+                RiotGalleryViewer.galleries[xhr.galleryKey].imageFileUrlIsComplete = true;
+
+                // checks if all urls are complete. if so, initialization continues
+                // RiotGalleryViewer.galleryFileRemoteUrlsComplete();
+                RiotGalleryViewer.initializeRemoteComplete();
+            }
+        };
+
+        xhr.send();
+    },
+
+    /*
+    process text from a remote url (file with lists of images for a gallery)
+    either send the text to a function that handles the array parsed from json or a text list
+    */
+    addGalleryImagesByText(galleryKey, text) {
+        //console.log('addGalleryImagesByText(galleryKey, text) {', galleryKey, text);
+
+        let parsed = null;
+
+        text = this.strReplace(["\r\n", "\n\r", "\r"], "\n", text);
+        text = text.trim();
+
+        if (!text) {
+            this.galleries[galleryKey].isError = true;
+            this.galleries[galleryKey].errorMessages.push('addGalleryImagesByText - text file is empty: ' + galleryKey);
+            return false;
+        }
+
+        const firstChar = text.substring(0, 1);
+        const lastChar = text.charAt(text.length - 1);
+
+        // initial check so that there is no console log error trying to parse non json as json
+        if (firstChar === '[' && lastChar === ']') {
+            parsed = this.parseJson(text);
+            console.log(parsed);
+        }
+
+        if (parsed) {
+            for (let x = 0; x < parsed.length; x++) {
+                this.addImageByObj(galleryKey, parsed[x]);
+            }
+        } else {
+
+            const lines = text.split("\n");
+
+            for (let x = 0; x < lines.length; x++) {
+                //let line = lines[x].trim();
+                //console.log('270 ------- lines[x]', lines[x]);
+                this.addImageByString(galleryKey, lines[x]);
+                //console.log('272 ------- galleries', this.galleries);
+                //img = this.strLineToItem(line);
+                //if (item) {
+                //imgs.push(img);
+                //}
+                //console.log('abc', line, item);
+            }
+        }
+    },
+
+    /*
+    process an image object (from a remote text file)
+    */
+    addImageByObj(galleryKey, obj) {
+        console.log('addImageByObj(galleryKey, obj) {', galleryKey, obj);
+
+        // double check that the gallery exists.
+        if (!this.galleries[galleryKey]) {
+            return false;
+        }
+
+        if (typeof obj !== 'object') {
+            return false;
+        }
+
+        let url = null;
+        let thumbUrl = null;
+        let caption = null;
+
+        if (Array.isArray(obj)) {
+            if (obj[0]) {
+                url = obj[0].trim();
+            }
+            if (obj[1]) {
+                thumbUrl = obj[1].trim();
+            }
+            if (obj[2]) {
+                caption = obj[0].trim();
+            }
+        } else {
+            if (obj.url) {
+                url = obj.url.trim();
+            }
+            if (obj.thumbUrl) {
+                thumbUrl = obj.thumbUrl.trim();
+            }
+            if (obj.caption) {
+                caption = obj.caption.trim();
+            }
+        }
+        /*if (!url) {
+
+            console.log('addImageByObj(galleryKey, obj) { ERROR - no url found', obj);
+            return false;
+        }*/
+
+        /*const newObj = { url: url, thumbUrl: thumbUrl, caption: caption };
+        this.galleries[galleryKey].initImages.push(newObj);*/
+        this.addInitImage(galleryKey, url, thumbUrl, caption);
+
+        return true;
+        //let img = this.strLineToItem(string);
+        //if (item) {
+        //imgs.push(img);
+        //}
+        //console.log('abc', line, item);
+    },
+
+    /*
+    process a single image from string (single line from a remote text file)
+    */
+    addImageByString(galKey, line) {
+        //console.log('addImageByString(galKey, line) {', galKey, line);
+
+        let url = null;
+        let thumbUrl = null;
+        let caption = null;
+
+        const strs = line.split("\t");
+
+        if (strs.length > 1) {
+            // tab separated
+            if (strs[0]) {
+                url = this.strStripStartEndQuotes(strs[0]);
+                //console.log('---------------if (strs[0]) {', url, strs[0]);
+            }
+            if (strs[1]) {
+                thumbUrl = this.strStripStartEndQuotes(strs[1]);
+            }
+            if (strs[2]) {
+                caption = this.strStripStartEndQuotes(strs[2]);
+            }
+            this.addInitImage(galKey, url, thumbUrl, caption);
+        } else {
+            // strings in quotes (with validation)
+            //console.log(line);
+            const strs = this.addImageByStringsWithQuotes(galKey, line);
+        }
+
+        if (!url) {
+            //console.log('addImageByString(galKey, line) { ERROR - no url found', line);
+            return false;
+        }
+
+        //const newObj = { url: url, thumbUrl: thumbUrl, caption: caption };
+        //this.galleries[galKey].initImages.push(newObj);
+
+        return true;
+    },
+
+    /*
+    trim a double quote from the beginning and end of the string
+    convert an escaped quote so that it does not get removed. ex: \"Have a nice day\"
+    */
+    strStripStartEndQuotes(str) {
+        const tempQuoteReplace = "[~~(quote here, riotgallery)~~]";
+        str = str.strReplace('\\"', tempQuoteReplace, str).trim();
+
+        if (str.length < 1) {
+            return '';
+        }
+
+        const first = str.substring(0, 1);
+        if (first === '"') {
+            // remove 1st character
+            str = str.substring(1);
+            if (str.length < 1) {
+                return '';
+            }
+        }
+
+        const last = str.substring(str.length - 1, 1);
+        if (last === '"') {
+            // remove last character
+            str = str.substring(0, str.length - 1);
+            if (str.length < 1) {
+                return '';
+            }
+        }
+
+        str = str.strReplace(tempQuoteReplace, '\\"', str).trim();
+        return str;
+    },
+
+    /*
+    add image to a gallery based on a quoted string, ex: "./image1.jpg", "./image1_thumbnail.jpg", "My Image"
+    */
+    addImageByStringsWithQuotes(galKey, line) {
+        console.log('addImageByStringsWithQuotes(galleryKey, line) {', galKey, line);
+        console.log(line);
+        const tempQuoteReplace = "[~~(quote here, riotgallery)~~]";
+        line = this.strReplace('\\"', tempQuoteReplace, line);
+        console.log(line);
+        line = line.trim();
+        console.log(line);
+
+        strs = line.split('"');
+
+        for (let x = 0; x < strs.length; x++) {
+            strs[x] = this.strReplace('\\"', tempQuoteReplace, strs[x]);
+        }
+
+        //console.log(strs);
+
+        // 0 = [before first quote], 1 = url, 2 = [between quotes], 3 = thumUrl, 4 = [between quotes], 5 = caption
+
+        let url = null;
+        let thumbUrl = null;
+        let caption = null;
+
+        if (strs[1]) {
+            url = strs[1];
+        }/* else {
+                console.log('addImageByStringsWithQuotes(galleryKey, line) {', galleryKey, line);
+                return false;
+            }*/
+        if (strs[3]) {
+            thumbUrl = strs[3];
+        }
+        if (strs[5]) {
+            caption = strs[5];
+        }
+
+        //const newObj = { url: url, thumbUrl: thumbUrl, caption: caption };
+        //this.galleries[galleryKey].initImages.push(newObj);
+
+        this.addInitImage(galKey, url, thumbUrl, caption);
+
+        console.log('453 ------------ ', this.galleries[galKey]);
+        return true;
+    },
+
+    /* Get images from remote text files - END
+     *****************************************************************************
+     *****************************************************************************/
+
+
+
+    buildHtmlGalleries() {
+        for (let galKey = 0; galKey < this.galleries.length; galKey++) {
+            if (!this.galleries[galKey].isHtmlBuilt && !this.galleries[galKey].isError) {
+                this.buildHtmlGallery(galKey);
+            }
+        }
+    },
+
+    buildHtmlGallery(galKey) {
+        //console.log('buildGallery(gallery) {', galKey, this.galleries[galKey]);
+
+        if (!this.galleries[galKey]) {
+            return false;
+        }
+
+        const gal = this.galleries[galKey];
+
+        if (gal.isError) {
+            return false;
+        }
+
+        if (gal.isHtmlBuilt) {
+            return false;
+        }
+
+        if (gal.initImgs.length < 1) {
+            return false;
+        }
+
+        this.setGalleryElem(galKey);
+
+        if (!this.galleries[galKey].elem) {
+            return false;
+        }
+
+        this.addGalleryLiItemsFromInitImages(galKey);
+
+
+
+        /*
+
+            for (let y = 0; y < gal.initImages.length; y++) {
+                const initImage = gal.initImages[y];
+
+                if (initImage.url && typeof initImage.url === 'string') {
+                    let obj = { url: initImage.url }
+
+                    if (initImage.thumbUrl && typeof initImage.url === 'string') {
+                        obj.thumbUrl = initImage.thumbUrl;
+                    } else {
+                        obj.thumbUrl = obj.url;
+                    }
+
+                    if (initImage.caption && (typeof initImage.caption === 'string')) {
+                        obj.caption = initImage.thumbUrl;
+                    } else if (typeof initImage.caption === 'number') {
+                        obj.caption = initImage.thumbUrl.toString();
+                    } else {
+                        obj.caption = null;
+                    }
+
+                    this.galleries[x].items.push(obj);
+                }
+            }
+        }*/
+    },
+
+
+
+    setGalleryElem(galKey) {
+        //console.log('setGalleryElem(gallery) {', galKey);
+
+        if (!this.galleries[galKey]) {
+            return false;
+        }
+
+        if (!this.galleries[galKey].elemId) {
+            this.galleries[galKey].isError = true;
+            this.galleries[galKey].errorMessages.push('setGalleryElem - gallery Elem ID not set');
+            return false;
+        }
+
+        let elem = document.getElementById(this.galleries[galKey].elemId);
+        if (!elem) {
+            this.galleries[galKey].isError = true;
+            this.galleries[galKey].errorMessages.push('setGalleryElem - gallery Elem ID not found: ' + this.galleries[galKey].elemId);
+            return false;
+        }
+
+        let tagName = this.getElemTagName(elem);
+
+        if (!tagName) {
+            this.galleries[galKey].isError = true;
+            this.galleries.errorMessages.push('setGalleryElem - could not get element tag name: ' + this.galleries[galKey].elemId);
+            return false;
+        }
+
+        tagName = tagName.trim().toLowerCase();
+
+        let ulElem = null;
+
+        if (tagName === 'ul' || tagName === 'ol') {
+            // we're already in a list
+            ulElem = elem;
+            //ulElem = this.elemAddClass(elem, 'riot-gallery-style');
+            ulElem.classList.add('riot-gallery-style');
+        } else if (tagName === 'div') {
+            // we'e in a div, add a list inside
+            ulElem = document.createElement('ul');
+            ulElem.classList = 'riot-gallery-style';
+            elem.innerHTML = '';
+            elem.appendChild(ulElem);
+        } else {
+            // not a list or a div, add the ul after
+            ulElem = document.createElement('ul');
+            ulElem.classList = 'riot-gallery-style';
+            this.insertAfter(elem, ulElem);
+        }
+
+        this.galleries[galKey].elem = ulElem;
+
+        return true;
+    },
+
+    addGalleryLiItemsFromInitImages(galKey) {
+        //console.log('setGalleryItemsFromInitImages(gallery) {', galKey);
+
+        if (!this.galleries[galKey]) {
+            return false;
+        }
+
+        let isImageAdded = false;
+        for (let initImageKey = 0; initImageKey < this.galleries[galKey].initImgs.length; initImageKey++) {
+            if (this.addGalleryLiItemFromInitImage(galKey, initImageKey)) {
+                isImageAdded = true;
+            }
+        }
+
+        if (!isImageAdded) {
+            this.galleries[galKey].isError = true;
+            this.galleries[galKey].errorMessages.push('addGalleryLiItemsFromInitImages - no images set');
+            return false;
+        }
+
+        this.galleries[galKey].isHtmlBuilt = true;
+
+        this.galleries[galKey].isLoaded = true;
+
+        return true;
+        //this.galleries[x].isHtmlBuilt = true;
+        //this.galleries[x].images = images;
+    },
+
+    addGalleryLiItemFromInitImage(galKey, initImageKey) {
+        //console.log('addGalleryLiItemFromInitImage(galKey, initImageKey)', galKey, initImageKey);
+
+        if (!this.galleries[galKey]) {
+            return false;
+        }
+
+        if (!this.galleries[galKey].initImgs[initImageKey]) {
+            return false;
+        }
+
+        if (!this.galleries[galKey].elem) {
+            return false;
+        }
+
+
+        const initImage = this.galleries[galKey].initImgs[initImageKey];
+
+        if (typeof initImage.url !== 'string') {
+            // url is not a string
+            return false;
+        }
+
+        if (initImage.url.length < 1) {
+            // url is an empty string
+            return false;
+        }
+
+        let url = initImage.url;
+        let thumbUrl = initImage.url;
+        let caption = null;
+
+        if (typeof initImage.thumbUrl === 'string') {
+            if (initImage.thumbUrl.length > 0) {
+                thumbUrl = initImage.thumbUrl;
+            }
+        }
+
+        if (typeof initImage.caption === 'number') {
+            caption = caption.toString();
+        } else if (typeof initImage.caption === 'string') {
+            if (initImage.caption.length > 0) {
+                caption = initImage.caption;
+            }
+        }
+
+        let liElem = document.createElement('li');
+        let aElem = document.createElement('a')
+        aElem.href = url;
+        aElem.setAttribute('target', '_blank');
+
+        if (!this.setGalleryItem(galKey, url, aElem, caption)) {
+            return false;
+        }
+
+        let imgElem = document.createElement('img');
+        imgElem.src = thumbUrl;
+        aElem.appendChild(imgElem);
+        liElem.appendChild(aElem);
+        if (caption) {
+            let divCapElem = document.createElement('div');
+            divCapElem.innerHTML = caption;
+            divCapElem.className = "riot-gallery-image-caption";
+            liElem.appendChild(divCapElem);
+        }
+
+        //setGalleryImageByElem(galKey, elem) {
+
+
+
+        this.galleries[galKey].elem.appendChild(liElem);
+
+
+
+        return true;
+    },
+
+
+
+
+    /*****************************************************************************
+     *****************************************************************************
+     * add gallery and image - START - add to the galleries array or the initImgs array */
+
+    /*
+    get the key of the galleries array. if it doesn't exist, add it
+    */
+    getGalleryKeyByElemId(elemId) {
+
+        if (typeof elemId !== 'string') {
+            this.consoleLog('ERROR - cannot add gallery, invalid elemId type', elemId, typeof elemId);
+            return false;
+        }
+
+        if (elemId.length < 1) {
+            this.consoleLog('ERROR - cannot add gallery, elemId is empty', elemId, typeof elemId);
+            return false;
+        }
+
+        for (let x = 0; x < this.galleries.length; x++) {
+            if (this.galleries[x].elemId === elemId) {
+                if (this.isError) {
+                    // addGallery error - gallery already created with error
+                    return false;
+                }
+                return x;
+            }
+        }
+
+        // new empty gallery record
+        let gal = this.getByVal(this.galleryBlank);
+
+        gal.elemId = elemId;
+
+        this.consoleLog('new gallery added', elemId);
+
+        // add a new empty gallery to the galleries array. assign so that it is copied by value.
+        this.galleries.push(gal);
+
+        // array key of the current (new) gallery
+        const galleryKey = this.galleries.length - 1;
+
+        return galleryKey;
+    },
+
+    /*
+    get the key of the galleries array. if it doesn't exist, add it
+    */
+    getNewGalleryKeyByElem(elem) {
+
+        console.log('getNewGalleryKeyByElem(elem) {', elem);
+
+        if (!this.getIsElem(elem)) {
+            return false;
+        }
+
+        for (let k = 0; k < this.galleries.length; k++) {
+            if (this.galleries[k].elem === elem) {
+                if (this.isError) {
+                    // gallery already added, but had errors
+                    return false;
+                }
+                // gallery found, return key, do not add
+                return k;
+            }
+        }
+        console.log(this.galleryBlank);
+        // create new gallery object
+        let gal = this.getObjByVal(this.galleryBlank);
+        console.log(gal);
+
+        gal.elem = elem;
+
+        this.galleries.push(gal);
+
+        // array key of the current (new) gallery
+        const galKey = this.galleries.length - 1;
+
+        return galKey;
+    },
+
+    /*
+    add an initImgs record to a gallery record
+    */
+    addInitImage(galKey, url, thumbUrl, caption) {
+
+        // double check that the gallery exists.
+        if (!this.galleries[galKey]) {
+            return false;
+        }
+
+        if (!url || typeof url !== 'string') {
+            return false;
+        }
+
+        this.galleries[galKey].initImgs.push({ url: url, thumbUrl: thumbUrl, caption: caption });
+
+        return true;
+    },
+
+    /* add gallery and image - END
+     *****************************************************************************
+     *****************************************************************************/
 
 
     /*****************************************************************************
@@ -787,8 +1510,7 @@ RiotGalleryViewer = {
         }
     },
 
-    areMaterialIconsLoaded() 
-    {
+    areMaterialIconsLoaded() {
         console.log('areMaterialIconsLoaded()');
         divElem = document.createElement('div');
         divElem.style.position = "fixed";
@@ -799,7 +1521,7 @@ RiotGalleryViewer = {
         this.elems.body.appendChild(divElem);
         const w = divElem.offsetWidth;
         document.body.removeChild(divElem);
-        
+
         if (w < 50) {
             this.consoleLog('material icons are already available.');
             return true;
@@ -1662,6 +2384,50 @@ RiotGalleryViewer = {
     /*****************************************************************************
      *****************************************************************************
      * Helper - START - not specific to this program */
+
+
+    createXHR() {
+        if (window.XMLHttpRequest) { // Modern browsers
+            return new XMLHttpRequest();
+        } else if (window.ActiveXObject) { // IE 6-8
+            try {
+                return new ActiveXObject("Msxml2.XMLHTTP");
+            } catch (e) {
+                try {
+                    return new ActiveXObject("Microsoft.XMLHTTP");
+                } catch (e) { }
+            }
+        }
+        throw new Error("This browser does not support XMLHttpRequest or ActiveXObject");
+    },
+
+    strReplace(from, to, str) {
+        if (typeof from === 'number') {
+            from = from.toString();
+        }
+        if (typeof to === 'number') {
+            to = to.toString();
+        }
+        if (typeof from === 'string' || typeof from === 'number') {
+            from = [from];
+        } else {
+            if (Array.isArray(from)) {
+                return str;
+            }
+        }
+        //const temp = str; 
+        //console.log(temp);
+        for (let x = 0; x < from.length; x++) {
+            let curFrom = from[x];
+            let prev = '';
+            while (prev !== str) {
+                prev = str;
+                str = str.replace(curFrom, to, str);
+            }
+        }
+        //console.log('strReplace', from, to, temp, str);
+        return str;
+    },
 
     /*
      * return the value of an object (does NOT return a reference)
