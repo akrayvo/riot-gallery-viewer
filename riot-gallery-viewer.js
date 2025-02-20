@@ -103,6 +103,12 @@ RiotGalleryViewer = {
         endTimeMs: null,
     },
 
+    swipeInfo: {
+        startX: null,
+        //startY: null,
+        startTime: null
+      },
+
 
     options: {
         // write information to the console log. needed for troubeshooting/testing/development only
@@ -1480,11 +1486,35 @@ RiotGalleryViewer = {
                 subDivElem.id = 'riot-gallery-viewer-loading' + x;
                 subDivElem.classList = 'riot-gallery-viewer-loading';
                 divElem.appendChild(subDivElem);
+
                 divElem.addEventListener('click', function (event) {
                     event.preventDefault();
                     event.stopPropagation();
+                    console.log('img click');
                     RiotGalleryViewer.nextClicked();
                 }, false);
+
+                //document.getElementById('my-image').ondragstart = function() { return false; };
+
+                imgElem.addEventListener("ondragstart", function (event) {
+                    //event.preventDefault();
+                    //event.stopPropagation();
+                    console.log('-----------------img ondragstart');
+                    //RiotGalleryViewer.slideSwipeStartEvent(event);
+                });
+
+                divElem.addEventListener("touchstart", function (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    console.log('-----------------img touchstart');
+                    RiotGalleryViewer.slideSwipeStartEvent(event);
+                });
+                divElem.addEventListener("touchend", function (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    console.log('--------------------img touchend');
+                    rRiotGalleryViewer.slideSwipeEndEvent(event);
+                });
                 this.elems.imageCons[x] = divElem;
                 ////
                 this.elems.body.appendChild(divElem);
@@ -1612,6 +1642,123 @@ RiotGalleryViewer = {
     /* load HTML viewer - END
      *****************************************************************************
      *****************************************************************************/
+
+
+
+
+    /*
+      * Touchscreen swipe started
+      * save time in milliseconds and the X and Y position
+      */
+    slideSwipeStartEvent(event) {
+
+        const temp = this.getSwipeXYFromEvent(event);
+        const x = temp[0];
+        //const y = temp[1];
+
+        if (!x) {
+            this.swipeInfoReset();
+            this.consoleLogInfo('slideSwipeStartEvent - no position found, stop swipe action;');
+            return;
+        }
+
+        this.swipeInfo.startX = x;
+        //this.swipeInfo.startY = y;
+        this.swipeInfo.startTime = this.getCurMs();
+
+        this.consoleLogInfo('slideSwipeStartEvent - position = ' + x);
+    },
+
+      /*
+      * Touchscreen swipe ended
+      * make sure the time and position is valid
+      * go to the next or previous slide
+      */
+      slideSwipeEndEvent(event) {
+
+        if (!this.swipeInfo.startX || !this.swipeInfo.startTime) {
+            this.swipeInfoReset();
+            this.consoleLogInfo('slideSwipeEndEvent - end swipe with no start swipe, stop swipe action');
+            return;
+        }
+
+        const timeDif = this.getCurMs() - this.swipeInfo.startTime;
+
+        if (timeDif > this.options.swipeMaxSeconds * 1000) {
+            this.swipeInfoReset();
+            // too much time passed bewteen start and end. either event missed or very slow slide.
+            this.consoleLogInfo('slideSwipeEndEvent - slide time too long, stop swipe action, max seconds = '
+                + this.options.swipeMaxSeconds + ', seconds taken = ' + (timeDif / 1000));
+            return;
+        }
+
+        const temp = this.getSwipeXYFromEvent(event);
+        const x = temp[0];
+        //const y = temp[1];
+
+        if (!x) {
+            this.swipeInfoReset();
+            this.consoleLogInfo('slideSwipeEndEvent - no position found, stop swipe action');
+            return;
+        }
+
+        const xDif = Math.abs(x - this.swipeInfo.startX);
+        //const yDif = Math.abs(y - this.swipeInfo.startY);
+
+        this.consoleLogInfo('slideSwipeEndEvent - x=' + xDif + 'px, time=' + timeDif + 'MS');
+
+
+        if (xDif < this.options.swipeMinPx) {
+            this.consoleLogInfo('slideSwipeEndEvent - xDif=' + xDif + ', < ' + this.options.swipeMinPx + ', check percednt');
+
+            const windowWidth = this.elems.main.width();
+            const widthPercent = xDif / windowWidth * 100;
+
+            if (widthPercent < this.options.swipeMinPercent) {
+                this.swipeInfoReset();
+                this.consoleLogInfo('slideSwipeEndEvent - xDif=' + xDif + ', windowWidth=' + windowWidth +
+                    ', percent=' + (Math.round(widthPercent * 100) / 100) + '%, < 20%, stop swipe action');
+                return;
+            }
+        }
+
+        this.stopInterval()
+        if (x > this.swipeInfo.startX) {
+            this.consoleLogInfo('slideSwipeEndEvent - previous');
+            this.incrementSlideNumber(-1);
+        } else {
+            this.consoleLogInfo('slideSwipeEndEvent - next');
+            this.incrementSlideNumber();
+        }
+        this.goToSlide();
+    },
+    
+    swipeInfoReset() {
+        this.swipeInfo.startX = null;
+        //this.swipeInfo.startY = null;
+        this.swipeInfo.startTime = null;
+    },
+    
+    getSwipeXYFromEvent(event) {
+        if (event.TouchList) {
+            if (event.TouchList[0]) {
+                if (event.TouchList[0].screenX && event.TouchList[0].screenY) {
+                    return [event.TouchList[0].pageX, event.TouchList[0].pageY];
+                }
+            }
+        }
+
+        if (event.changedTouches) {
+            if (event.changedTouches[0]) {
+                if (event.changedTouches[0].screenX && event.changedTouches[0].screenX) {
+                    return [event.changedTouches[0].screenX, event.changedTouches[0].screenY];
+                }
+            }
+        }
+
+        return [null, null];
+    },
+
 
 
 
