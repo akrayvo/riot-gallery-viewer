@@ -97,8 +97,8 @@ RiotGalleryViewer = {
 
     transitionBlank: {
         jsTnterval: null,
-        isTransitioning: false,
-        type: null, // left, or right
+        //isTransitioning: false,
+        //type: null, // left, or right
         startTimeMs: null,
         endTimeMs: null,
     },
@@ -115,13 +115,13 @@ RiotGalleryViewer = {
         doConsoleLog: false,
         // write a code trace on every console log. needed for troubeshooting/testing/development only
         doConsoleTrace: false,
-        transitionSeconds: 400,
-        transitionFrameSeconds: 10,
+        transitionSeconds: 4,
+        transitionFrameSeconds: .02,
         imageFailedCaptionHtml: '<i>Could Not Load Image</i>',
         defaultImgSize: 300,
-        trainsitionType: 'slidefade', // "slide", "fade", "slidefade"
+        transitionType: 'none', // "none", "size", "slide", "fade", "slidefade"
         useMaterialIcons: true,
-        doTouchSwipe: true,
+        doTouchSwipe: false,
         swipeMinPx: 200,
         swipeMinPercent: 50,
         swipeMaxSeconds: 500
@@ -1303,18 +1303,23 @@ RiotGalleryViewer = {
      * event handling (click and other) - START */
 
     itemClicked(galKey, itemKey) {
+        console.log('itemClicked(galKey, itemKey) {', galKey, itemKey);
         this.loadImage(galKey, itemKey, null);
     },
 
     prevClicked() {
+        console.log('prevClicked() {');
         this.incrementImageAndLoad(-1, 'prev');
     },
 
     nextClicked() {
+        console.log('nextClicked() {');
         this.incrementImageAndLoad(1, 'next');
     },
 
-    incrementImageAndLoad(increment, transType) {
+    incrementImageAndLoad(increment, transDirection) {
+        
+        console.log('increment', transDirection);
         if (!increment) {
             // should not happen
             return;
@@ -1348,7 +1353,7 @@ RiotGalleryViewer = {
             }
         }
 
-        this.loadImage(galKey, itemKey, transType);
+        this.loadImage(galKey, itemKey, transDirection);
     },
 
     closeClicked() {
@@ -1679,16 +1684,14 @@ RiotGalleryViewer = {
       * save time in milliseconds and the X and Y position
       */
     slideSwipeStartEvent(event) {
-
+        console.log('slideSwipeStartEvent(event)');
         const temp = this.getSwipeXYFromEvent(event);
-        const x = temp[0];
-        //const y = temp[1];
-
-        if (!x) {
+        if (temp === null) {
             this.swipeInfoReset();
             this.consoleLog('slideSwipeStartEvent - no position found, stop swipe action;');
             return;
         }
+        const x = temp[0];
 
         this.swipeInfo.startX = x;
         //this.swipeInfo.startY = y;
@@ -1703,7 +1706,7 @@ RiotGalleryViewer = {
     * go to the next or previous slide
     */
     slideSwipeEndEvent(event) {
-
+        console.log('slideSwipeEndEvent(event)');
         if (!this.swipeInfo.startX || !this.swipeInfo.startTime) {
             this.swipeInfoReset();
             this.consoleLog('slideSwipeEndEvent - end swipe with no start swipe, stop swipe action');
@@ -1725,14 +1728,15 @@ RiotGalleryViewer = {
         }
 
         const temp = this.getSwipeXYFromEvent(event);
-        const x = temp[0];
-        //const y = temp[1];
 
-        if (!x) {
+        if (temp === null) {
             this.swipeInfoReset();
             this.consoleLog('slideSwipeEndEvent - no position found, stop swipe action');
             return;
         }
+
+        const x = temp[0];
+        //const y = temp[1];
 
         const xDif = Math.abs(x - this.swipeInfo.startX);
         //const yDif = Math.abs(y - this.swipeInfo.startY);
@@ -1757,7 +1761,7 @@ RiotGalleryViewer = {
             }
         }
 
-        if (!this.options.swipeMinPercent && this.options.swipeMinPx && !swipeDistinceSuccess) {
+        if (this.options.swipeMinPercent && this.options.swipeMinPx && !swipeDistinceSuccess) {
             this.swipeInfoReset();
             this.consoleLog('swipe distance was insufficient. Do not go to next image.');
             return;
@@ -1800,7 +1804,7 @@ RiotGalleryViewer = {
             }
         }
 
-        return [null, null];
+        return null;
     },
 
 
@@ -1814,8 +1818,8 @@ RiotGalleryViewer = {
      * new image displayed in the viewer
      * happens on gallery image and previous/next button click
      */
-    loadImage(galKey, itemKey, transType) {
-        console.log('loadImage(galKey, itemKey, transType) {', galKey, itemKey, transType);
+    loadImage(galKey, itemKey, transDirection) {
+        console.log('loadImage(galKey, itemKey, transDirection) {', galKey, itemKey, transDirection);
         const galItem = this.getGalItem(galKey, itemKey);
 
         if (!galItem) {
@@ -1839,13 +1843,19 @@ RiotGalleryViewer = {
             this.openViewer();
             this.setWindowSize();
         }
+//console.log('zzzzzzzzzzzzzzzz a');
+  //      if (this.options.transitionType === 'none') {
+  //          console.log('zzzzzzzzzzzzzzzz b');
+  //          this.removePrevViewer();
+  //      }
 
-        this.viewerPrevKey = this.viewerCurKey;
+        
         console.log('viewerPrevKey set to cur key', this.viewerPrevKey);
-        if (this.viewerCurKey == null) {
+        if (this.viewerCurKey === null || this.options.transitionType === 'none') {
             this.viewerCurKey = 0;
             //console.log('b', this.viewerCurKey);
         } else {
+            this.viewerPrevKey = this.viewerCurKey;
             this.viewerCurKey++;
             //console.log('c', this.viewerCurKey);
             if (this.viewerCurKey >= 2) {
@@ -1866,15 +1876,15 @@ RiotGalleryViewer = {
 
         //console.log('viewers',this.viewers,this.viewerPrevKey,this.viewerCurKey);
 
-        //console.log('START');
+        console.log('START load image');
         //console.log('a1');
         if (!galItem.isLoaded) {
-            //console.log('b1');
+            console.log('!galItem.isLoaded');
             var img = new Image();
             img.src = galItem.url;
             //console.log(img.src);
             if (img.complete) {
-                //console.log('c1');
+                console.log('img.complete');
                 //console.log('if (img.complete) {');
                 //console.log(this.viewers);
                 this.updateGalItem(galKey, itemKey, img, false);
@@ -1885,12 +1895,12 @@ RiotGalleryViewer = {
                 img.galKey = galKey;
                 img.itemKey = itemKey;
                 //    this.startImageLoad();
+                console.log('img.onload');
                 img.onload = function (e) {
                     //console.log('e1');
-                    //console.log('IMAGE LOADED');
+                    console.log('IMAGE LOADED');
                     RiotGalleryViewer.updateGalItem(this.galKey, this.itemKey, img, false);
-                    if (!RiotGalleryViewer.isViewerOpen || RiotGalleryViewer.galKey === null || RiotGalleryViewer.itemKey === null)
-                    {
+                    if (!RiotGalleryViewer.isViewerOpen || RiotGalleryViewer.galKey === null || RiotGalleryViewer.itemKey === null) {
                         return false;
                     }
                     const viewer = RiotGalleryViewer.getViewerCur();
@@ -1924,7 +1934,7 @@ RiotGalleryViewer = {
 
         }
         //console.log('j1');
-        this.calculateViewerPlacement(transType);
+        this.calculateViewerPlacement(transDirection);
         this.placeImgInPosition();
         this.updateCaption();
 
@@ -1960,6 +1970,7 @@ RiotGalleryViewer = {
     },
 
     updateGalItem(galKey, itemKey, img, isError) {
+        console.log('updateGalItem', galKey, itemKey, img, isError);
         if (!this.isGalItem(galKey, itemKey)) {
             return;
         }
@@ -1978,33 +1989,64 @@ RiotGalleryViewer = {
         this.galleries[galKey].items[itemKey].height = img.height;
         this.galleries[galKey].items[itemKey].isError = false;
         this.galleries[galKey].items[itemKey].isLoaded = true;
-        //console.log('updateGalItem', galKey, itemKey, this.galleries[galKey].items[itemKey]);
+
     },
 
     endTransition() {
-        if (this.transition) {
-            if (this.transition.isTransitioning) {
-                clearInterval(this.transition.jsTnterval);
+
+        if (this.viewerCurKey !== null) {
+            let viewer = this.getViewerCur();
+            if (viewer.transition) {
+                for (var prop in viewer.transition) {
+                    if (Object.prototype.hasOwnProperty.call(viewer.transition, prop)) {
+                        // do stuff
+                        console.log(prop, viewer.transition[prop]);
+                        //hasTransition = true;
+                        if (prop === 'left') {
+                            this.elems.imageCons[this.viewerCurKey].style.left = viewer.left + 'px';
+                        }
+                        if (prop === 'opacity') {
+                            this.elems.imageCons[this.viewerCurKey].style.opacity = 1;
+                        }
+                    }
+                }
             }
-            this.transition = this.getByVal(this.transitionBlank);
         }
 
+        if (this.transition) {
+            //if (this.transition.isTransitioning) {
+                clearInterval(this.transition.jsTnterval);
+            //}
+            //this.transition = this.getByVal(this.transitionBlank);
+            this.transition = null;
+        }
+
+        this.removePrevViewer();
+
+        if (this.viewerCurKey !== null) {
+            this.viewers[this.viewerCurKey].transition = null;
+        }
+
+    },
+
+    removePrevViewer() {
+        console.log('removePrevViewer() {');
         if (this.viewerPrevKey !== null) {
+            console.log('if (this.viewerPrevKey !== null) {');
             this.elems.imageCons[this.viewerPrevKey].classList.remove('is-displayed');
             this.elems.images[this.viewerPrevKey].src = this.blankImageSrc;
             this.viewers[this.viewerPrevKey] = null;
             this.viewerPrevKey = null;
-            console.log('endTransition - this.viewerPrevKey set to null', this.viewerPrevKey);
+            console.log('removePrevViewer - this.viewerPrevKey set to null', this.viewerPrevKey);
         }
-        if (this.viewerCurKey !== null) {
-            this.viewers[this.viewerCurKey].transition = {};
-        }
-
     },
 
     transitionFrame() {
-
-        const curMs = this.getCurMs();
+        //console.log('transitionFrame() {');
+        if (!this.getIsTransitioning()) {
+            this.endTransition();
+            return;
+        }
 
         const k = this.viewerCurKey;
         const viewer = this.viewers[k];
@@ -2012,6 +2054,8 @@ RiotGalleryViewer = {
         //const viewerPrev = this.viewers[this.viewerPrevKey];
 
         //viewer.left = viewer.transition[prop];
+
+        console.log('if (!this.transition.endTimeMs || curMs > this.transition.endTimeMs) {', curMs, this.transition.endTimeMs);
 
         if (!this.transition.endTimeMs || curMs > this.transition.endTimeMs) {
             this.endTransition();
@@ -2029,7 +2073,7 @@ RiotGalleryViewer = {
         } /**/
 
         const timeSinceTransStart = curMs - this.transition.startTimeMs;
-        const percentToEnd = timeSinceTransStart / this.options.transitionMs;
+        const percentToEnd = timeSinceTransStart / (this.options.transitionSeconds * 1000);
         const percentToStart = 1 - percentToEnd;
 
         /*let newLeft = (percentToStart * this.viewItemCur.transLeftPx) + (percentToEnd * this.viewItemCur.left);
@@ -2037,12 +2081,16 @@ RiotGalleryViewer = {
  
         newLeft = (percentToEnd * this.viewItemPrev.transLeftPx) + (percentToStart * this.viewItemPrev.left);
         this.elems.imageTransCon.style.left = newLeft + 'px';*/
+
+        //console.log('viewer.transition', viewer.transition);
+
         for (var prop in viewer.transition) {
             if (Object.prototype.hasOwnProperty.call(viewer.transition, prop)) {
                 // do stuff
-                //console.log(prop, viewer.transition[prop]);
+                console.log(prop, viewer.transition[prop]);
                 //hasTransition = true;
                 if (prop === 'left') {
+                    console.log('if (prop === \'left\') {');
                     let newLeft = '';
                     if (this.viewerPrevKey !== null) {
                         const prevViewer = this.viewers[this.viewerPrevKey];
@@ -2050,8 +2098,9 @@ RiotGalleryViewer = {
                         this.elems.imageCons[this.viewerPrevKey].style.left = newLeft + 'px';
                     }
                     newLeft = (percentToStart * viewer.transition[prop]) + (percentToEnd * viewer.left);
-                    //console.log('newLeft = (percentToStart * viewer.transition[prop]) + (percentToEnd * viewer.left);', newLeft, percentToStart, viewer.transition[prop], percentToEnd, viewer.left);
+                    console.log('newLeft = (percentToStart * viewer.transition[prop]) + (percentToEnd * viewer.left);', newLeft, percentToStart, viewer.transition[prop], percentToEnd, viewer.left);
                     this.elems.imageCons[k].style.left = newLeft + 'px';
+                    console.log('newLeft', newLeft);
                 }
                 if (prop === 'opacity') {
                     let newOpacity = '';
@@ -2077,12 +2126,12 @@ RiotGalleryViewer = {
         this.windowHeight = window.innerHeight;
     },
 
-    calculateViewerPlacement(transType) {
-
-        if (!transType) {
-            transType = null;
+    calculateViewerPlacement(transDirection) {
+        console.log('calculateViewerPlacement(transDirection) {');
+        if (!transDirection) {
+            transDirection = null;
         }
-        console.log('calculateViewerPlacement(transType) {', transType);
+        console.log('calculateViewerPlacement(transDirection) {', transDirection);
         //console.log('calculateViewerPlacement() {');
         const item = this.getCurGalItem();
 
@@ -2150,6 +2199,7 @@ RiotGalleryViewer = {
         this.viewItemCur.closeRight = closeRight;
         this.viewItemCur.padding = conPadding;*/
         const curK = this.viewerCurKey;
+        const prevK = this.viewerPrevKey;
 
         this.viewers[curK].width = viewerWidth;
         this.viewers[curK].height = viewerHeight;
@@ -2163,19 +2213,19 @@ RiotGalleryViewer = {
         const closeXWidth = 40;
 
 
-        if (transType !== null) {
-            const prevK = this.viewerPrevKey;
+        if (transDirection !== null) {
+            
             this.viewers[curK].transition = {};
             if (prevK !== null) {
                 this.viewers[prevK].transition = {};
             }
             //console.log('--------1167', this.viewerPrevKey);
             if (prevK !== null) {
-                if (this.options.trainsitionType === 'slide' || this.options.trainsitionType === 'slidefade') {
-                    if (transType === 'prev') {
+                if (this.options.transitionType === 'slide' || this.options.transitionType === 'slidefade') {
+                    if (transDirection === 'prev') {
                         this.viewers[curK].transition.left = (this.windowWidth + transExtraDistance);
                         this.viewers[prevK].transition.left = -(this.viewers[prevK].width + transExtraDistance + closeXWidth);
-                    } else if (transType === 'next') {
+                    } else if (transDirection === 'next') {
                         this.viewers[curK].transition.left = -(this.viewers[prevK].width + transExtraDistance + closeXWidth);
                         this.viewers[prevK].transition.left = (this.windowWidth + transExtraDistance);
                     }
@@ -2183,7 +2233,7 @@ RiotGalleryViewer = {
 
             }
 
-            if (this.options.trainsitionType === 'fade' || this.options.trainsitionType === 'slidefade') {
+            if (this.options.transitionType === 'fade' || this.options.transitionType === 'slidefade') {
                 this.viewers[curK].transition.opacity = 0;
                 if (prevK !== null) {
                     this.viewers[prevK].transition.opacity = 0
@@ -2304,7 +2354,7 @@ RiotGalleryViewer = {
                 if (Object.prototype.hasOwnProperty.call(viewer.transition, prop)) {
                     // do stuff
                     console.log(prop, viewer.transition[prop]);
-                    hasTransition = true;
+                    //hasTransition = true;
                     if (prop === 'left') {
                         curLeft = null;
                     }
@@ -2323,6 +2373,7 @@ RiotGalleryViewer = {
                 this.transition.isTransitioning = true;
                 this.transition.startTimeMs = this.getCurMs();
                 this.transition.endTimeMs = this.transition.startTimeMs + (this.options.transitionSeconds * 1000);
+                console.log('this.transition.jsTnterval');
                 this.transition.jsTnterval = setInterval(function () {
                     RiotGalleryViewer.transitionFrame();
                 }, this.options.transitionFrameSeconds * 1000);
