@@ -1819,9 +1819,6 @@ RiotGalleryViewer = {
      * happens on gallery image and previous/next button click
      */
     loadImage(galKey, itemKey, transDirection) {
-
-        console.log('99999999999999999999999999999999 loadImage', this.viewerCurKey);
-
         console.log('loadImage(galKey, itemKey, transDirection) {', galKey, itemKey, transDirection);
         const galItem = this.getGalItem(galKey, itemKey);
 
@@ -1997,9 +1994,7 @@ RiotGalleryViewer = {
 
     endTransition() {
 
-        console.log('endTransition() {');
         if (this.viewerCurKey !== null) {
-            console.log('a1a1a1a1a1a1a1a1a1a1');
             let viewer = this.getViewerCur();
             if (viewer.transition) {
                 for (var prop in viewer.transition) {
