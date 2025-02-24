@@ -163,10 +163,10 @@ RiotGalleryViewer = {
 
 
     /*
-    add a gallery from a file (remote url)
-    called by user
-    gallery is created if needed
-    */
+     * add a gallery from a file (remote url)
+     * called by user
+     * gallery is created if needed
+     */
     addImagesByFile(galleryElemId, fileUrl) {
         if (!fileUrl || typeof fileUrl !== 'string') {
             this.consoleLog('addGalleryByString failed, no fileUrl', fileUrl, typeof fileUrl);
@@ -186,9 +186,9 @@ RiotGalleryViewer = {
     },
 
     /*
-    set global options to determine the style and behavior of the gallery
-    called by user
-    */
+     * set global options to determine the style and behavior of the gallery
+     * called by user
+     */
     setOption(option, value) {
 
         if (typeof value === 'undefined') {
@@ -252,7 +252,6 @@ RiotGalleryViewer = {
         }
         this.buildHtmlGalleries();
         this.setGalleriesByClass();
-        console.log(this.galleries);
     },
 
     /* Initialization - END
@@ -266,10 +265,10 @@ RiotGalleryViewer = {
     * Get images from remote text files - START - either a list or json */
 
     /*
-    process remote urls (files with lists of images for galleries)
-    calls function that runs the individual urls
-    return whether or not there is a file to process exists.
-    */
+     * process remote urls (files with lists of images for galleries)
+     * calls function that runs the individual urls
+     * return whether or not there is a file to process exists.
+     */
     processGalleryFileRemoteUrls() {
         let isGalleryWithFileRemoteUrl = false;
         for (let x = 0; x < this.galleries.length; x++) {
@@ -282,10 +281,10 @@ RiotGalleryViewer = {
     },
 
     /*
-    process a remote url (file with lists of images for a gallery)
-    send text to a function that processes images or set error
-    call function that checks if all urls are complete. if so, initialization continues
-    */
+     * process a remote url (file with lists of images for a gallery)
+     * send text to a function that processes images or set error
+     * call function that checks if all urls are complete. if so, initialization continues
+     */
     processGalleryFileRemoteUrl(galleryKey) {
         // double check that the url exists.
         if (!this.galleries[galleryKey]) {
@@ -304,22 +303,15 @@ RiotGalleryViewer = {
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
-                    //console.log(xhr);
                     RiotGalleryViewer.addGalleryImagesByText(xhr.galleryKey, xhr.responseText);
-                    //console.log(RiotGalleryViewer);
-                    //RiotGalleryViewer.textFilesDone.push(xhr.responseURL);
                 } else {
                     // failed
                     RiotGalleryViewer.galleries[xhr.galleryKey].isError = true;
                     RiotGalleryViewer.galleries[xhr.galleryKey].errorMessages.push('could not read file: ' + xhr.responseURL);
-
-                    console.log('addGalleryByFile failed. could not read file', xhr.galleryKey, xhr.responseURL, xhr);
-                    //RiotGalleryViewer.textFilesDone.push(xhr.responseURL);
                 }
                 RiotGalleryViewer.galleries[xhr.galleryKey].imageFileUrlIsComplete = true;
 
                 // checks if all urls are complete. if so, initialization continues
-                // RiotGalleryViewer.galleryFileRemoteUrlsComplete();
                 RiotGalleryViewer.initializeRemoteComplete();
             }
         };
@@ -328,12 +320,10 @@ RiotGalleryViewer = {
     },
 
     /*
-    process text from a remote url (file with lists of images for a gallery)
-    either send the text to a function that handles the array parsed from json or a text list
-    */
+     * process text from a remote url (file with lists of images for a gallery)
+     * either send the text to a function that handles the array parsed from json or a text list
+     */
     addGalleryImagesByText(galleryKey, text) {
-        //console.log('addGalleryImagesByText(galleryKey, text) {', galleryKey, text);
-
         let parsed = null;
 
         text = this.strReplace(["\r\n", "\n\r", "\r"], "\n", text);
@@ -359,29 +349,18 @@ RiotGalleryViewer = {
                 this.addImageByObj(galleryKey, parsed[x]);
             }
         } else {
-
             const lines = text.split("\n");
 
             for (let x = 0; x < lines.length; x++) {
-                //let line = lines[x].trim();
-                //console.log('270 ------- lines[x]', lines[x]);
                 this.addImageByString(galleryKey, lines[x]);
-                //console.log('272 ------- galleries', this.galleries);
-                //img = this.strLineToItem(line);
-                //if (item) {
-                //imgs.push(img);
-                //}
-                //console.log('abc', line, item);
             }
         }
     },
 
     /*
-    process an image object (from a remote text file)
-    */
+     * process an image object (from a remote text file)
+     */
     addImageByObj(galleryKey, obj) {
-        console.log('addImageByObj(galleryKey, obj) {', galleryKey, obj);
-
         // double check that the gallery exists.
         if (!this.galleries[galleryKey]) {
             return false;
@@ -416,30 +395,16 @@ RiotGalleryViewer = {
                 caption = obj.caption.trim();
             }
         }
-        /*if (!url) {
 
-            console.log('addImageByObj(galleryKey, obj) { ERROR - no url found', obj);
-            return false;
-        }*/
-
-        /*const newObj = { url: url, thumbUrl: thumbUrl, caption: caption };
-        this.galleries[galleryKey].initImages.push(newObj);*/
         this.addInitImage(galleryKey, url, thumbUrl, caption);
 
         return true;
-        //let img = this.strLineToItem(string);
-        //if (item) {
-        //imgs.push(img);
-        //}
-        //console.log('abc', line, item);
     },
 
     /*
-    process a single image from string (single line from a remote text file)
-    */
+     * process a single image from string (single line from a remote text file)
+     */
     addImageByString(galKey, line) {
-        //console.log('addImageByString(galKey, line) {', galKey, line);
-
         let url = null;
         let thumbUrl = null;
         let caption = null;
@@ -450,7 +415,6 @@ RiotGalleryViewer = {
             // tab separated
             if (strs[0]) {
                 url = this.strStripStartEndQuotes(strs[0]);
-                //console.log('---------------if (strs[0]) {', url, strs[0]);
             }
             if (strs[1]) {
                 thumbUrl = this.strStripStartEndQuotes(strs[1]);
@@ -461,25 +425,14 @@ RiotGalleryViewer = {
             this.addInitImage(galKey, url, thumbUrl, caption);
         } else {
             // strings in quotes (with validation)
-            //console.log(line);
-            const strs = this.addImageByStringsWithQuotes(galKey, line);
+            this.addImageByStringsWithQuotes(galKey, line);
         }
-
-        if (!url) {
-            //console.log('addImageByString(galKey, line) { ERROR - no url found', line);
-            return false;
-        }
-
-        //const newObj = { url: url, thumbUrl: thumbUrl, caption: caption };
-        //this.galleries[galKey].initImages.push(newObj);
-
-        return true;
     },
 
     /*
-    trim a double quote from the beginning and end of the string
-    convert an escaped quote so that it does not get removed. ex: \"Have a nice day\"
-    */
+     * trim a double quote from the beginning and end of the string
+     * convert an escaped quote so that it does not get removed. ex: \"Have a nice day\"
+     */
     strStripStartEndQuotes(str) {
         const tempQuoteReplace = "[~~(quote here, riotgallery)~~]";
         str = str.strReplace('\\"', tempQuoteReplace, str).trim();
@@ -511,16 +464,12 @@ RiotGalleryViewer = {
     },
 
     /*
-    add image to a gallery based on a quoted string, ex: "./image1.jpg", "./image1_thumbnail.jpg", "My Image"
-    */
+     * add image to a gallery based on a quoted string, ex: "./image1.jpg", "./image1_thumbnail.jpg", "My Image"
+     */
     addImageByStringsWithQuotes(galKey, line) {
-        console.log('addImageByStringsWithQuotes(galleryKey, line) {', galKey, line);
-        console.log(line);
         const tempQuoteReplace = "[~~(quote here, riotgallery)~~]";
         line = this.strReplace('\\"', tempQuoteReplace, line);
-        console.log(line);
         line = line.trim();
-        console.log(line);
 
         strs = line.split('"');
 
@@ -528,20 +477,15 @@ RiotGalleryViewer = {
             strs[x] = this.strReplace('\\"', tempQuoteReplace, strs[x]);
         }
 
-        //console.log(strs);
-
-        // 0 = [before first quote], 1 = url, 2 = [between quotes], 3 = thumUrl, 4 = [between quotes], 5 = caption
-
         let url = null;
         let thumbUrl = null;
         let caption = null;
 
+        // 0 = [before first quote], 1 = url, 2 = [between quotes], 3 = thumUrl, 4 = [between quotes], 5 = caption
+
         if (strs[1]) {
             url = strs[1];
-        }/* else {
-                console.log('addImageByStringsWithQuotes(galleryKey, line) {', galleryKey, line);
-                return false;
-            }*/
+        }
         if (strs[3]) {
             thumbUrl = strs[3];
         }
@@ -549,13 +493,7 @@ RiotGalleryViewer = {
             caption = strs[5];
         }
 
-        //const newObj = { url: url, thumbUrl: thumbUrl, caption: caption };
-        //this.galleries[galleryKey].initImages.push(newObj);
-
         this.addInitImage(galKey, url, thumbUrl, caption);
-
-        console.log('453 ------------ ', this.galleries[galKey]);
-        return true;
     },
 
     /* Get images from remote text files - END
@@ -573,8 +511,6 @@ RiotGalleryViewer = {
     },
 
     buildHtmlGallery(galKey) {
-        //console.log('buildGallery(gallery) {', galKey, this.galleries[galKey]);
-
         if (!this.galleries[galKey]) {
             return false;
         }
@@ -600,42 +536,11 @@ RiotGalleryViewer = {
         }
 
         this.addGalleryLiItemsFromInitImages(galKey);
-
-
-
-        /*
-
-            for (let y = 0; y < gal.initImages.length; y++) {
-                const initImage = gal.initImages[y];
-
-                if (initImage.url && typeof initImage.url === 'string') {
-                    let obj = { url: initImage.url }
-
-                    if (initImage.thumbUrl && typeof initImage.url === 'string') {
-                        obj.thumbUrl = initImage.thumbUrl;
-                    } else {
-                        obj.thumbUrl = obj.url;
-                    }
-
-                    if (initImage.caption && (typeof initImage.caption === 'string')) {
-                        obj.caption = initImage.thumbUrl;
-                    } else if (typeof initImage.caption === 'number') {
-                        obj.caption = initImage.thumbUrl.toString();
-                    } else {
-                        obj.caption = null;
-                    }
-
-                    this.galleries[x].items.push(obj);
-                }
-            }
-        }*/
     },
 
 
 
     setGalleryElem(galKey) {
-        //console.log('setGalleryElem(gallery) {', galKey);
-
         if (!this.galleries[galKey]) {
             return false;
         }
@@ -689,8 +594,6 @@ RiotGalleryViewer = {
     },
 
     addGalleryLiItemsFromInitImages(galKey) {
-        //console.log('setGalleryItemsFromInitImages(gallery) {', galKey);
-
         if (!this.galleries[galKey]) {
             return false;
         }
@@ -713,13 +616,9 @@ RiotGalleryViewer = {
         this.galleries[galKey].isLoaded = true;
 
         return true;
-        //this.galleries[x].isHtmlBuilt = true;
-        //this.galleries[x].images = images;
     },
 
     addGalleryLiItemFromInitImage(galKey, initImageKey) {
-        //console.log('addGalleryLiItemFromInitImage(galKey, initImageKey)', galKey, initImageKey);
-
         if (!this.galleries[galKey]) {
             return false;
         }
@@ -783,13 +682,7 @@ RiotGalleryViewer = {
             liElem.appendChild(divCapElem);
         }
 
-        //setGalleryImageByElem(galKey, elem) {
-
-
-
         this.galleries[galKey].elem.appendChild(liElem);
-
-
 
         return true;
     },
@@ -843,8 +736,8 @@ RiotGalleryViewer = {
     },
 
     /*
-    get the key of the galleries array. if it doesn't exist, add it
-    */
+     * get the key of the galleries array. if it doesn't exist, add it
+     */
     getNewGalleryKeyByElem(elem) {
 
         console.log('getNewGalleryKeyByElem(elem) {', elem);
@@ -879,8 +772,8 @@ RiotGalleryViewer = {
     },
 
     /*
-    add an initImgs record to a gallery record
-    */
+     * add an initImgs record to a gallery record
+     */
     addInitImage(galKey, url, thumbUrl, caption) {
 
         // double check that the gallery exists.
@@ -1082,6 +975,7 @@ RiotGalleryViewer = {
         if (url) {
             return url;
         }
+
         // data-image-url set on li container or children
         // <li data-image-url="./image.jpg"><img src="./thumb.jpg"></li>
         // <li><a href="./image.jpg" data-image-url="./image.jpg"><img src="./thumb.jpg"></a></li>
@@ -1139,7 +1033,6 @@ RiotGalleryViewer = {
      * Get clickable gallery element (loads the image in the viewer) from container element
      */
     getClickElemFromConElem(conElem) {
-
         // a tag (link) with a class of "riot-gallery-image-link"
         // <li><a href="./image.jpg" class="riot-gallery-image-link"><img src="./thumb.jpg"></a></li>
         let elem = this.getSubElemBySelector(conElem, 'a.riot-gallery-image-link');
@@ -1259,6 +1152,7 @@ RiotGalleryViewer = {
                 }
             }
         }
+
         // alt or title of an img with img.riot-gallery-image-thumb class
         // <li><img src="./image.jpg" class="image-thumb" alt="My Pic"></li>
         for (let x = 0; x < imgElems.length; x++) {
@@ -1274,6 +1168,7 @@ RiotGalleryViewer = {
                 }
             }
         }
+        
         // alt or title of an img with img.riot-gallery-image-thumb class
         // <li><img src="./image.jpg" alt="My Pic"></li>
         for (let x = 0; x < imgElems.length; x++) {
@@ -1303,23 +1198,18 @@ RiotGalleryViewer = {
      * event handling (click and other) - START */
 
     itemClicked(galKey, itemKey) {
-        console.log('itemClicked(galKey, itemKey) {', galKey, itemKey);
         this.loadImage(galKey, itemKey, null);
     },
 
     prevClicked() {
-        console.log('prevClicked() {');
         this.incrementImageAndLoad(-1, 'prev');
     },
 
     nextClicked() {
-        console.log('nextClicked() {');
         this.incrementImageAndLoad(1, 'next');
     },
 
     incrementImageAndLoad(increment, transDirection) {
-
-        console.log('increment', transDirection);
         if (!increment) {
             // should not happen
             return;
@@ -1368,9 +1258,6 @@ RiotGalleryViewer = {
 
         this.calculateViewerPlacement();
         this.placeImgInPosition();
-
-        //this.endTransition();
-        //this.placeImage();
     },
 
     /* event handling (click and other) - END
@@ -1416,24 +1303,15 @@ RiotGalleryViewer = {
                     if (!RiotGalleryViewer.isViewerOpen) {
                         return;
                     }
-                    //event.preventDefault();
-                    //event.stopPropagation();
-                    console.log('-----------------img touchstart');
                     RiotGalleryViewer.slideSwipeStartEvent(event);
                 });
                 window.addEventListener("touchend", function (event) {
                     if (!RiotGalleryViewer.isViewerOpen) {
                         return;
                     }
-                    //event.preventDefault();
-                    //event.stopPropagation();
-                    console.log('--------------------img touchend');
                     RiotGalleryViewer.slideSwipeEndEvent(event);
                 });
             }
-
-
-
 
             // background
             // <div id="riot-gallery-viewer-bg"></div>
@@ -1527,29 +1405,11 @@ RiotGalleryViewer = {
                     RiotGalleryViewer.nextClicked();
                 }, false);
 
-                //document.getElementById('my-image').ondragstart = function() { return false; };
-
                 imgElem.addEventListener("ondragstart", function (event) {
-                    //event.preventDefault();
-                    //event.stopPropagation();
                     console.log('-----------------img ondragstart');
-                    //RiotGalleryViewer.slideSwipeStartEvent(event);
                 });
 
-                /*divElem.addEventListener("touchstart", function (event) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    console.log('-----------------img touchstart');
-                    RiotGalleryViewer.slideSwipeStartEvent(event);
-                });
-                divElem.addEventListener("touchend", function (event) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    console.log('--------------------img touchend');
-                    RiotGalleryViewer.slideSwipeEndEvent(event);
-                });*/
                 this.elems.imageCons[x] = divElem;
-                ////
                 this.elems.body.appendChild(divElem);
             }
 
@@ -1595,13 +1455,11 @@ RiotGalleryViewer = {
     loadMaterialIcons() {
         console.log('loadMaterialIcons() {');
         if (this.isMaterialIconsLoadComplete) {
-            console.log('// already loaded 1');
             this.addMaterialIconsToHtml();
             return;
         }
         if (this.areMaterialIconsLoaded()) {
             // already loaded
-            console.log('// already loaded 2');
             this.addMaterialIconsToHtml();
             return;
         }
@@ -1662,14 +1520,6 @@ RiotGalleryViewer = {
                 nextAs[x].appendChild(spanElem);
             }
         }
-
-
-        //document.querySelector('.riot-gallery-viewer-close-con a').innerHTML = 'c';
-        //document.querySelector('#riot-gallery-viewer-prev-con a').innerHTML = 'p';
-        //document.querySelector('#riot-gallery-viewer-next-con a').innerHTML = 'n';
-        //<span class="material-symbols-outlined">close</span>
-        //<span class="material-symbols-outlined">arrow_forward_ios</span>
-        //<span class="material-symbols-outlined">arrow_back_ios_new</span>
     },
 
     /* load HTML viewer - END
@@ -1680,9 +1530,9 @@ RiotGalleryViewer = {
 
 
     /*
-      * Touchscreen swipe started
-      * save time in milliseconds and the X and Y position
-      */
+     * Touchscreen swipe started
+     * save time in milliseconds and the X and Y position
+     */
     slideSwipeStartEvent(event) {
         console.log('slideSwipeStartEvent(event)');
         const temp = this.getSwipeXYFromEvent(event);
@@ -1701,10 +1551,10 @@ RiotGalleryViewer = {
     },
 
     /*
-    * Touchscreen swipe ended
-    * make sure the time and position is valid
-    * go to the next or previous slide
-    */
+     * Touchscreen swipe ended
+     * make sure the time and position is valid
+     * go to the next or previous slide
+     */
     slideSwipeEndEvent(event) {
         console.log('slideSwipeEndEvent(event)');
         if (!this.swipeInfo.startX || !this.swipeInfo.startTime) {
@@ -1741,21 +1591,15 @@ RiotGalleryViewer = {
         const xDif = Math.abs(x - this.swipeInfo.startX);
         //const yDif = Math.abs(y - this.swipeInfo.startY);
 
-        //this.consoleLog('slideSwipeEndEvent - x=' + xDif + 'px, time=' + timeDif + 'MS');
-
         let swipeDistinceSuccess = false;
         if (this.options.swipeMinPx) {
-            console.log('if (xDif >= this.options.swipeMinPx) {', (xDif >= this.options.swipeMinPx), xDif, this.options.swipeMinPx);
             if (xDif >= this.options.swipeMinPx) {
                 swipeDistinceSuccess = true;
             }
         }
 
         if (!swipeDistinceSuccess && this.options.swipeMinPercent) {
-            this.consoleLog('slideSwipeEndEvent - xDif=' + xDif + ', < ' + this.options.swipeMinPx + ', check percednt');
-
             const widthPercent = xDif / window.innerWidth * 100;
-            console.log('if (widthPercent >= this.options.swipeMinPercent)', (widthPercent >= this.options.swipeMinPercent), widthPercent, this.options.swipeMinPercent);
             if (widthPercent >= this.options.swipeMinPercent) {
                 swipeDistinceSuccess = true;
             }
@@ -1819,7 +1663,6 @@ RiotGalleryViewer = {
      * happens on gallery image and previous/next button click
      */
     loadImage(galKey, itemKey, transDirection) {
-        console.log('loadImage(galKey, itemKey, transDirection) {', galKey, itemKey, transDirection);
         const galItem = this.getGalItem(galKey, itemKey);
 
         if (!galItem) {
@@ -1831,11 +1674,6 @@ RiotGalleryViewer = {
         this.endTransition();
 
 
-        //this.viewItemCur ++;
-        //if (this.viewItemCur > 2) {
-        //    this.viewItemCur = 1;
-        //}
-
         if (!this.isViewerOpen) {
             if (!this.isViewerHtmlLoaded) {
                 this.loadViewerHtml();
@@ -1843,101 +1681,66 @@ RiotGalleryViewer = {
             this.openViewer();
             this.setWindowSize();
         }
-        //console.log('zzzzzzzzzzzzzzzz a');
-        //      if (this.options.transitionType === 'none') {
-        //          console.log('zzzzzzzzzzzzzzzz b');
-        //          this.removePrevViewer();
-        //      }
-
 
         console.log('viewerPrevKey set to cur key', this.viewerPrevKey);
         if (this.viewerCurKey === null || this.options.transitionType === 'none') {
             this.viewerCurKey = 0;
-            //console.log('b', this.viewerCurKey);
         } else {
             this.viewerPrevKey = this.viewerCurKey;
             this.viewerCurKey++;
-            //console.log('c', this.viewerCurKey);
             if (this.viewerCurKey >= 2) {
                 this.viewerCurKey = 0;
-                //console.log('d', this.viewerCurKey);
             }
         }
 
-
         this.viewers[this.viewerCurKey] = this.getByVal(this.viewerBlank);
 
-        //this.viewItemCur = this.getByVal(this.viewItemBlank);
-
-        //this.viewItemCur.galKey = galKey;
-        //this.viewItemCur.itemKey = itemKey;
         this.viewers[this.viewerCurKey].galKey = galKey;
         this.viewers[this.viewerCurKey].itemKey = itemKey;
 
-        //console.log('viewers',this.viewers,this.viewerPrevKey,this.viewerCurKey);
-
-        console.log('START load image');
-        //console.log('a1');
         if (!galItem.isLoaded) {
-            console.log('!galItem.isLoaded');
             var img = new Image();
             img.src = galItem.url;
-            //console.log(img.src);
             if (img.complete) {
-                console.log('img.complete');
-                //console.log('if (img.complete) {');
-                //console.log(this.viewers);
+                this.consoleLog('display already loaded image', img);
                 this.updateGalItem(galKey, itemKey, img, false);
-                //console.log(this.viewers);
             } else {
-                //console.log('d1');
-                //console.log('ELSE if (img.complete) {');
                 img.galKey = galKey;
                 img.itemKey = itemKey;
-                //    this.startImageLoad();
-                console.log('img.onload');
+
                 img.onload = function (e) {
-                    //console.log('e1');
-                    console.log('IMAGE LOADED');
+                    // update the gallery item. even if we've moved on to another image, we'll set values in case the image is displayed again
                     RiotGalleryViewer.updateGalItem(this.galKey, this.itemKey, img, false);
+
                     if (!RiotGalleryViewer.isViewerOpen || RiotGalleryViewer.galKey === null || RiotGalleryViewer.itemKey === null) {
+                        // we've moved on to another image or closed the viewer, don't update view
                         return false;
                     }
                     const viewer = RiotGalleryViewer.getViewerCur();
                     if (viewer.galKey === this.galKey && viewer.itemKey === this.itemKey) {
                         // image has not changed since start of image load
-                        //RiotGalleryViewer.updateViewerImg();
-                        //console.log('f1');
                         RiotGalleryViewer.calculateViewerPlacement();
                         RiotGalleryViewer.placeImgInPosition();
                     }
                 }
-                //console.log('g1');
+
                 img.onerror = function (e) {
-                    //console.log('h1');
-                    //console.log('IMAGE ERROR');
                     RiotGalleryViewer.consoleLog('image not found. can not load', this.url);
                     RiotGalleryViewer.updateGalItem(this.galKey, this.itemKey, null, true);
-                    //RiotGalleryViewer.updateGalItem(this.galKey, this.itemKey, img, false);
                     const viewer = RiotGalleryViewer.getViewerCur();
                     if (viewer.galKey === this.galKey && viewer.itemKey === this.itemKey) {
-                        //console.log('i1');
-                        //RiotGalleryViewer.setImage();
-                        //RiotGalleryViewer.updateViewerImg();
                         RiotGalleryViewer.calculateViewerPlacement();
                         RiotGalleryViewer.placeImgInPosition();
-                        //RiotGalleryViewer.placeImage(this.galKey, this.itemKey);
                         RiotGalleryViewer.updateCaption();
                     }
                 }
+                this.consoleLog('load image', img);
             }
 
         }
-        //console.log('j1');
         this.calculateViewerPlacement(transDirection);
         this.placeImgInPosition();
         this.updateCaption();
-
     },
 
     /*
@@ -1953,14 +1756,12 @@ RiotGalleryViewer = {
     },
 
     closeViewer() {
-        console.log('closeViewer()');
         this.elems.body.classList.remove('riot-gallery-viewer-open');
         this.isViewerOpen = false;
         this.resetViewerValues();
     },
 
     resetViewerValues() {
-        console.log('resetViewerValues() {');
         for (let x = 0; x < this.elems.imageCons.length; x++) {
             this.elems.images[x].src = this.blankImageSrc;
             this.elems.imageCons[x].classList.remove('is-displayed');
@@ -1970,7 +1771,6 @@ RiotGalleryViewer = {
     },
 
     updateGalItem(galKey, itemKey, img, isError) {
-        console.log('updateGalItem', galKey, itemKey, img, isError);
         if (!this.isGalItem(galKey, itemKey)) {
             return;
         }
@@ -1999,9 +1799,6 @@ RiotGalleryViewer = {
             if (viewer.transition) {
                 for (var prop in viewer.transition) {
                     if (Object.prototype.hasOwnProperty.call(viewer.transition, prop)) {
-                        // do stuff
-                        console.log(prop, viewer.transition[prop]);
-                        //hasTransition = true;
                         if (prop === 'left') {
                             this.elems.imageCons[this.viewerCurKey].style.left = viewer.left + 'px';
                         }
@@ -2024,97 +1821,56 @@ RiotGalleryViewer = {
         }
         console.log(this.transition);
         if (this.transition) {
-            console.log('if (this.transition) {', this.transition);
-            //if (this.transition.isTransitioning) {
-                clearInterval(this.transition.jsTnterval);
-            //}
-            //this.transition = this.getByVal(this.transitionBlank);
+            clearInterval(this.transition.jsTnterval);
             this.transition = null;
         }
 
         this.removePrevViewer();
-
     },
 
     removePrevViewer() {
-        console.log('removePrevViewer() {');
         if (this.viewerPrevKey !== null) {
-            console.log('if (this.viewerPrevKey !== null) {');
             this.elems.imageCons[this.viewerPrevKey].classList.remove('is-displayed');
             this.elems.images[this.viewerPrevKey].src = this.blankImageSrc;
             this.viewers[this.viewerPrevKey] = null;
             this.viewerPrevKey = null;
-            console.log('removePrevViewer - this.viewerPrevKey set to null', this.viewerPrevKey);
         }
     },
 
     transitionFrame() {
-        //console.log('transitionFrame() {');
         if (!this.transition) {
             this.endTransition();
             return;
         }
 
         const curMs = this.getCurMs();
-
         const k = this.viewerCurKey;
         const viewer = this.viewers[k];
 
-        //const viewerPrev = this.viewers[this.viewerPrevKey];
-
-        //viewer.left = viewer.transition[prop];
-
-        console.log('if (!this.transition.endTimeMs || curMs > this.transition.endTimeMs) {', curMs, this.transition.endTimeMs);
-
         if (!this.transition.endTimeMs || curMs > this.transition.endTimeMs) {
-            console.log('mmmmmmmmmmmmmmmmmmm this.endTransition();');
             this.endTransition();
-            //this.placeImgInPosition();
-            /*for (var prop in viewer.transition) {
-                if (Object.prototype.hasOwnProperty.call(viewer.transition, prop)) {
-                    // do stuff
-                    hasTransition = true;
-                    if (prop === 'left') {
-                        this.elems.imageCons[k].style.left = viewer.left + 'px';
-                    }
-                }
-            }*/
             return;
-        } /**/
+        }
 
         const timeSinceTransStart = curMs - this.transition.startTimeMs;
         const percentToEnd = timeSinceTransStart / (this.options.transitionSeconds * 1000);
         const percentToStart = 1 - percentToEnd;
 
-        /*let newLeft = (percentToStart * this.viewItemCur.transLeftPx) + (percentToEnd * this.viewItemCur.left);
-        this.elems.imageCon.style.left = newLeft + 'px';
- 
-        newLeft = (percentToEnd * this.viewItemPrev.transLeftPx) + (percentToStart * this.viewItemPrev.left);
-        this.elems.imageTransCon.style.left = newLeft + 'px';*/
-
-        //console.log('viewer.transition', viewer.transition);
-
         let prevViewer = null;
         if (this.viewerPrevKey !== null) {
             prevViewer = this.viewers[this.viewerPrevKey];
         }
-console.log(viewer.transition);
+
         for (var prop in viewer.transition) {
             if (Object.prototype.hasOwnProperty.call(viewer.transition, prop)) {
-                // do stuff
-                console.log('-------------', prop, viewer.transition[prop]);
-                //hasTransition = true;
                 if (prop === 'left') {
-                    console.log('if (prop === \'left\') {');
                     let newLeft;
                     if (prevViewer) {
                         newLeft = (percentToStart * prevViewer.left) + (percentToEnd * prevViewer.transition[prop]);
                         this.elems.imageCons[this.viewerPrevKey].style.left = newLeft + 'px';
                     }
                     newLeft = (percentToStart * viewer.transition[prop]) + (percentToEnd * viewer.left);
-                    console.log('newLeft = (percentToStart * viewer.transition[prop]) + (percentToEnd * viewer.left);', newLeft, percentToStart, viewer.transition[prop], percentToEnd, viewer.left);
                     this.elems.imageCons[k].style.left = newLeft + 'px';
-                    console.log('newLeft', newLeft);
                 }
                 if (prop === 'top') {
                     let newTop;
@@ -2150,7 +1906,6 @@ console.log(viewer.transition);
                         this.elems.imageCons[this.viewerPrevKey].style.opacity = newOpacity;
                     }
                     newOpacity = (percentToStart * 0) + (percentToEnd * 1);
-                    //console.log('newLeft = (percentToStart * viewer.transition[prop]) + (percentToEnd * viewer.left);', newLeft, percentToStart, viewer.transition[prop], percentToEnd, viewer.left);
                     this.elems.imageCons[k].style.opacity = newOpacity;
                 }
             }
@@ -2167,15 +1922,11 @@ console.log(viewer.transition);
     },
 
     calculateViewerPlacement(transDirection) {
-        console.log('calculateViewerPlacement(transDirection) { ____________________________________________________________');
         if (!transDirection) {
             transDirection = null;
         }
-        console.log('calculateViewerPlacement(transDirection) {', transDirection);
-        //console.log('calculateViewerPlacement() {');
-        const item = this.getCurGalItem();
 
-        //console.log(item);
+        const item = this.getCurGalItem();
 
         let imgWidth = this.options.defaultImgSize;
         let imgHeight = this.options.defaultImgSize;
@@ -2191,28 +1942,21 @@ console.log(viewer.transition);
         let viewerWidth = imgWidth;
         let viewerHeight = imgHeight;
 
-        //console.log('a', viewerWidth, viewerHeight);
-
         const maxWidth = this.windowWidth - 40;
         const maxHeight = this.windowHeight - 24;
 
         if (viewerWidth > maxWidth) {
             viewerWidth = maxWidth;
             viewerHeight = imgHeight / imgWidth * viewerWidth;
-            //console.log('b', viewerWidth, viewerHeight);
         }
-
-
 
         if (viewerHeight > maxHeight) {
             viewerHeight = maxHeight;
             viewerWidth = imgWidth / imgHeight * viewerHeight;
-            //console.log('c', viewerWidth, viewerHeight);
         }
 
         let viewerLeft = (this.windowWidth - viewerWidth) / 2;
         let viewerTop = (this.windowHeight - viewerHeight) / 2;
-        //console.log('viewerTop = (this.windowHeight - viewerHeight) / 2;', viewerTop, this.windowHeight, viewerHeight);
 
         if (isLoadingImage) {
             viewerLeft = viewerLeft - 8;
@@ -2220,7 +1964,6 @@ console.log(viewer.transition);
             conPadding = 8;
         }
 
-        //console.log(pos);
         let closeRight = -28;
         let closeTop = -28;
         if (viewerTop < 36) {
@@ -2230,40 +1973,8 @@ console.log(viewer.transition);
             closeRight = closeRight + (98 - viewerLeft);
         }
 
-
-        /*this.viewItemCur.width = viewerWidth;
-        this.viewItemCur.height = viewerHeight;
-        this.viewItemCur.left = viewerLeft;
-        this.viewItemCur.top = viewerTop;
-        this.viewItemCur.closeTop = closeTop;
-        this.viewItemCur.closeRight = closeRight;
-        this.viewItemCur.padding = conPadding;*/
         const curK = this.viewerCurKey;
 
-        /* let prevWidth = null;
-         let prevHeight = null;
-         let prevLeft = null;
-         let prevTop = null;
- 
-         console.log('zzzzzzzzzzzzzzzz');
-         if (this.options.transitionType === 'size' && curK !== null) {
-             console.log('yyyyyyyyyyyyy');
-             if (this.viewers[curK]) {
-                 console.log('xxxxxxxxxxxxxx');
-                 console.log(this.viewers[curK]);
-                 console.log(this.viewers[curK].width);
-                 if (this.viewers[curK].width) {
-                     console.log('wwwwwwwwwwwwwwww');
-                     prevWidth = this.viewers[curK].width;
-                     prevHeight = this.viewers[curK].height;
-                     prevLeft = this.viewers[curK].left;
-                     prevTop = this.viewers[curK].top;
-                     console.log('this.viewers[curK]', this.viewers[curK]);
-                     console.log('prevWidth', prevWidth);
-                 }
-             }
-         }
- console.log('yyyyyyyyyyy transDirection',transDirection, curK, this.viewers, prevWidth);*/
         this.viewers[curK].width = viewerWidth;
         this.viewers[curK].height = viewerHeight;
         this.viewers[curK].left = viewerLeft;
@@ -2275,15 +1986,13 @@ console.log(viewer.transition);
         const transExtraDistance = 4;
         const closeXWidth = 40;
 
-        console.log('111111111111 transDirection', transDirection);
         if (transDirection !== null) {
-            console.log('222222222222222222');
             const prevK = this.viewerPrevKey;
             this.viewers[curK].transition = {};
             if (prevK !== null) {
                 this.viewers[prevK].transition = {};
             }
-            console.log('--------2221', prevK);
+
             if (prevK !== null) {
                 if (this.options.transitionType === 'slide' || this.options.transitionType === 'slidefade') {
                     if (transDirection === 'prev') {
@@ -2296,7 +2005,6 @@ console.log(viewer.transition);
                 }
 
                 if (this.options.transitionType === 'size') {
-                    console.log('444444444444444444');
                     this.viewers[curK].transition.width = this.viewers[prevK].width;
                     this.viewers[curK].transition.height = this.viewers[prevK].height;
                     this.viewers[curK].transition.left = this.viewers[prevK].left;
@@ -2306,8 +2014,6 @@ console.log(viewer.transition);
                 console.log(this.viewers[curK].transition);
 
             }
-            console.log('33333333333333333');
-
 
             if (this.options.transitionType === 'fade' || this.options.transitionType === 'slidefade') {
                 this.viewers[curK].transition.opacity = 0;
@@ -2315,129 +2021,48 @@ console.log(viewer.transition);
                     this.viewers[prevK].transition.opacity = 0;
                 }
             }
-
         }
-
-        console.log(this.viewers, curK);
-
-        //console.log('-=-=-=-=--=-=-=-=-=--=-=-=--=-=-');
-
-        //console.log('calculateViewerPlacement', this.viewers);
     },
 
     updateImgClassesAndSrc() {
-        console.log('updateImgClassesAndSrc() {');
         const item = this.getCurGalItem();
         const curK = this.viewerCurKey;
 
         let src = this.blankImageSrc;
 
         if (item.isError) {
-            //console.log('a');
             this.elems.imageCons[curK].classList.add('is-error');
             this.elems.imageCons[curK].classList.remove('is-loading');
         } else if (!item.isLoaded) {
-            //console.log('b');
             this.elems.imageCons[curK].classList.add('is-loading');
             this.elems.imageCons[curK].classList.remove('is-error');
         } else {
-            //console.log('c');
             this.elems.imageCons[curK].classList.remove('is-loading', 'is-error');
             if (item.url) {
-                //console.log('d');
                 src = item.url;
             }
         }
         this.elems.images[curK].src = item.url;
-
-        
     },
 
-    /*getIsTransitioning() {
-        console.log('getIsTransitioning()', 'this.transition', this.transition);
-        if (this.transition) {
-            //if (this.transition.isTransitioning) {
-            return true;
-            //}
-        }
-        return false;
-    },*/
-
     placeImgInPosition() {
-        console.log('placeImgInPosition() {');
-        //this.endTransition();
-
-        //if (!transType) {
-        //    transType = null
-        //}
-
-
-
-
-
-        //const item = this.getCurGalItem();
-        //console.log('1178 item', item);
-
         const curK = this.viewerCurKey;
 
         if (curK === null) {
             return;
         }
 
-        //const prevK = this.viewerPrevKey;
-
-
-        //console.log('curK prevK', curK, prevK);
-
-        //isImgLoaded = false;
-
-
-
-
-        //console.log('curK', curK, this.elems.imageCons[curK]);
-
-
-
         const viewer = this.getViewerCur();
-        //console.log(this.viewerCurKey, this.elems);
-        // image is complete
-
-        //this.elems.images[k].src = item.url;
-        //console.log('zzzzzzzz', transType, this.viewerPrevKey);
-        //if (transType && this.viewerPrevKey !== null) {
-        //    this.transImg(transType);
-        //    return;
-        //}
-
-
-        //const viewer = this.viewers[curK];
-
-
-
-        /*if (this.viewItemPrev) {
-            this.elems.imageCons[curK].classList.remove('is-loading', 'is-error', 'is-displayed');
-            this.elems.images[curK].src = this.blankImageSrc;
-        }*/
-        ///console.log('ttttttttttttttttt', item);
-
-
 
         this.elems.imageCons[curK].classList.add('is-displayed');
-
-
 
         let curLeft = viewer.left;
         let curTop = viewer.top;
         let curWidth = viewer.width;
         let curHeight = viewer.height;
-        console.log('CHECK TRANSITIONING');
         if (this.transition) {
-            console.log('if (this.getIsTransitioning()) { is TRUE');
             for (var prop in viewer.transition) {
                 if (Object.prototype.hasOwnProperty.call(viewer.transition, prop)) {
-                    // do stuff
-                    console.log(prop, viewer.transition[prop]);
-                    //hasTransition = true;
                     if (prop === 'left') {
                         curLeft = null;
                     } else if (prop === 'top') {
@@ -2450,71 +2075,45 @@ console.log(viewer.transition);
                 }
             }
         }
-        //console.log('isTransitioning', isTransitioning);
-        //if (hasTransition) {
-        //let doPlaceLeft = true;
 
-        //if (transType) {
         let isNewTransition = false;
-        //console.trace();
-        console.log('a************************ ', this.transition);
-        console.log('b************************ ', viewer.transition);
         
         if (curLeft !== null) {
             if (viewer.transition) {
                 if (Object.keys(viewer.transition).length > 0) {
                     isNewTransition = true;
-                    console.log('--------------------------------------------------- transition when the new transition starts', this.transition);
                     this.transition = this.getByVal(this.transitionBlank);
-                    //this.transition.isTransitioning = true;
                     this.transition.startTimeMs = this.getCurMs();
                     this.transition.endTimeMs = this.transition.startTimeMs + (this.options.transitionSeconds * 1000);
-                    console.log('------------- this.transition.jsTnterval = setInterval(function () {');
+
                     this.transition.jsTnterval = setInterval(function () {
                         RiotGalleryViewer.transitionFrame();
                     }, this.options.transitionFrameSeconds * 1000);
-                    console.log('b', this.transition);
-                    //console.log('77777777777 viewer', viewer);
-                    //console.log('a');
+
                     if (viewer.transition.hasOwnProperty('left')) {
-                        //console.log('b');
                         if (viewer.transition.left !== null) {
-                            //console.log('c');
                             curLeft = viewer.transition.left;
-                            //console.log('d');
                         }
                     }
                     if (viewer.transition.hasOwnProperty('top')) {
-                        //console.log('b');
                         if (viewer.transition.top !== null) {
-                            //console.log('c');
                             curTop = viewer.transition.top;
-                            //console.log('d');
                         }
                     }
                     if (viewer.transition.hasOwnProperty('width')) {
-                        //console.log('b');
                         if (viewer.transition.width !== null) {
-                            //console.log('c');
                             curWidth = viewer.transition.width;
-                            //console.log('d');
                         }
                     }
                     if (viewer.transition.hasOwnProperty('height')) {
-                        //console.log('b');
                         if (viewer.transition.height !== null) {
-                            //console.log('c');
                             curHeight = viewer.transition.height;
-                            //console.log('d');
                         }
                     }
-
-                    //console.log('placeImgInPosition', viewer);
-                    //console.log(this.elems.imageCons);
                 }
             }
         }
-        //console.log('e', curLeft);
+
         if (curLeft !== null) {
             this.elems.imageCons[curK].style.left = curLeft + 'px';
         }
@@ -2539,13 +2138,7 @@ console.log(viewer.transition);
         this.elems.closeCons[curK].style.right = viewer.closeRight + 'px';
         this.elems.closeCons[curK].style.top = viewer.closeTop + 'px';
 
-
-
-        console.log(this.elems.imageCons);
-
         this.updateImgClassesAndSrc();
-
-        //this.elems.images[curK].src = item.url;
 
         if (this.options.transitionType === 'size') {
             this.removePrevViewer();
@@ -2554,7 +2147,7 @@ console.log(viewer.transition);
 
     updateCaption() {
         const item = this.getCurGalItem();
-        //imageFailedCaptionHtml
+
         if (item.isError && this.options.imageFailedCaptionHtml) {
             this.elems.caption.innerHTML = this.options.imageFailedCaptionHtml;
             this.elems.captionCon.classList = 'is-displayed';
@@ -2571,8 +2164,6 @@ console.log(viewer.transition);
     /* Item/image display - END
      *****************************************************************************
      *****************************************************************************/
-
-
 
 
 
@@ -2630,7 +2221,6 @@ console.log(viewer.transition);
     },
 
     getSubElemTextBySelector(elem, selector) {
-
         const subElem = this.getSubElemBySelector(elem, selector);
         if (!subElem) {
             return null;
@@ -2767,10 +2357,10 @@ console.log(viewer.transition);
      *****************************************************************************/
 
 
+
     /*****************************************************************************
      *****************************************************************************
      * Helper - START - not specific to this program */
-
 
     createXHR() {
         if (window.XMLHttpRequest) { // Modern browsers
@@ -2801,8 +2391,7 @@ console.log(viewer.transition);
                 return str;
             }
         }
-        //const temp = str; 
-        //console.log(temp);
+
         for (let x = 0; x < from.length; x++) {
             let curFrom = from[x];
             let prev = '';
@@ -2811,7 +2400,7 @@ console.log(viewer.transition);
                 str = str.replace(curFrom, to, str);
             }
         }
-        //console.log('strReplace', from, to, temp, str);
+
         return str;
     },
 
