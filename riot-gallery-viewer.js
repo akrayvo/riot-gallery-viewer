@@ -115,16 +115,16 @@ RiotGalleryViewer = {
         doConsoleLog: false,
         // write a code trace on every console log. needed for troubeshooting/testing/development only
         doConsoleTrace: false,
-        transitionSeconds: .7,
-        transitionFrameSeconds: .01,
+        transitionSeconds: 0.7,
+        transitionFrameSeconds: 0.01,
         imageFailedCaptionHtml: '<i>Could Not Load Image</i>',
         defaultImgSize: 300,
-        transitionType: 'size', // "none", "size", "slide", "fade", "slidefade"
+        transitionType: 'slide', // "none", "size", "slide", "fade", "slidefade"
         useMaterialIcons: true,
-        doTouchSwipe: false,
-        swipeMinPx: 200,
-        swipeMinPercent: 50,
-        swipeMaxSeconds: 500
+        doTouchSwipe: true,
+        swipeMinPx: 1000,
+        swipeMinPercent: 60,
+        swipeMaxSeconds: 10.5
     },
 
     materialIconsCssUrl: 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined',
@@ -1168,7 +1168,7 @@ RiotGalleryViewer = {
                 }
             }
         }
-        
+
         // alt or title of an img with img.riot-gallery-image-thumb class
         // <li><img src="./image.jpg" alt="My Pic"></li>
         for (let x = 0; x < imgElems.length; x++) {
@@ -1591,24 +1591,32 @@ RiotGalleryViewer = {
         const xDif = Math.abs(x - this.swipeInfo.startX);
         //const yDif = Math.abs(y - this.swipeInfo.startY);
 
-        let swipeDistinceSuccess = false;
-        if (this.options.swipeMinPx) {
-            if (xDif >= this.options.swipeMinPx) {
-                swipeDistinceSuccess = true;
+        if (this.options.swipeMinPx || this.options.swipeMinPercent) {
+            let swipeDistinceSuccess = false;
+            
+            if (this.options.swipeMinPx) {
+                console.log('if (xDif >= this.options.swipeMinPx) {', xDif, this.options.swipeMinPx);
+                if (xDif >= this.options.swipeMinPx) {
+                    swipeDistinceSuccess = true;
+                }
+                console.log('swipeDistinceSuccess', swipeDistinceSuccess);
             }
-        }
 
-        if (!swipeDistinceSuccess && this.options.swipeMinPercent) {
-            const widthPercent = xDif / window.innerWidth * 100;
-            if (widthPercent >= this.options.swipeMinPercent) {
-                swipeDistinceSuccess = true;
+            if (!swipeDistinceSuccess && this.options.swipeMinPercent) {
+                
+                const widthPercent = xDif / window.innerWidth * 100;
+                console.log('if (widthPercent >= this.options.swipeMinPercent) {', widthPercent, this.options.swipeMinPercent);
+                if (widthPercent >= this.options.swipeMinPercent) {
+                    swipeDistinceSuccess = true;
+                }
+                console.log('swipeDistinceSuccess', swipeDistinceSuccess);
             }
-        }
 
-        if (this.options.swipeMinPercent && this.options.swipeMinPx && !swipeDistinceSuccess) {
-            this.swipeInfoReset();
-            this.consoleLog('swipe distance was insufficient. Do not go to next image.');
-            return;
+            if (!swipeDistinceSuccess) {
+                this.swipeInfoReset();
+                this.consoleLog('swipe distance was insufficient. Do not go to next image.');
+                return;
+            }
         }
 
 
@@ -2077,7 +2085,7 @@ RiotGalleryViewer = {
         }
 
         let isNewTransition = false;
-        
+
         if (curLeft !== null) {
             if (viewer.transition) {
                 if (Object.keys(viewer.transition).length > 0) {
