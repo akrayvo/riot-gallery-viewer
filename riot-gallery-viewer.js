@@ -111,21 +111,42 @@ RiotGalleryViewer = {
 
 
     options: {
+        // 
+        preloadImagesType: 'prevNext', // none, pageLoad, galleryLoad, prevNext
         // write information to the console log. needed for troubeshooting/testing/development only
         doConsoleLog: false,
         // write a code trace on every console log. needed for troubeshooting/testing/development only
         doConsoleTrace: false,
-        transitionSeconds: 0.7,
-        transitionFrameSeconds: 0.01,
-        imageFailedCaptionHtml: '<i>Could Not Load Image</i>',
-        defaultImgSize: 300,
-        transitionType: 'slide', // "none", "size", "slide", "fade", "slidefade"
+
+        // should material icons be loaded. 
+        // if so, the close, previous, and next buttons will look nicer. if not, the page will load slighly faster
         useMaterialIcons: true,
+
+        // the number of seconds to transition from one image to another. min = 0.1, max = 5
+        transitionSeconds: 0.7,
+        // the number of seconds between animation updates.
+        // higher number = smoother, lower number = less computations. min = 0.02, max = 0.25
+        transitionFrameSeconds: 0.04,
+        // text to display in the caption if an image does not load. can include html
+        imageFailedCaptionHtml: '<i>Could Not Load Image</i>',
+        // default image size. will be used while an image is loaded (spinner) and or fails loading (red)
+        // min = 200, max = 1000
+        defaultImgSize: 300,
+        // transition from one image to another. see validTransitionTypes
+        transitionType: 'slide',
+        // allow users on touch screens (phones, tables) to swipe to the previous or next image.
         doTouchSwipe: true,
-        swipeMinPx: 1000,
+        // doTouchSwipe is true, this determines the minimum number of pixels to swipe. min=0, max = 1000
+        SwipeMinPixels: 200,
+        // doTouchSwipe is true, this determines the minimum number of % of the screen to swipe. min=0, max = 90  
         swipeMinPercent: 60,
-        swipeMaxSeconds: 10.5
+        // doTouchSwipe is true, this determines the minimum number of seconds to swipe. min=0, max = 2
+        swipeMaxSeconds: 0.8
     },
+
+    validPreloadImagesTypes: ["none", "pageLoad", "galleryLoad", "prevNext"],
+
+    validTransitionTypes: ["none", "size", "slide", "fade", "slidefade"],
 
     materialIconsCssUrl: 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined',
 
@@ -135,8 +156,8 @@ RiotGalleryViewer = {
     windowHeight: null,
 
     /*****************************************************************************
-         *****************************************************************************
-         * User Input - START - User functions to build and load galleries */
+     *****************************************************************************
+     * User Input - START - User functions to build and load galleries */
 
     /*
      * add an image to a gallery
@@ -149,14 +170,14 @@ RiotGalleryViewer = {
         const galleryKey = this.getGalleryKeyByElemId(galleryElemId); // , false
 
         if (galleryKey === false) {
-            this.consoleLog('ERROR - addImage failed, could not find gallery', galleryElemId);
+            this.consoleError('addImage failed, could not find gallery', galleryElemId);
             return false;
         }
 
         if (this.addInitImage(galleryKey, url, thumbUrl, caption)) {
             this.consoleLog('image added', url);
         } else {
-            this.consoleLog('ERROR - image added failed', url);
+            this.consoleError('image added failed', url);
         }
     },
 
@@ -169,14 +190,14 @@ RiotGalleryViewer = {
      */
     addImagesByFile(galleryElemId, fileUrl) {
         if (!fileUrl || typeof fileUrl !== 'string') {
-            this.consoleLog('addGalleryByString failed, no fileUrl', fileUrl, typeof fileUrl);
+            this.consoleError('addGalleryByString failed, no fileUrl', fileUrl, typeof fileUrl);
             return false;
         }
 
         const galleryKey = this.getGalleryKeyByElemId(galleryElemId);
 
         if (galleryKey === false) {
-            this.consoleLog('ERROR - could not add add images to failed gallery', galleryElemId);
+            this.consoleError('could not add add images to failed gallery', galleryElemId);
             return false;
         }
 
@@ -189,7 +210,7 @@ RiotGalleryViewer = {
      * set global options to determine the style and behavior of the gallery
      * called by user
      */
-    setOption(option, value) {
+    /*setOption(option, value) {
 
         if (typeof value === 'undefined') {
             this.consoleLog('setOption - ERROR - no value passed', option);
@@ -208,9 +229,147 @@ RiotGalleryViewer = {
 
         this.consoleLog('setOption - ERROR - invalid option passed', option);
         return false;
-    },
+    },*/
 
     /* User Input - END
+     *****************************************************************************
+     *****************************************************************************/
+
+
+
+    /*****************************************************************************
+     *****************************************************************************
+     * Set options - START - User specified settings */
+
+    setOptionBoolen(option, passedValue) {
+        let value = false;
+        if (passedValue) {
+            value = true;
+        }
+
+        this.options[option] = value;
+        this.consoleLog('option value set', option, this.options[option]);
+        return true;
+    },
+
+    setOptionFloat(option, value, min, max) {
+        const valueType = typeof value;
+
+        if (valueType === 'string') {
+            if (isNaN(value)) {
+                this.consoleError('option value must be a number, string passed', option, value);
+                return false;
+            }
+            value = parseFloat(value);
+        } else if (valueType === 'number') {
+            // the value is already a number, do nothing
+        } else if (valueType === 'null') {
+            value = 0;
+        } else {
+            // not a string or a number
+            this.consoleError('option value must be a number', option, value, typeof value);
+            return false;
+        }
+
+        if (value < min || value > max) {
+            this.consoleError('option value not in range', option, value, 'must be between', min, 'and', max);
+            return false;
+        }
+
+        if (value > max) {
+            this.consoleError('invalid option value, must be less than maximum', option, value, max);
+            return false;
+        }
+
+        this.options[option] = value;
+        this.consoleLog('option value set', option, value);
+        return true;
+    },
+
+    setOptionString(option, value) {
+        const valueType = typeof value;
+
+        if (valueType === 'string') {
+            // the value is already a string, do nothing
+        } else if (valueType === 'null') {
+            value = '';
+        } else if (valueType === 'number' || valueType === 'bigint') {
+            value = value.toString();
+        } else {
+            this.consoleError('option value must be a string', option, value, typeof value);
+            return false;
+        }
+
+        this.options[option] = value;
+        this.consoleLog('option value set', option, value);
+        return true;
+    },
+
+    setOptionFromValid(option, value, validValues) {
+        if (validValues.indexOf(value) >= 0) {
+            this.options[option] = value;
+            this.consoleLog('option value set', option, value);
+            return true;
+        }
+        this.consoleError('option doesn\'t exist', option, value);
+        return false;
+    },
+
+    setOption(option, value) {
+
+        if (typeof value === 'undefined') {
+            this.consoleError('setOption called with no value', option);
+            return;
+        }
+
+        if (!option) {
+            this.consoleError('setOption called with no option');
+            return;
+        }
+
+        if (typeof option !== 'string') {
+            this.consoleError('setOption requires the option (field) to be a string', option);
+            return;
+        }
+
+        // set to lower case so check is case insensiteive. ex: "transitionType" = "transitiontype" = "TRANSITIONTYPE"
+        option = option.toLowerCase();
+
+        switch (option) {
+            case 'preloadimagestype':
+                return this.setOptionFromValid('preloadImagesType', value, this.validPreloadImagesTypes);
+            case 'doconsolelog':
+                return this.setOptionBoolen('doConsoleLog', value);
+            case 'doconsoletrace':
+                return this.setOptionBoolen('doConsoleTrace', value);
+            case 'usematerialicons':
+                return this.setOptionBoolen('useMaterialIcons', value);
+            case 'transitionseconds':
+                return this.setOptionFloat('transitionSeconds', value, 0.1, 5);
+            case 'transitionframeseconds':
+                return this.setOptionFloat('transitionFrameSeconds', value, 0.02, 0.25);
+            case 'imagefailedcaptionghtml':
+                return this.setOptionString('imageFailedCaptionHtml', value);
+            case 'defaultimgsize':
+                return this.setOptionFloat('defaultImgSize', value, 200, 1000);
+            case 'transitiontype':
+                return this.setOptionFromValid('validTransitionTypes', value, this.validTransitionTypes);
+            case 'dotouchswipe':
+                return this.setOptionBoolen('doTouchSwipe', value);
+            case 'SwipeMinPixels':
+                return this.setOptionFloat('SwipeMinPixels', value, 0, 1000);
+            case 'swipeminpercent':
+                return this.setOptionFloat('swipeMinPercent', value, 0, 90);
+            case 'swipemaxseconds':
+                return this.setOptionFloat('swipeMaxSeconds', value, 0, 2);
+        }
+
+        this.consoleError('invalid option', option, value);
+        return true;
+    },
+
+
+    /* Set options - END
      *****************************************************************************
      *****************************************************************************/
 
@@ -252,17 +411,85 @@ RiotGalleryViewer = {
         }
         this.buildHtmlGalleries();
         this.setGalleriesByClass();
+        if (this.options.preloadImagesType === 'pageLoad') {
+            this.preloadAllImages();
+        }
     },
 
     /* Initialization - END
      *****************************************************************************
      *****************************************************************************/
+    
+    
+    /*****************************************************************************
+     *****************************************************************************
+     * Preload Images - START */
 
+    preloadAllImages() {
+        for (let galKey = 0; galKey < this.galleries.length; galKey++) {
+            this.preloadGalleryImages(galKey);
+        }
+    },
+
+    preloadGalleryImages(galKey) {
+        if (!this.galleries[galKey]) {
+            return;
+        }
+        for (let itemKey = 0; itemKey < this.galleries[galKey].items.length; itemKey++) {
+            this.preloadImage(galKey, itemKey);
+        }
+    },// url of the full sized display image
+
+
+    preloadImage(galKey, itemKey) {
+        if (!this.galleries[galKey]) {
+            return;
+        }
+        if (itemKey < 0) {
+            itemKey = this.galleries[galKey].items.length - 1;
+        }
+        if (itemKey >= this.galleries[galKey].items.length) {
+            itemKey = 0;
+        }
+
+        if (!this.galleries[galKey].items[itemKey]) {
+            return;
+        }
+
+        const item = this.galleries[galKey].items[itemKey];
+
+        if (item.isLoaded || item.isError) {
+            return;
+        }
+
+        
+        const img = new Image();
+        img.src = item.url;
+        img.galKey = galKey;
+        img.itemKey = itemKey;
+        this.consoleLog('start image preload', item.url);
+
+        img.onload = function (e) {
+            RiotGalleryViewer.consoleLog('image url preload successful', img.src);
+            RiotGalleryViewer.updateGalItem(this.galKey, this.itemKey, img, false);
+        }
+
+        img.onerror = function (e) {
+            RiotGalleryViewer.consoleError('image url preload load error', this.src);
+            RiotGalleryViewer.updateGalItem(this.galKey, this.itemKey, null, true);
+        }
+    },
+
+
+
+    /* Preload Images - END
+     *****************************************************************************
+     *****************************************************************************/  
 
 
     /*****************************************************************************
      *****************************************************************************
-    * Get images from remote text files - START - either a list or json */
+     * Get images from remote text files - START - either a list or json */
 
     /*
      * process remote urls (files with lists of images for galleries)
@@ -700,12 +927,12 @@ RiotGalleryViewer = {
     getGalleryKeyByElemId(elemId) {
 
         if (typeof elemId !== 'string') {
-            this.consoleLog('ERROR - cannot add gallery, invalid elemId type', elemId, typeof elemId);
+            this.consoleError('cannot add gallery, invalid elemId type', elemId, typeof elemId);
             return false;
         }
 
         if (elemId.length < 1) {
-            this.consoleLog('ERROR - cannot add gallery, elemId is empty', elemId, typeof elemId);
+            this.consoleError('cannot add gallery, elemId is empty', elemId, typeof elemId);
             return false;
         }
 
@@ -843,7 +1070,7 @@ RiotGalleryViewer = {
         if (elems.length < 1) {
             this.galleries[galKey].isError = true;
             this.galleries[galKey].errorMessages.push('no items (image containers) found');
-            this.consoleLog('gallery not loaded. no items (image containers) found', galKey);
+            this.consoleError('gallery not loaded. no items (image containers) found', galKey);
             return false;
         }
 
@@ -854,7 +1081,7 @@ RiotGalleryViewer = {
         if (this.galleries[galKey].items.length < 1) {
             this.galleries[galKey].isError = true;
             this.galleries[galKey].errorMessages.push('no items found');
-            this.consoleLog('gallery not loaded. no valid items (image containers) found', galKey);
+            this.consoleError('gallery not loaded. no valid items (image containers) found', galKey);
             return false;
         }
 
@@ -1427,7 +1654,6 @@ RiotGalleryViewer = {
             this.consoleLog('load html complete');
         }
 
-        console.log('this.options.useMaterialIcons', this.options.useMaterialIcons);
         if (this.options.useMaterialIcons) {
             this.loadMaterialIcons();
         }
@@ -1477,7 +1703,7 @@ RiotGalleryViewer = {
         };
 
         styleLink.onerror = function () {
-            RiotGalleryViewer.consoleLog('Could not load Material Icons');
+            RiotGalleryViewer.consoleError('Could not load Material Icons');
         };
 
         document.head.appendChild(styleLink);
@@ -1591,19 +1817,19 @@ RiotGalleryViewer = {
         const xDif = Math.abs(x - this.swipeInfo.startX);
         //const yDif = Math.abs(y - this.swipeInfo.startY);
 
-        if (this.options.swipeMinPx || this.options.swipeMinPercent) {
+        if (this.options.SwipeMinPixels || this.options.swipeMinPercent) {
             let swipeDistinceSuccess = false;
-            
-            if (this.options.swipeMinPx) {
-                console.log('if (xDif >= this.options.swipeMinPx) {', xDif, this.options.swipeMinPx);
-                if (xDif >= this.options.swipeMinPx) {
+
+            if (this.options.SwipeMinPixels) {
+                console.log('if (xDif >= this.options.SwipeMinPixels) {', xDif, this.options.SwipeMinPixels);
+                if (xDif >= this.options.SwipeMinPixels) {
                     swipeDistinceSuccess = true;
                 }
                 console.log('swipeDistinceSuccess', swipeDistinceSuccess);
             }
 
             if (!swipeDistinceSuccess && this.options.swipeMinPercent) {
-                
+
                 const widthPercent = xDif / window.innerWidth * 100;
                 console.log('if (widthPercent >= this.options.swipeMinPercent) {', widthPercent, this.options.swipeMinPercent);
                 if (widthPercent >= this.options.swipeMinPercent) {
@@ -1681,16 +1907,17 @@ RiotGalleryViewer = {
         // if transition is running, stop it
         this.endTransition();
 
-
+        let isOpenViewerNow = false;
         if (!this.isViewerOpen) {
             if (!this.isViewerHtmlLoaded) {
                 this.loadViewerHtml();
             }
             this.openViewer();
             this.setWindowSize();
+            isOpenViewerNow = true;
         }
 
-        console.log('viewerPrevKey set to cur key', this.viewerPrevKey);
+        //console.log('viewerPrevKey set to cur key', this.viewerPrevKey);
         if (this.viewerCurKey === null || this.options.transitionType === 'none') {
             this.viewerCurKey = 0;
         } else {
@@ -1706,7 +1933,7 @@ RiotGalleryViewer = {
         this.viewers[this.viewerCurKey].galKey = galKey;
         this.viewers[this.viewerCurKey].itemKey = itemKey;
 
-        if (!galItem.isLoaded) {
+        if (!galItem.isLoaded && !galItem.isError) {
             var img = new Image();
             img.src = galItem.url;
             if (img.complete) {
@@ -1717,6 +1944,7 @@ RiotGalleryViewer = {
                 img.itemKey = itemKey;
 
                 img.onload = function (e) {
+                    RiotGalleryViewer.consoleLog('image url successfully loaded', img.src);
                     // update the gallery item. even if we've moved on to another image, we'll set values in case the image is displayed again
                     RiotGalleryViewer.updateGalItem(this.galKey, this.itemKey, img, false);
 
@@ -1733,7 +1961,7 @@ RiotGalleryViewer = {
                 }
 
                 img.onerror = function (e) {
-                    RiotGalleryViewer.consoleLog('image not found. can not load', this.url);
+                    RiotGalleryViewer.consoleError('image url load error', this.src);
                     RiotGalleryViewer.updateGalItem(this.galKey, this.itemKey, null, true);
                     const viewer = RiotGalleryViewer.getViewerCur();
                     if (viewer.galKey === this.galKey && viewer.itemKey === this.itemKey) {
@@ -1749,6 +1977,15 @@ RiotGalleryViewer = {
         this.calculateViewerPlacement(transDirection);
         this.placeImgInPosition();
         this.updateCaption();
+
+        if (this.options.preloadImagesType === 'prevNext') {
+            this.preloadImage(galKey, itemKey+1);
+            this.preloadImage(galKey, itemKey-1);
+        }
+        else if (isOpenViewerNow && this.options.preloadImagesType === 'galleryLoad') {
+            this.preloadGalleryImages(galKey);
+        }
+        
     },
 
     /*
@@ -1789,7 +2026,7 @@ RiotGalleryViewer = {
 
         if (!img.width || !img.height) {
             this.galleries[galKey].items[itemKey].isError = true;
-            RiotGalleryViewer.consoleLog('invalid image. can not load', img.url);
+            RiotGalleryViewer.consoleError('invalid image. can not load', img.url);
             return;
         }
 
@@ -1827,7 +2064,7 @@ RiotGalleryViewer = {
             }
             this.viewers[this.viewerCurKey].transition = null;
         }
-        console.log(this.transition);
+        //console.log(this.transition);
         if (this.transition) {
             clearInterval(this.transition.jsTnterval);
             this.transition = null;
@@ -2019,7 +2256,7 @@ RiotGalleryViewer = {
                     this.viewers[curK].transition.top = this.viewers[prevK].top;
                 }
 
-                console.log(this.viewers[curK].transition);
+                //console.log(this.viewers[curK].transition);
 
             }
 
@@ -2050,7 +2287,8 @@ RiotGalleryViewer = {
                 src = item.url;
             }
         }
-        this.elems.images[curK].src = item.url;
+        this.elems.images[curK].src = src;
+        this.elems.imageCons[curK].classList.add('is-displayed');
     },
 
     placeImgInPosition() {
@@ -2062,7 +2300,7 @@ RiotGalleryViewer = {
 
         const viewer = this.getViewerCur();
 
-        this.elems.imageCons[curK].classList.add('is-displayed');
+        //this.elems.imageCons[curK].classList.add('is-displayed');
 
         let curLeft = viewer.left;
         let curTop = viewer.top;
@@ -2295,8 +2533,8 @@ RiotGalleryViewer = {
      * get the value of a
      */
     getOptionVal(option) {
-        if (this.options.hasOwnProperty('option')) {
-            return this.options['option'];
+        if (this.options.hasOwnProperty(option)) {
+            return this.options[option];
         }
 
         return null;
@@ -2341,17 +2579,52 @@ RiotGalleryViewer = {
      * add info to the console 
      * only works if options.doConsoleLog is true
      */
-    consoleLog(val1, val2, val3, val4) {
+    consoleLog(val1, val2, val3, val4, val5, val6, val7) {
 
         if (this.getOptionVal('doConsoleLog')) {
-            if (typeof val4 !== 'undefined') {
-                console.log(val1, '|', val2, '|', val3, '|', vals4);
+            if (typeof val7 !== 'undefined') {
+                console.log(val1, '|', val2, '|', val3, '|', val4, '|', val5, '|', val6, '|', val7);
+            } else if (typeof val6 !== 'undefined') {
+                console.log(val1, '|', val2, '|', val3, '|', val4, '|', val5, '|', val6);
+            } else if (typeof val5 !== 'undefined') {
+                console.log(val1, '|', val2, '|', val3, '|', val4, '|', val5);
+            } else if (typeof val4 !== 'undefined') {
+                console.log(val1, '|', val2, '|', val3, '|', val4);
             } else if (typeof val3 !== 'undefined') {
                 console.log(val1, '|', val2, '|', val3);
             } else if (typeof val2 !== 'undefined') {
                 console.log(val1, '|', val2);
             } else if (typeof val1 !== 'undefined') {
                 console.log(val1);
+            }
+        }
+
+        if (this.getOptionVal('doConsoleTrace')) {
+            console.trace();
+        }
+    },
+
+    /*
+     * add info to the console 
+     * only works if options.doConsoleLog is true
+     */
+    consoleError(val1, val2, val3, val4, val5, val6, val7) {
+
+        if (this.getOptionVal('doConsoleLog')) {
+            if (typeof val7 !== 'undefined') {
+                console.error(val1, '|', val2, '|', val3, '|', val4, '|', val5, '|', val6, '|', val7);
+            } else if (typeof val6 !== 'undefined') {
+                console.error(val1, '|', val2, '|', val3, '|', val4, '|', val5, '|', val6);
+            } else if (typeof val5 !== 'undefined') {
+                console.error(val1, '|', val2, '|', val3, '|', val4, '|', val5);
+            } else if (typeof val4 !== 'undefined') {
+                console.error(val1, '|', val2, '|', val3, '|', val4);
+            } else if (typeof val3 !== 'undefined') {
+                console.error(val1, '|', val2, '|', val3);
+            } else if (typeof val2 !== 'undefined') {
+                console.error(val1, '|', val2);
+            } else if (typeof val1 !== 'undefined') {
+                console.error(val1);
             }
         }
 
