@@ -99,6 +99,7 @@ ul.riot-gallery-style {
     max-width: 100%;
     box-sizing: border-box;
     display: block;
+    cursor: pointer;
 }
 
 .riot-gallery-style figure {

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Riot Gallery Viewer - Basic JavasScript</title>
+    <link rel="stylesheet" href="./example-pages-styles.css">
+    <link rel="stylesheet" href="../riot-gallery-viewer.min.css" />
+</head>
+
+<body>
+    <div id="page-content">
+        <h1>Riot Gallery Viewer - Basic JavasScript</h1>
+        <div><a href="./">back to examples</a></div><br>
+
+        <ul id="gallery-1"></ul>
+
+    </div>
+
+    <script src="../riot-gallery-viewer.min.js"></script>
+    <script>
+        RiotGalleryViewer.addImage('gallery-1', './images/cat.jpg', './images/cat_thumb.jpg', 'White Cat');
+        RiotGalleryViewer.addImage('gallery-1', './images/king-tut.jpg', './images/king-tut_thumb.jpg', 'King Tut');
+        RiotGalleryViewer.addImage('gallery-1', './images/dog-at-lake.jpg', './images/dog-at-lake_thumb.jpg');
+    </script>
+</body>
+
+</html>
