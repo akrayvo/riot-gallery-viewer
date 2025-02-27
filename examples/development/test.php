@@ -73,7 +73,21 @@ $images = array(
         <script src="../../riot-gallery-viewer.js?x=<?php echo time(); ?>"></script>
         <script>
             RiotGalleryViewer.setOption('doConsoleLog', true);
-            RiotGalleryViewer.setOption('doConsoleTrace', true);
+            RiotGalleryViewer.setOption('doConsoleTrace', false);
+            RiotGalleryViewer.setOption('useMaterialIcons', false);
+
+            RiotGalleryViewer.setOption('transitionSeconds', 1);
+            RiotGalleryViewer.setOption('transitionFrameSeconds', .03);
+            RiotGalleryViewer.setOption('imagefailedcaptionghtml', '<b>Hey Dummy</b>, <i>this image doesn not exist!</i>');
+            RiotGalleryViewer.setOption('defaultImgSize', 500);
+            // "none", "size", "slide", "fade", "slidefade"
+            RiotGalleryViewer.setOption('transitionType', "slidefade");
+
+            //
+            RiotGalleryViewer.setOption('preloadImagesType', "prevNext");
+            // none, pageLoad, galleryLoad, prevNext
+
+            console.log(RiotGalleryViewer.options);
 
             RiotGalleryViewer.addImage('gal1', '../images/blue-jay.jpg', '../images/blue-jay_thumb.jpg', 'Blue Jay');
             RiotGalleryViewer.addImage('gal1', '../images/lake-7301021_640.jpg', '../images/lake-7301021_640_thumb.jpg', 'LaKe 7301021');
