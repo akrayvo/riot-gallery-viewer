@@ -233,7 +233,8 @@ RiotGalleryViewer.addImagesByFile('gallery-1', './images.json');
 Image must be valid JSON that can be parsed by JavaScript's JSON.parse function. an array of images is required. each image can have the full image URL, the thumbnail image url, and the caption . each image can be either an object with **url**, **thumbURL**, can **caption** parameters or an array with values in that order (0=url, 1=thumbURL, 2=caption). these formats can both be used in the same file. thumbURL is optional but recommended and caption is optinal.
 ```
 [
-{"url":"./images/blue-jay.jpg","thumbUrl":"./images/blue-jay_thumb.jpg","caption":"Blue Jay"},{"url":"./images/cat.jpg","thumbUrl":"./images/cat.jpg"},
+{"url":"./images/blue-jay.jpg","thumbUrl":"./images/blue-jay_thumb.jpg","caption":"Blue Jay"},
+{"url":"./images/cat.jpg","thumbUrl":"./images/cat.jpg"},
 ["./images/lake.jpg", "./images/lake_thumb.jpg", "Lake"],
 ["./images/waterfall.jpg","./images/waterfall_thumb.jpg"]
 ]
