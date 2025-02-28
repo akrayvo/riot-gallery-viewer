@@ -19,3 +19,21 @@ h1 {
     margin: 0 0 15px 0;
     padding:0;
 }
+
+ul.page-directory {
+    display:table;
+    list-style-position: inside;
+    margin:0;
+    padding: 0;
+    list-style-type: none;
+}
+
+ul.page-directory li {
+    display:table-row;
+}
+
+ul.page-directory li a ,
+ul.page-directory li span {
+    display:table-cell;
+    padding: 10px 6px;
+}
