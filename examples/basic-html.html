@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Riot Gallery Viewer - Basic HTML</title>
+    <link rel="stylesheet" href="./example-pages-styles.css">
+    <link rel="stylesheet" href="../riot-gallery-viewer.min.css" />
+</head>
+
+<body>
+    <div id="page-content">
+        <h1>Riot Gallery Viewer - Basic HTML</h1>
+        <div><a href="./">back to examples</a></div><br>
+
+        <!--
+        note that there are several ways to add optional captions.
+        that can be added by adding a class (riot-gallery-image-caption or image-caption)
+        or by adding a title or alt tag to the the image. we can also set up images
+        without a caption.
+        -->
+
+        <ul class="riot-gallery riot-gallery-style">
+            <li><a href="./images/blue-jay.jpg" target="blank"><img src="./images/blue-jay_thumb.jpg"></a><div class="image-caption">Blue Jay</div></li>
+            <li><a href="./images/cat.jpg" target="blank"><img src="./images/cat_thumb.jpg"></a><div class="image-caption">Cat</div></li>
+            <li><a href="./images/dog-at-lake.jpg" target="blank"><img src="./images/dog-at-lake_thumb.jpg" title="Dog At Lake"></a></li>
+            <li><a href="./images/lake.jpg" target="blank"><img src="./images/lake_thumb.jpg"></a></li>
+        </ul>
+
+    </div>
+
+    <script src="../riot-gallery-viewer.min.js"></script>
+</body>
+
+</html>

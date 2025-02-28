@@ -1,0 +1,6 @@
+./images/party-lights.jpg	./images/party-lights_thumb.jpg	Party \"Lights\"
+./images/pennsylvania-landscape.jpg	./images/pennsylvania-landscape_thumb.jpg	\"Landscape\"
+./images/port-au-prince-haiti.jpg	./images/port-au-prince-haiti_thumb.jpg
+./images/squirrel.jpg	./images/squirrel_thumb.jpg	"Squirrel"
+
+./images/waterfall.jpg	./images/waterfall_thumb.jpg

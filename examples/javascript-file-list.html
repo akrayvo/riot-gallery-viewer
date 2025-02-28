@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Riot Gallery Viewer - Javascript List File</title>
+    <link rel="stylesheet" href="./example-pages-styles.css">
+    <link rel="stylesheet" href="../riot-gallery-viewer.min.css" />
+</head>
+
+<body>
+    <div id="page-content">
+        <h1>Riot Gallery Viewer - Javascript List File</h1>
+        <div><a href="./">back to examples</a></div><br>
+
+        <h2>Images from list separated by quotes</h2>
+        <ul id="gallery-1"></ul>
+
+        <br><br>
+
+        <h2>Images from list separated by commas</h2>
+        <ul id="gallery-2" class="riot-gallery-style-dark"></ul>
+
+    </div>
+
+    <script src="../riot-gallery-viewer.min.js"></script>
+    <script>
+        RiotGalleryViewer.addImagesByFile('gallery-1', './image-list-quotes.txt');
+        RiotGalleryViewer.addImagesByFile('gallery-2', './image-list-tab-separated.txt');
+    </script>
+</body>
+
+</html>

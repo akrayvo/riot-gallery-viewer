@@ -1,0 +1,6 @@
+"./images/blue-jay.jpg" "./images/blue-jay_thumb.jpg" "Blue Jay"
+"./images/cat.jpg" "./images/cat_thumb.jpg" "Cat"
+"./images/dog-at-lake.jpg" "./images/dog-at-lake_thumb.jpg" "Dog At Lake"
+"./images/king-tut.jpg", "./images/king-tut_thumb.jpg", "King \"Tut\""
+"./images/lake.jpg" "./images/lake.jpg"
+"./images/mountains.jpg" "./images/mountains_thumb.jpg"
