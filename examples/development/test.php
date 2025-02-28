@@ -7,16 +7,17 @@
 
 $images = array(
     'blue-jay',
-    'lake-7301021_640',
-    'lake-8257272_1280',
-    'mountains-8451480_640',
-    'party-lights-5232873_1280',
+    'cat',
+    'dog-at-lake',
+    'king-tut',
+    'lake',
+    'mountains',
+    'party-lights',
     'pennsylvania-landscape',
-    'pet-8274536_640',
     'port-au-prince-haiti',
     'squirrel',
-    'tutankhamun-1038544_1280',
-    'waterfall-8445292_1280'
+    'waterfall'
+    
 );
 
 
@@ -53,10 +54,10 @@ $images = array(
                     '<a href="../images/' . htmlentities($image) . '.jpg" target="blank">' .
                     '<img src="../images/' . htmlentities($image) . '_thumb.jpg">' .
                     '</a>' .
-                    '<div class="riot-gallery-image-caption">' . ucwords(htmlentities(str_replace(['_', '-'], ' ', $image))) . '</div>' .
+                    '<div class="image-caption">' . ucwords(htmlentities(str_replace(['_', '-'], ' ', $image))) . '</div>' .
                     '</li>' . "\n";
             }
-            foreach ($images as $image) {
+            /*foreach ($images as $image) {
                 echo '<li>' .
                     '<a href="../images/z' . htmlentities($image) . '.jpg" target="blank">' .
                     '<img src="../images/' . htmlentities($image) . '_thumb.jpg">' .
@@ -64,10 +65,10 @@ $images = array(
                     '            <div class="riot-gallery-image-caption">this image will no load dude.</div>' .
                     '</li>' . "\n";
                 break;
-            } ?>
+            }
             <li data-riot-gallery-image-url="https://www.streetmachine.com.au/wp-content/uploads/2023/07/greg-eslick-hq-monaro-bonnet-up-wm-2048x1365.jpg?x=<?php echo time(); ?>">
                 <a href="#">test</a>
-            </li>
+            </li>*/ ?>
         </ul>
 
         <script src="../../riot-gallery-viewer.js?x=<?php echo time(); ?>"></script>

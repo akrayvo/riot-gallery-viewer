@@ -169,3 +169,72 @@ RiotGalleryViewer.setOption("useMaterialIcons", false);
 - if a swipe is too long, the user most most likely not trying to change images
 - must be between 0 and 2
 - default value: **0.8**
+
+## Generate HTML gallery through JavaScript
+
+An image gallery can be added by simply setting up a container element and adding images through JavaScript. Individual images can be added or images can be added by setting up a list of files
+
+Simply create an empty container element in HTML with a unique ID.
+
+```
+<ul id="gallery-1"></ul>
+```
+
+# Adding images individually in JavaScript
+the addImage function takes 4 parameters:
+- container ID
+- full sized image URL
+- thumbnail image URL (optional, but recommmended for efficiency)
+- caption (optional)
+
+```
+<script>
+RiotGalleryViewer.addImage('gallery-1', './images/cat.jpg', './images/cat_thumb.jpg', 'White Cat');
+RiotGalleryViewer.addImage('gallery-1', './images/lake.jpg', './images/lake_thumb.jpg');
+</script>
+```
+
+# Adding images in JavaScript by file list
+
+the addImagesByFile function has 2 parameters:
+- container ID
+- URL of the file
+```
+<script>
+RiotGalleryViewer.addImagesByFile('gallery-1', './image-list.txt');
+</script>
+```
+
+The format of the file is very flexible. Each line of the file is a separate image. Image information in each line can be contained in **double quotes**, separated by **tabs**, or both. Each
+line is processed indivudually, formatting can be different on each line. Each line can have 3 parameters, additional information will be ignored. blank lines are ignored. double quotes can be escaped with a backslash. ex: Dwayne \"The Rock\" Johnson
+- full sized image URL
+- thumbnail image URL (optional, but recommmended for efficiency)
+- caption (optional)
+```
+"./images/blue-jay.jpg" "./images/blue-jay_thumb.jpg" "Blue Jay"
+"./images/cat.jpg" "./images/cat_thumb.jpg"
+./images/party-lights.jpg	./images/party-lights_thumb.jpg	Party	\"Lights\"
+"./images/pennsylvania-landscape.jpg"	"./images/pennsylvania-landscape_thumb.jpg"	"Landscape"
+./images/port-au-prince-haiti.jpg	./images/port-au-prince-haiti_thumb.jpg
+```
+
+
+# Adding images in JavaScript from JSON file info
+
+uses the same addImagesByFile function as adding images through a file list. has 2 parameters:
+- container ID
+- URL of the file
+```
+<script>
+RiotGalleryViewer.addImagesByFile('gallery-1', './images.json');
+</script>
+```
+
+Image must be valid JSON that can be parsed by JavaScript's JSON.parse function. an array of images is required. each image can have the full image URL, the thumbnail image url, and the caption . each image can be either an object with **url**, **thumbURL**, can **caption** parameters or an array with values in that order (0=url, 1=thumbURL, 2=caption). these formats can both be used in the same file. thumbURL is optional but recommended and caption is optinal.
+```
+[
+{"url":"./images/blue-jay.jpg","thumbUrl":"./images/blue-jay_thumb.jpg","caption":"Blue Jay"},{"url":"./images/cat.jpg","thumbUrl":"./images/cat.jpg"},
+["./images/lake.jpg", "./images/lake_thumb.jpg", "Lake"],
+["./images/waterfall.jpg","./images/waterfall_thumb.jpg"]
+]
+```

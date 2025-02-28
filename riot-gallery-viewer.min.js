@@ -180,8 +180,6 @@ RiotGalleryViewer = {
         }
     },
 
-
-
     /*
      * add a gallery from a file (remote url)
      * called by user
@@ -209,26 +207,59 @@ RiotGalleryViewer = {
      * set global options to determine the style and behavior of the gallery
      * called by user
      */
-    /*setOption(option, value) {
-
+    setOption(option, value) {
+        console.log('setOption(option, value) {', option, value);
         if (typeof value === 'undefined') {
-            this.consoleLog('setOption - ERROR - no value passed', option);
-            return false;
+            this.consoleError('setOption called with no value', option);
+            return;
         }
 
-        if (option === 'doConsoleLog' || option === 'doConsoleTrace') {
-            if (value) {
-                this.options[option] = true;
-            } else {
-                this.options[option] = false;
-            }
-            this.consoleLog('setOption - global option set', option, this.options[option]);
-            return true;
+        if (!option) {
+            this.consoleError('setOption called with no option');
+            return;
         }
 
-        this.consoleLog('setOption - ERROR - invalid option passed', option);
-        return false;
-    },*/
+        if (typeof option !== 'string') {
+            this.consoleError('setOption requires the option (field) to be a string', option);
+            return;
+        }
+
+        // set to lower case so check is case insensiteive. ex: "transitionType" = "transitiontype" = "TRANSITIONTYPE"
+        passedOption = option;
+        option = option.toLowerCase();
+
+        switch (option) {
+            case 'preloadimagestype':
+                return this.setOptionFromValid('preloadImagesType', value, this.validPreloadImagesTypes);
+            case 'doconsolelog':
+                return this.setOptionBoolen('doConsoleLog', value);
+            case 'doconsoletrace':
+                return this.setOptionBoolen('doConsoleTrace', value);
+            case 'usematerialicons':
+                return this.setOptionBoolen('useMaterialIcons', value);
+            case 'transitionseconds':
+                return this.setOptionFloat('transitionSeconds', value, 0.1, 5);
+            case 'transitionframeseconds':
+                return this.setOptionFloat('transitionFrameSeconds', value, 0.02, 0.25);
+            case 'imagefailedcaptionhtml':
+                return this.setOptionString('imageFailedCaptionHtml', value);
+            case 'defaultimgsize':
+                return this.setOptionFloat('defaultImgSize', value, 200, 1000);
+            case 'transitiontype':
+                return this.setOptionFromValid('transitionType', value, this.validTransitionTypes);
+            case 'dotouchswipe':
+                return this.setOptionBoolen('doTouchSwipe', value);
+            case 'swipeminpixels':
+                return this.setOptionFloat('swipeMinPixels', value, 0, 1000);
+            case 'swipeminpercent':
+                return this.setOptionFloat('swipeMinPercent', value, 0, 90);
+            case 'swipemaxseconds':
+                return this.setOptionFloat('swipeMaxSeconds', value, 0, 2);
+        }
+
+        this.consoleError('invalid option', passedOption, value);
+        return true;
+    },
 
     /* User Input - END
      *****************************************************************************
@@ -322,61 +353,6 @@ RiotGalleryViewer = {
         return false;
     },
 
-    setOption(option, value) {
-        console.log('setOption(option, value) {', option, value);
-        if (typeof value === 'undefined') {
-            this.consoleError('setOption called with no value', option);
-            return;
-        }
-
-        if (!option) {
-            this.consoleError('setOption called with no option');
-            return;
-        }
-
-        if (typeof option !== 'string') {
-            this.consoleError('setOption requires the option (field) to be a string', option);
-            return;
-        }
-
-        // set to lower case so check is case insensiteive. ex: "transitionType" = "transitiontype" = "TRANSITIONTYPE"
-        passedOption = option;
-        option = option.toLowerCase();
-
-        switch (option) {
-            case 'preloadimagestype':
-                return this.setOptionFromValid('preloadImagesType', value, this.validPreloadImagesTypes);
-            case 'doconsolelog':
-                return this.setOptionBoolen('doConsoleLog', value);
-            case 'doconsoletrace':
-                return this.setOptionBoolen('doConsoleTrace', value);
-            case 'usematerialicons':
-                return this.setOptionBoolen('useMaterialIcons', value);
-            case 'transitionseconds':
-                return this.setOptionFloat('transitionSeconds', value, 0.1, 5);
-            case 'transitionframeseconds':
-                return this.setOptionFloat('transitionFrameSeconds', value, 0.02, 0.25);
-            case 'imagefailedcaptionghtml':
-                return this.setOptionString('imageFailedCaptionHtml', value);
-            case 'defaultimgsize':
-                return this.setOptionFloat('defaultImgSize', value, 200, 1000);
-            case 'transitiontype':
-                return this.setOptionFromValid('validTransitionTypes', value, this.validTransitionTypes);
-            case 'dotouchswipe':
-                return this.setOptionBoolen('doTouchSwipe', value);
-            case 'swipeminpixels':
-                return this.setOptionFloat('swipeMinPixels', value, 0, 1000);
-            case 'swipeminpercent':
-                return this.setOptionFloat('swipeMinPercent', value, 0, 90);
-            case 'swipemaxseconds':
-                return this.setOptionFloat('swipeMaxSeconds', value, 0, 2);
-        }
-
-        this.consoleError('invalid option', passedOption, value);
-        return true;
-    },
-
-
     /* Set options - END
      *****************************************************************************
      *****************************************************************************/
@@ -429,6 +405,7 @@ RiotGalleryViewer = {
      *****************************************************************************/
 
 
+
     /*****************************************************************************
      *****************************************************************************
      * Preload Images - START */
@@ -446,8 +423,7 @@ RiotGalleryViewer = {
         for (let itemKey = 0; itemKey < this.galleries[galKey].items.length; itemKey++) {
             this.preloadImage(galKey, itemKey);
         }
-    },// url of the full sized display image
-
+    },
 
     preloadImage(galKey, itemKey) {
         if (!this.galleries[galKey]) {
@@ -470,7 +446,6 @@ RiotGalleryViewer = {
             return;
         }
 
-
         const img = new Image();
         img.src = item.url;
         img.galKey = galKey;
@@ -488,11 +463,10 @@ RiotGalleryViewer = {
         }
     },
 
-
-
     /* Preload Images - END
      *****************************************************************************
      *****************************************************************************/
+
 
 
     /*****************************************************************************
@@ -571,7 +545,7 @@ RiotGalleryViewer = {
         }
 
         const firstChar = text.substring(0, 1);
-        const lastChar = text.charAt(text.length - 1);
+        const lastChar = text.substring(text.length - 1);
 
         // initial check so that there is no console log error trying to parse non json as json
         if (firstChar === '[' && lastChar === ']') {
@@ -617,7 +591,7 @@ RiotGalleryViewer = {
                 thumbUrl = obj[1].trim();
             }
             if (obj[2]) {
-                caption = obj[0].trim();
+                caption = obj[2].trim();
             }
         } else {
             if (obj.url) {
@@ -670,7 +644,7 @@ RiotGalleryViewer = {
      */
     strStripStartEndQuotes(str) {
         const tempQuoteReplace = "[~~(quote here, riotgallery)~~]";
-        str = str.strReplace('\\"', tempQuoteReplace, str).trim();
+        str = this.strReplace('\\"', tempQuoteReplace, str).trim();
 
         if (str.length < 1) {
             return '';
@@ -685,16 +659,22 @@ RiotGalleryViewer = {
             }
         }
 
-        const last = str.substring(str.length - 1, 1);
+        const last = str.substring(str.length - 1);
+        console.log('1last', last);
         if (last === '"') {
             // remove last character
+            console.log('2str', str);
             str = str.substring(0, str.length - 1);
+            console.log('3str', str);
             if (str.length < 1) {
                 return '';
             }
         }
 
-        str = str.strReplace(tempQuoteReplace, '\\"', str).trim();
+        //console.log('str.strReplace(tempQuoteReplace, \'\\"\', str).trim();', tempQuoteReplace, str);
+
+        str = this.strReplace(tempQuoteReplace, '"', str).trim();
+        //console.log(str);
         return str;
     },
 
@@ -708,9 +688,9 @@ RiotGalleryViewer = {
 
         strs = line.split('"');
 
-        for (let x = 0; x < strs.length; x++) {
+        /*for (let x = 0; x < strs.length; x++) {
             strs[x] = this.strReplace('\\"', tempQuoteReplace, strs[x]);
-        }
+        }*/
 
         let url = null;
         let thumbUrl = null;
@@ -719,13 +699,13 @@ RiotGalleryViewer = {
         // 0 = [before first quote], 1 = url, 2 = [between quotes], 3 = thumUrl, 4 = [between quotes], 5 = caption
 
         if (strs[1]) {
-            url = strs[1];
+            url = this.strReplace(tempQuoteReplace, '"', strs[1]);
         }
         if (strs[3]) {
-            thumbUrl = strs[3];
+            thumbUrl = this.strReplace(tempQuoteReplace, '"', strs[3]);
         }
         if (strs[5]) {
-            caption = strs[5];
+            caption = this.strReplace(tempQuoteReplace, '"', strs[5]);
         }
 
         this.addInitImage(galKey, url, thumbUrl, caption);
@@ -2578,7 +2558,7 @@ RiotGalleryViewer = {
      * only works if options.doConsoleLog is true
      */
     consoleLog(val1, val2, val3, val4, val5, val6, val7) {
-console.log('consoleLog', 'if (this.options.doConsoleLog) {', this.options.doConsoleLog);
+        console.log('consoleLog', 'if (this.options.doConsoleLog) {', this.options.doConsoleLog);
         if (this.options.doConsoleLog) {
             if (typeof val7 !== 'undefined') {
                 console.log(val1, '|', val2, '|', val3, '|', val4, '|', val5, '|', val6, '|', val7);
@@ -2699,6 +2679,17 @@ console.log('consoleLog', 'if (this.options.doConsoleLog) {', this.options.doCon
     getCurMs() {
         const d = new Date();
         return d.getTime();
+    },
+
+    parseJson(str) {
+        let parsed;
+        try {
+            parsed = JSON.parse(str);
+        } catch (e) {
+            // console.log(e);
+            return false;
+        }
+        return parsed;
     },
 
     /* Helper - END
