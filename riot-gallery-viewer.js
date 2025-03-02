@@ -1191,14 +1191,6 @@ RiotGalleryViewer = {
             return url;
         }
 
-        // data-image-url set on li container or children
-        // <li data-image-url="./image.jpg"><img src="./thumb.jpg"></li>
-        // <li><a href="./image.jpg" data-image-url="./image.jpg"><img src="./thumb.jpg"></a></li>
-        url = this.getSubElemAttrVal(conElem, 'data-image-url');
-        if (url) {
-            return url;
-        }
-
         // href from a tag (link) with a class of "riot-gallery-image-link"
         // <li><a href="./image.jpg" class="riot-gallery-image-link"><img src="./thumb.jpg"></a></li>
         url = this.getSubElemAttrValBySelector(conElem, 'a.riot-gallery-image-link', 'href');
@@ -1206,23 +1198,9 @@ RiotGalleryViewer = {
             return url;
         }
 
-        // href from a tag (link) with a class of "image-link"
-        // <li><a href="./image.jpg" class="image-link"><img src="./thumb.jpg"></a></li>
-        url = this.getSubElemAttrValBySelector(conElem, 'a.image-link', 'href');
-        if (url) {
-            return url;
-        }
-
         // src from img tag with "riot-gallery-image-thumb" class
         // <li><img src="./image.jpg" class="riot-gallery-image-thumb"></li>
         url = this.getSubElemAttrValBySelector(conElem, 'img.riot-gallery-image-thumb', 'src');
-        if (url) {
-            return url;
-        }
-
-        // src from img tag with "image-thumb" class
-        // <li><img src="./thumb.jpg" class="image-thumb"></li>
-        url = this.getSubElemAttrValBySelector(conElem, 'img.image-thumb', 'src');
         if (url) {
             return url;
         }
@@ -1262,30 +1240,9 @@ RiotGalleryViewer = {
             return elem;
         }
 
-        // a tag (link) with a class of "image-link"
-        // <li><a href="./image.jpg" class="image-link"><img src="./thumb.jpg"></a></li>
-        elem = this.getSubElemBySelector(conElem, 'a.image-link');
-        if (elem) {
-            return elem;
-        }
-
-        // img tag with "image-thumb" class
-        // <li><img src="./thumb.jpg" class="image-thumb"></li>
-        elem = this.getSubElemBySelector(conElem, 'img.image-thumb');
-        if (elem) {
-            return elem;
-        }
-
         // data-riot-gallery-image-url set on an img
         // <li><img src="./thumb.jpg" data-riot-gallery-image-url="./image.jpg"></li>
         elem = this.getElemSubByAttr(conElem, 'data-riot-gallery-image-url');
-        if (elem) {
-            return elem;
-        }
-
-        // data-image-url set on an img
-        // <li><img src="./thumb.jpg" data-image-url="./image.jpg"></li>
-        elem = this.getElemSubByAttr(conElem, 'data-image-url');
         if (elem) {
             return elem;
         }
@@ -1297,7 +1254,7 @@ RiotGalleryViewer = {
             return elem;
         }
 
-        // src from img tag
+        // img tag
         // <li><img src="./image.jpg"></li>
         elem = this.getSubElemBySelector(conElem, 'img');
         if (elem) {
@@ -1320,14 +1277,6 @@ RiotGalleryViewer = {
             return caption;
         }
 
-        // data-image-caption on the container
-        // <li data-image-caption="My Pic"><img src="./image.jpg"></li>
-        // <li><img src="./image.jpg" data-image-caption="My Pic"></li>
-        caption = this.getSubElemAttrVal(conElem, 'data-image-caption');
-        if (caption) {
-            return caption;
-        }
-
         // riot-gallery-image-caption class on any text container
         // <li><img src="./image.jpg"><div class="riot-gallery-image-caption">My Pic</div></li>
         caption = this.getSubElemTextBySelector(conElem, '.riot-gallery-image-caption', 'text');
@@ -1335,14 +1284,7 @@ RiotGalleryViewer = {
             return caption;
         }
 
-        // image-caption class on any text container
-        // <li><img src="./image.jpg"><div class="image-caption">My Pic</div></li>
-        caption = this.getSubElemTextBySelector(conElem, '.image-caption', 'text');
-        if (caption) {
-            return caption;
-        }
-
-        // image-caption class on any text container
+        // text inside a figcaption tag
         // <li><figure><img src="./image.jpg"><figcaption>My Pic</figcaption></figure></li>
         caption = this.getSubElemTextBySelector(conElem, 'figcaption', 'text');
         if (caption) {
@@ -1368,23 +1310,7 @@ RiotGalleryViewer = {
             }
         }
 
-        // alt or title of an img with img.riot-gallery-image-thumb class
-        // <li><img src="./image.jpg" class="image-thumb" alt="My Pic"></li>
-        for (let x = 0; x < imgElems.length; x++) {
-            const imgElem = imgElems[x];
-            if (imgElem.classList.contains('image-thumb')) {
-                let caption = imgElem.getAttribute('title');
-                if (caption) {
-                    return caption;
-                }
-                caption = imgElem.getAttribute('alt');
-                if (caption) {
-                    return caption;
-                }
-            }
-        }
-
-        // alt or title of an img with img.riot-gallery-image-thumb class
+        // alt or title of an img
         // <li><img src="./image.jpg" alt="My Pic"></li>
         for (let x = 0; x < imgElems.length; x++) {
             const imgElem = imgElems[x];
