@@ -225,6 +225,11 @@ src from an image (**img**) tag
 The element that is clicked to load the full sized image in the viewer. 
 Generally, the best way to set the image URL is to include a link (**a**) tag around the thumbnail image, but  but there are rare instances where another method will be better. If no other element is found, the item container itself will be clickable, so there will always be a clickable element. The following methods (in order) are used to find a clickable element inside an item container:
 
+any tag with a class of **riot-gallery-item-clickable**
+```
+<li><span class="riot-gallery-item-clickable"><a href="./image.jpg"><img src="./thumb.jpg"></a></li>
+```
+
 a link tag (**a**) with a class of **riot-gallery-image-link**
 ```
 <li><a href="./image.jpg" class="riot-gallery-image-link"><img src="./thumb.jpg"></a></li>

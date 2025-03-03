@@ -1043,6 +1043,8 @@ RiotGalleryViewer = {
         // try to get elements by class
         let elems = galElem.getElementsByClassName('riot-gallery-item');
 
+        console.log('zzzzzzzzzzzzz',elems, elems.length);
+
         if (elems.length < 1) {
             const tagName = this.getElemTagName(galElem);
             // try to get elements by tag based on the container tag
@@ -1063,6 +1065,7 @@ RiotGalleryViewer = {
         }
 
         for (let elemKey = 0; elemKey < elems.length; elemKey++) {
+            console.log('elemKey', elemKey);
             this.setGalleryItemByElem(galKey, elems[elemKey]);
         }
 
@@ -1114,7 +1117,9 @@ RiotGalleryViewer = {
     setGalleryItemByElem(galleryKey, elem) {
 
         const url = this.getImgUrlFromConElem(elem);
+        console.log('p1');
         if (!url) {
+            console.log('p2');
             return false;
         }
 
@@ -1183,6 +1188,8 @@ RiotGalleryViewer = {
     getImgUrlFromConElem(conElem) {
         let url;
 
+        console.log('getImgUrlFromConElem');
+
         // data-riot-gallery-image-url set on container or children
         // <li data-riot-gallery-image-url="./image.jpg"><img src="./thumb.jpg"></li>
         // <li><img src="./thumb.jpg" data-riot-gallery-image-url="./image.jpg"></li>
@@ -1226,9 +1233,17 @@ RiotGalleryViewer = {
      * Get clickable gallery element (loads the image in the viewer) from container element
      */
     getClickElemFromConElem(conElem) {
+
+        // tag with a class of "riot-gallery-item-clickable"
+        // <li><span class="riot-gallery-item-clickable"><a href="./image.jpg"><img src="./thumb.jpg"></a></span></li>
+        let elem = this.getSubElemBySelector(conElem, '.riot-gallery-item-clickable');
+        if (elem) {
+            return elem;
+        }
+
         // a tag (link) with a class of "riot-gallery-image-link"
         // <li><a href="./image.jpg" class="riot-gallery-image-link"><img src="./thumb.jpg"></a></li>
-        let elem = this.getSubElemBySelector(conElem, 'a.riot-gallery-image-link');
+        elem = this.getSubElemBySelector(conElem, 'a.riot-gallery-image-link');
         if (elem) {
             return elem;
         }
@@ -2352,6 +2367,7 @@ RiotGalleryViewer = {
         }
 
         let val = elem.getAttribute(attr);
+        console.log('let val = elem.getAttribute(attr);', elem, val);
         if (val !== null && val !== false) {
             return val;
         }
