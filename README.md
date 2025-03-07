@@ -13,6 +13,9 @@ A simple, easy to implement, flexible, image viewer. Displays a modal with the f
 
 - none (only uses JavaScript, CSS, and HTML, will work on any modern browser)
 
+## Gallery Components and Functionality
+A gallery is set up within a container. Items are inside the container. Each item can include a full sized image URL, clickable element (usually an image thumbnail), and an (optional) caption. When an item is clicked/selected in the gallery, the viewer opens with the full sized image and caption (if set). The viewer also includes buttons to close the viewer, move to the previous image, or move to the next image.
+
 ## Installation
 
 Add **riot-gallery-viewer.min.css** and **riot-gallery-viewer.min.js** files to your project.
@@ -170,6 +173,132 @@ RiotGalleryViewer.setOption("useMaterialIcons", false);
 - must be between 0 and 2
 - default value: **0.8**
 
+## HTML setup
+The program is very flexable in how to set items in the gallery. For instance, setting up the images in an html table, list, or div.
+
+# Gallery Containers
+The gallery container can be any HTML container element. Just add the **riot-gallery** class. A web page can have multiple gallery containers.
+
+# Item Containerss
+Items (images) containers can be any HTML container eleement. 
+- If an element in the container has the **riot-gallery-item** class, all elements in the gallery container with this callss will be item containers.
+- If no element with the **riot-gallery-item** is in the gallery container, the following rules are used to find items:
+    - If the container element is a list (**ul** or **ol**), the item containers are list item (**li**)
+    elements.
+    - If the container element is a table (**table**), the item containers are table cell (**td**)
+    elements.
+    - If the container element is anything else (not **ul**, **ol**, or **table**), the item containers are figure (**figure**) elements.
+    - if no item containers are found in a gallery container, the gallery is not set up.
+
+# Item Image URL (Full Size)
+Generally, the best way to set the image URL is to include a link (**a**) tag with the image URL in the **src** attribute, but there are rare instances where another method will be better. If an image is not found, the gallery items is not set up. The following methods (in order) are used to find an image inside an item container:
+
+the data attribute, **data-riot-gallery-image-url**, on the item container or any children
+```
+<li data-riot-gallery-image-url="./image.jpg"><img src="./thumb.jpg"></li>
+```
+```
+<li><img src="./thumb.jpg" data-riot-gallery-image-url="./image.jpg"></li>
+```
+
+href from a link (**a**) tag with a class of **riot-gallery-image-link**
+```
+<li><a href="./image.jpg" class="riot-gallery-image-link"><img src="./thumb.jpg"></a></li>
+```
+
+src from an image (**img**) tag with a class of **riot-gallery-image-thumb**
+```
+<li><a href="./image.jpg" class="image-link"><img src="./thumb.jpg"></a></li>
+```
+
+href from a link (**a**) tag
+```
+<li><a href="./image.jpg"><img src="./thumb.jpg"></a></li>
+```
+
+src from an image (**img**) tag
+```
+<li><img src="./image.jpg"></li>
+```
+
+## Item Clickable Element
+The element that is clicked to load the full sized image in the viewer. 
+Generally, the best way to set the image URL is to include a link (**a**) tag around the thumbnail image, but  but there are rare instances where another method will be better. If no other element is found, the item container itself will be clickable, so there will always be a clickable element. The following methods (in order) are used to find a clickable element inside an item container:
+
+any tag with a class of **riot-gallery-item-clickable**
+```
+<li><span class="riot-gallery-item-clickable"><a href="./image.jpg"><img src="./thumb.jpg"></a></li>
+```
+
+a link tag (**a**) with a class of **riot-gallery-image-link**
+```
+<li><a href="./image.jpg" class="riot-gallery-image-link"><img src="./thumb.jpg"></a></li>
+```
+
+an image tag (**img**) with a class of **riot-gallery-image-thumb**
+```
+<li><a href="./image.jpg" class="riot-gallery-image-link"><img src="./thumb.jpg"></a></li>
+```
+
+an image tag (**img**) with a data attribute of **data-riot-gallery-image-url**
+```
+<li><img src="./thumb.jpg" data-riot-gallery-image-url="./image.jpg"></li>
+```
+
+a link tag (**a**)
+```
+<li><a href="./image.jpg"><img src="./thumb.jpg"></a></li>
+```
+
+an image tag (**img**)
+```
+<li><img src="./thumb.jpg"></li>
+```
+
+the item container itself
+
+## Item Caption (optional)
+Text related to the item image that will display with image. The best way to add a caption depends on if you want it do display and the tag type of the item container. The following methods (in order) are used to find a caption inside an item container:
+
+the data attribute, **data-riot-gallery-image-caption**, on the item container or any children
+```
+<li data-riot-gallery-image-caption="My Pic"><img src="./image.jpg"></li>
+```
+```
+<li><img src="./image.jpg" data-riot-gallery-image-caption="My Pic"></li>
+```
+
+text inside a tag with a class of **riot-gallery-image-caption**
+```
+<li><img src="./image.jpg"><div class="riot-gallery-image-caption">My Pic</div></li>
+```
+
+text inside a figure caption (**figcaption**)tag
+```
+<li><figure><img src="./image.jpg"><figcaption>My Pic</figcaption></figure></li>
+```
+
+**title** attribute of an image (**img**) tag with a class of **riot-gallery-image-thumb**
+```
+<li><img src="./image.jpg" class="riot-gallery-image-thumb" title="My Pic"></li>
+```
+
+**alt** attribute of an image (**img**) tag with a class of **riot-gallery-image-thumb**
+```
+<li><img src="./image.jpg" class="riot-gallery-image-thumb" alt="My Pic"></li>
+```
+
+**title** attribute of an image (**img**) tag
+```
+<li><img src="./image.jpg" title="My Pic"></li>
+```
+
+**alt** attribute of an image (**img**) tag
+```
+<li><img src="./image.jpg" alt="My Pic"></li>
+```   
+
+
 ## Generate HTML gallery through JavaScript
 
 An image gallery can be added by simply setting up a container element and adding images through JavaScript. Individual images can be added or images can be added by setting up a list of files
@@ -198,15 +327,15 @@ RiotGalleryViewer.addImage('gallery-1', './images/lake.jpg', './images/lake_thum
 
 the addImagesByFile function has 2 parameters:
 - container ID
-- URL of the file
+- URL of the text file
 ```
 <script>
 RiotGalleryViewer.addImagesByFile('gallery-1', './image-list.txt');
 </script>
 ```
+The file name and extension do not matter.
 
-The format of the file is very flexible. Each line of the file is a separate image. Image information in each line can be contained in **double quotes**, separated by **tabs**, or both. Each
-line is processed indivudually, formatting can be different on each line. Each line can have 3 parameters, additional information will be ignored. blank lines are ignored. double quotes can be escaped with a backslash. ex: Dwayne \"The Rock\" Johnson
+The format of the file is very flexible. Each line of the file is a separate image. Image information in each line can be contained in **double quotes**, separated by **tabs**, or both. Each line is processed indivudually, formatting can be different on each line. Each line can have 3 parameters, additional information will be ignored. blank lines are ignored. double quotes can be escaped with a backslash. ex: Dwayne \"The Rock\" Johnson
 - full sized image URL
 - thumbnail image URL (optional, but recommmended for efficiency)
 - caption (optional)
@@ -229,6 +358,7 @@ uses the same addImagesByFile function as adding images through a file list. has
 RiotGalleryViewer.addImagesByFile('gallery-1', './images.json');
 </script>
 ```
+The file name and extension do not matter. Note that the same function is used to process a formatted text list or a JSON file. The function checks the formats and processed it appropriately.
 
 Image must be valid JSON that can be parsed by JavaScript's JSON.parse function. an array of images is required. each image can have the full image URL, the thumbnail image url, and the caption . each image can be either an object with **url**, **thumbURL**, can **caption** parameters or an array with values in that order (0=url, 1=thumbURL, 2=caption). these formats can both be used in the same file. thumbURL is optional but recommended and caption is optinal.
 ```
