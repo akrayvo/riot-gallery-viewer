@@ -62,7 +62,7 @@ $images = array(
                     '<a href="../images/z' . htmlentities($image) . '.jpg" target="blank">' .
                     '<img src="../images/' . htmlentities($image) . '_thumb.jpg">' .
                     '</a>' .
-                    '            <div class="riot-gallery-image-caption">this image will no load dude.</div>' .
+                    '            <div class="riot-gallery-caption">this image will no load dude.</div>' .
                     '</li>' . "\n";
                 break;
             }
