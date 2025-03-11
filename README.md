@@ -2,7 +2,7 @@
 
 [View on Github »](https://github.com/akrayvo/riot-gallery-viewer)
 
-A simple, easy to implement, flexible, image viewer. Displays a modal with the full sized image, an optional label, and previous/next buttons. Will also optionally create the HTML image gallery.
+A simple, easy-to-implement, flexible image viewer. It displays a modal window with the full-sized image, an optional label, and previous/next buttons. It can also optionally create the HTML for the image gallery.
 
 ## Working example
 
@@ -11,10 +11,10 @@ A simple, easy to implement, flexible, image viewer. Displays a modal with the f
 
 ## Requirements
 
-- none (only uses JavaScript, CSS, and HTML, will work on any modern browser)
+- none (only uses JavaScript, CSS, and HTML; will work on any modern browser)
 
 ## Gallery Components and Functionality
-A gallery is set up within a container. Items are inside the container. Each item can include a full sized image URL, clickable element (usually an image thumbnail), and an (optional) caption. When an item is clicked/selected in the gallery, the viewer opens with the full sized image and caption (if set). The viewer also includes buttons to close the viewer, move to the previous image, or move to the next image.
+A gallery is set up within an HTML tag container. Items are inside the container. Each item can include a full-sized image URL, a clickable element (usually an image thumbnail), and a caption (optional). When an item is clicked/selected in the gallery, the viewer opens with the full-sized image and caption (if set). The viewer also includes a close button, a previous image button, and a next image button.
 
 ## Installation
 
@@ -335,7 +335,7 @@ RiotGalleryViewer.addImagesByFile('gallery-1', './image-list.txt');
 ```
 The file name and extension do not matter.
 
-The format of the file is very flexible. Each line of the file is a separate image. Image information in each line can be contained in **double quotes**, separated by **tabs**, or both. Each line is processed individually, formatting can be different on each line. Each line can have 3 parameters, additional information will be ignored. blank lines are ignored. double quotes can be escaped with a backslash. ex: Dwayne \"The Rock\" Johnson
+The format of the file is very flexible. Each line of the file is a separate image. Image information in each line can be contained in **double quotes**, separated by **tabs**, or both. Each line is processed individually; formatting can be different on each line. Each line can have 3 parameters, additional information will be ignored. blank lines are ignored. double quotes can be escaped with a backslash. ex: Dwayne \"The Rock\" Johnson
 - full sized image URL
 - thumbnail image URL (optional, but recommended for efficiency)
 - caption (optional)
