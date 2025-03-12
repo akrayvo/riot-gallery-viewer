@@ -31,7 +31,7 @@ const RiotGalleryViewer = {
         errorMessages: [],
         // URL of a file of images for HTML galleries generated via JavaScript 
         imageFileUrl: null,
-        // has the the remote file (imageFileUrl) has been processed?
+        // has the remote file (imageFileUrl) has been processed?
         isImageFileUrlComplete: false
     },
 
@@ -71,7 +71,7 @@ const RiotGalleryViewer = {
         closeRight: null,
         closeTop: null,
         padding: null,
-        transition: {} // cssVar: [cssValStart, cssValEnd]
+        transition: {}
     },
 
     // is the RiotGalleryViewer HTML (main image, background, previous/next buttons, close button, etc) loaded?
@@ -381,7 +381,7 @@ const RiotGalleryViewer = {
 
     /*
      * set the value of an option to a preselected value
-     * value must be in teh validValues array
+     * value must be in the validValues array
      */
     setOptionFromValid(option, value, validValues) {
         if (validValues.indexOf(value) >= 0) {
@@ -412,7 +412,7 @@ const RiotGalleryViewer = {
 
         const hasGalleryWithFileRemoteUrl = this.processGalleryFileRemoteUrls();
 
-        // if there are no remote urls process now
+        // if there are no remote URLs process now
         if (!hasGalleryWithFileRemoteUrl) {
             this.initializeRemoteComplete();
         }
@@ -887,7 +887,7 @@ const RiotGalleryViewer = {
             //ulElem = this.elemAddClass(elem, 'riot-gallery-style');
             ulElem.classList.add('riot-gallery-style');
         } else if (tagName === 'div') {
-            // we'e in a div, add a list inside
+            // we're in a div, add a list inside
             ulElem = document.createElement('ul');
             ulElem.classList = 'riot-gallery-style';
             elem.innerHTML = '';
@@ -1557,7 +1557,7 @@ const RiotGalleryViewer = {
             return;
         }
 
-        // body needed for appending html and setting classes
+        // body needed for appending HTML and setting classes
         this.elems.body = document.body;
 
         // make sure the gallery HTML isn't already loaded 
