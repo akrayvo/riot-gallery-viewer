@@ -102,11 +102,12 @@ RiotGalleryViewer.setOption("useMaterialIcons", false);
 # preloadImagesType
 - if and when images should be preloaded
 - valid values are = **none**, **prevnext**, **galleryload**, and **pageload**
-- **none** = do not preload images. images are only loaded when they are clicked.
-- **prevnext** = when an image is viewed, the previous and next images are preloaded.
-- **galleryload** = when any image in a gallery is viewed, every other image in the gallery is preloaded.
-- **pageload** = when the HTML page is loaded, all images in all galleries are preloaded.
-- preloading will make viewing images faster, but could result in images loading that are never viewed. for galleries with many images or large image sizes, it is not recommended to use galleryload or pageload.
+- **none**: no preloading; only load images when they are viewed
+- **prevnext**: when an image is loaded, preload the previous and next images
+- **galleryload**: when a gallery is loaded, preload all images in the gallery
+- **pageload**: load all images in all galleries when the page is loaded
+- preloading will make viewing images faster, but could load images that are never viewed which is inefficient
+- for galleries with many images or large image sizes, it is not recommended to use galleryload or pageload.
 - default value: **prevnext**
 
 # useMaterialIcons
@@ -116,13 +117,13 @@ RiotGalleryViewer.setOption("useMaterialIcons", false);
 - default value: **true**
 
 # transitionType
-- effect when transitioning from one image to another
+- effect when transitioning from one image to the next
 - valid values are = **none**, **slide**, **fade**, **slidefade**, and **size**
-- **none** = load image immediately with no transition effect.
-- **slide** = horizontally slide the new image in and the old image out. the direction depends on if the next or previous image is loaded.
+- **none**: no transition; just remove the old image and display the new image
+- **slide**: horizontally slide the old image out and the new image in; the direction depends on if the next or previous image is loaded
 - **fade** = fade out the old image and fade in the new image
 - **slidefade** = do both the slide and fade transitions
-- **size** = move from the old image's size/dimensions to the new image's size/dimensions. will not appear to do anything if images are the same sizes.
+- **size** = move from the old image's size/dimensions to the new image's size/dimensions; will not appear to do anything if images are the same sizes.
 - default value: **slide**
 
 # transitionSeconds
