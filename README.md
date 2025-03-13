@@ -4,14 +4,15 @@
 
 A simple, easy-to-implement, flexible image viewer. It displays a modal window with the full-sized image, an optional label, and previous/next buttons. It can also optionally create the HTML for the image gallery.
 
-## Working example
+## Working examples
 
-!!!!!!!!!!! FILL THIS OUT LATER
+[The Treehouse Movie Images »](https://mastergorilla.com/the-treehouse/pictures/screens)
+[The Treehouse Movie Cat »](https://mastergorilla.com/the-treehouse/cast)
 
 
 ## Requirements
 
-- none (only uses JavaScript, CSS, and HTML; will work on any modern browser)
+- none (No jQuery or other libraries needed. only uses JavaScript, CSS, and HTML; will work on any modern web browser on any device)
 
 ## Gallery Components and Functionality
 A gallery is set up within an HTML tag container. Items are inside the container. Each item can include a full-sized image URL, a clickable element (usually an image thumbnail), and a caption (optional). When an item is clicked/selected in the gallery, the viewer opens with the full-sized image and caption (if set). The viewer also includes a close button, a previous image button, and a next image button.
