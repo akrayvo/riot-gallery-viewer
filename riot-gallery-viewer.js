@@ -422,8 +422,6 @@ const RiotGalleryViewer = {
      * 2nd part of initialization
      */
     initializeRemoteComplete() {
-        /*for (let x = 0; x < this.galleries.length; x++) {
-            const gal = this.galleries[x];*/
         this.galleries.forEach((gal) => {
             if (gal.imageFileUrl && !gal.isImageFileUrlComplete && !gal.isError) {
                 // there is still a remote file to process (file set, not processed, and no error)
@@ -452,9 +450,6 @@ const RiotGalleryViewer = {
      * preload all images in all galleries
      */
     preloadAllImages() {
-        /*for (let galKey = 0; galKey < this.galleries.length; galKey++) {
-            this.preloadGalleryImages(galKey);
-        }*/
         this.galleries.forEach((gal, galKey) => {
             this.preloadGalleryImages(galKey);
         });
@@ -467,9 +462,7 @@ const RiotGalleryViewer = {
         if (!this.galleries[galKey]) {
             return;
         }
-        /*for (let itemKey = 0; itemKey < this.galleries[galKey].items.length; itemKey++) {
-            this.preloadImage(galKey, itemKey);
-        }*/
+
         this.galleries[galKey].items.forEach((item, itemKey) => {
             this.preloadImage(galKey, itemKey);
         });
@@ -539,13 +532,7 @@ const RiotGalleryViewer = {
      */
     processGalleryFileRemoteUrls() {
         let hasGalleryWithFileRemoteUrl = false;
-        /*for (let x = 0; x < this.galleries.length; x++) {
-            if (this.galleries[x].imageFileUrl) {
-                this.processGalleryFileRemoteUrl(x);
-                isGalleryWithFileRemoteUrl = true;
-            }
-        }*/
-        //this.galleries.forEach((gal, galKey) => {
+
         this.galleries.forEach((gal, galKey) => {
             if (gal.imageFileUrl) {
                 this.processGalleryFileRemoteUrl(galKey);
@@ -575,7 +562,7 @@ const RiotGalleryViewer = {
 
         if (!xhr) {
             this.galleries[galKey].isError = true;
-            const msg = 'could not create an XHR. could not read file';
+            const msg = 'could not create an XHR request. could not read remote file.';
             this.galleries[galKey].errorMessages.push(msg + url);
             this.consoleError(msg, url);
             return;
@@ -630,9 +617,6 @@ const RiotGalleryViewer = {
         }
 
         if (parsed) {
-            /*for (let x = 0; x < parsed.length; x++) {
-                this.addImageByObj(galKey, parsed[x]);
-            }*/
             parsed.forEach((parsedItem) => {
                 this.addImageByObj(galKey, parsedItem);
             });
@@ -640,9 +624,6 @@ const RiotGalleryViewer = {
         } else {
             const lines = text.split("\n");
 
-            /*for (let x = 0; x < lines.length; x++) {
-                this.addImageByString(galKey, lines[x]);
-            }*/
             lines.forEach((line) => {
                 this.addImageByString(galKey, line);
             });
@@ -801,11 +782,6 @@ const RiotGalleryViewer = {
      * build HTML galleries that the user added via JavaScript
      */
     buildHtmlGalleries() {
-        /*for (let galKey = 0; galKey < this.galleries.length; galKey++) {
-            if (!this.galleries[galKey].isHtmlBuilt && !this.galleries[galKey].isError) {
-                this.buildHtmlGallery(galKey);
-            }
-        }*/
         this.galleries.forEach((gal, galKey) => {
             if (!gal.isHtmlBuilt && !gal.isError) {
                 this.buildHtmlGallery(galKey);
@@ -881,12 +857,11 @@ const RiotGalleryViewer = {
         let ulElem = null;
 
         if (tagName === 'ul' || tagName === 'ol') {
-            // we're already in a list
+            // already in a list
             ulElem = elem;
-            //ulElem = this.elemAddClass(elem, 'riot-gallery-style');
             ulElem.classList.add('riot-gallery-style');
         } else if (tagName === 'div') {
-            // we're in a div, add a list inside
+            // in a div, add a ul inside
             ulElem = document.createElement('ul');
             ulElem.classList = 'riot-gallery-style';
             elem.innerHTML = '';
@@ -909,11 +884,7 @@ const RiotGalleryViewer = {
         }
 
         let isImageAdded = false;
-        /*for (let initImageKey = 0; initImageKey < this.galleries[galKey].initImgs.length; initImageKey++) {
-            if (this.addGalleryLiItemFromInitImage(galKey, initImageKey)) {
-                isImageAdded = true;
-            }
-        }*/
+
         this.galleries[galKey].initImgs.forEach((initImg, initImgKey) => {
             if (this.addGalleryLiItemFromInitImage(galKey, initImgKey)) {
                 isImageAdded = true;
@@ -1026,16 +997,6 @@ const RiotGalleryViewer = {
             return false;
         }
 
-        /*for (let x = 0; x < this.galleries.length; x++) {
-            if (this.galleries[x].elemId === elemId) {
-                if (this.isError) {
-                    // addGallery error - gallery already created with error
-                    return false;
-                }
-                return x;
-            }
-        }*/
-
         this.galleries.forEach((gal, galKey) => {
             if (gal.elemId === elemId) {
                 if (gal.isError) {
@@ -1143,7 +1104,6 @@ const RiotGalleryViewer = {
         }
 
         for (let elemKey = 0; elemKey < elems.length; elemKey++) {
-            //console.log('elemKey', elemKey);
             this.setGalItemByElem(galKey, elems[elemKey]);
         }
         
@@ -1168,16 +1128,6 @@ const RiotGalleryViewer = {
             return false;
         }
 
-        /*for (let galKey = 0; galKey < this.galleries.length; galKey++) {
-            if (this.galleries[galKey].elem === elem) {
-                if (this.galleries[galKey].isError) {
-                    // gallery already added, but had errors
-                    return false;
-                }
-                // gallery found, return key, do not add
-                return galKey;
-            }
-        }*/
         this.galleries.forEach((gal, galKey) => {
             if (gal.elem === elem) {
                 if (gal.isError) {
@@ -1213,18 +1163,10 @@ const RiotGalleryViewer = {
         const clickElem = this.getClickElemFromConElem(elem);
         if (clickElem) {
             // make sure that the clickElem isn't already set (in this gallery or another)
-            /*for (let g = 0; g < this.galleries.length; g++) {
-                for (let i = 0; i < this.galleries[g].items.length; i++) {
-                    if (this.galleries[g].items[i].clickElem === clickElem) {
-                        console.log('skip element. click elem already set.');
-                        return false;
-                    }
-                }
-            }*/
             this.galleries.forEach((gal) => {
                 gal.items.forEach((item) => {
                     if (item.clickElem === clickElem) {
-                        console.log('skip element. click elem already set.');
+                        // skip element. click elem already set.
                         return false;
                     }
                 });
@@ -1731,7 +1673,6 @@ const RiotGalleryViewer = {
             return;
         }
         if (this.areMaterialIconsLoaded()) {
-            // already loaded
             this.addMaterialIconsToHtml();
             return;
         }
@@ -1932,6 +1873,7 @@ const RiotGalleryViewer = {
      *************************************************************/
 
 
+     
     /*************************************************************
      *************************************************************
       * Item/image display - START */
@@ -2429,7 +2371,6 @@ const RiotGalleryViewer = {
         }
 
         if (this.options.transitionType === 'fade' && isNewTransition) {
-            console.log('if (this.options.transitionType === \'fade\' && isNewTransition) {');
             this.elems.imageCons[curK].style.opacity = 0;
         }
 
@@ -2656,7 +2597,6 @@ const RiotGalleryViewer = {
      */
     getCurGalItem() {
         const viewer = this.getViewerCur();
-        //console.log(viewer);
         if (viewer === null) {
             return null;
         }
@@ -2758,14 +2698,6 @@ const RiotGalleryViewer = {
             }
         }
 
-        /*for (let x = 0; x < from.length; x++) {
-            let curFrom = from[x];
-            let prev = '';
-            while (prev !== str) {
-                prev = str;
-                str = str.replace(curFrom, to, str);
-            }
-        }*/
         from.forEach((curFrom) => {
             let prev = '';
             while (prev !== str) {
