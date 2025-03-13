@@ -6,13 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Riot Gallery Viewer - Basic JavasScript</title>
     <link rel="stylesheet" href="./example-pages-styles.css">
-    <link rel="stylesheet" href="../riot-gallery-viewer.min.css" />
+    <link rel="stylesheet" href="../riot-gallery-viewer.min.css">
 </head>
 
 <body>
     <div id="page-content">
-        <body>
-            <div id="page-content">
+
                 <h1>Riot Gallery Viewer - Basic HTML</h1>
                 <div><a href="./">back to examples</a></div><br>
         
@@ -20,22 +19,22 @@
                     <li><a href="./images/blue-jay.jpg"><img src="./images/blue-jay_thumb.jpg" alt="Blue Jay"></a></li>
                     <li><a href="./images/squirrel.jpg"><img src="./images/squirrel_thumb.jpg"></a>
                         <div class="image-caption">squirrel</div></li>
-                    <li><a href="./images/port-au-prince-haiti.jpg"><img src="./images/port-au-prince-haiti_thumb.jpg" /></a></li>
-                    <li><a href="./images/pennsylvania-landscape.jpg"><img src="./images/pennsylvania-landscape_thumb.jpg" /></a></li>
+                    <li><a href="./images/port-au-prince-haiti.jpg"><img src="./images/port-au-prince-haiti_thumb.jpg"></a></li>
+                    <li><a href="./images/pennsylvania-landscape.jpg"><img src="./images/pennsylvania-landscape_thumb.jpg"></a></li>
                     <li><a href="./images/noimagehere.jpg"><img src="./images/noimagehere_thumb.jpg"></a>
                         <div class="image-caption">Image doesn't exist. Load image to test error handling.</div></li>
                 </ul>
         
             </div>
         
-    </div>
 
-    <script src="../riot-gallery-viewer.min.js?x=4"></script>
+
+    <script src="../riot-gallery-viewer.min.js?x=6"></script>
 
     <script>
         /*
             # doConsoleLog
-                - write information to the console log and error log. needed for troubeshooting/testing/development only
+                - write information to the console log and error log. needed for troubleshooting/testing/development only
                 - used for troubleshooting/testing/development only.
                 - boolean (true or false)
                 - default value: **false**
@@ -46,7 +45,7 @@
        
         /*
             # doConsoleTrace
-                - write a code trace on every console and error log. needed for troubeshooting/testing/development
+                - write a code trace on every console and error log. needed for troubleshooting/testing/development
                 - used for troubleshooting/testing/development only.
                 - rarely needed, but can help with troubleshooting.
                 - boolean (true or false)
@@ -66,7 +65,7 @@
             - "pageload" when the HTML page is loaded, all images in all galleries are preloaded.
             - preloading will make viewing images faster, but could result in images 
                 loading that are never viewed. for galleries with many images or large image sizes, 
-                it is not recommeneded to use galleryload or pageload.
+                it is not recommended to use galleryload or pageload.
             - default value: "prevnext"
         */
         //RiotGalleryViewer.setOption('preloadImagesType', 'none');
@@ -80,7 +79,7 @@
                 - should material icons be loaded?
                 - boolean (true or false)
                 - if set, the close, previous, and next buttons will look nicer. 
-                    if not, the page will load slighly faster
+                    if not, the page will load slightly faster
                 - default value: true
         */
         //RiotGalleryViewer.setOption('useMaterialIcons', true);
@@ -114,9 +113,9 @@
                 - default value: 0.7
         */
         /* 3 tenths of a second (200 milliseconds). very fast. */
-        RiotGalleryViewer.setOption('transitionSeconds', .3);
+        //RiotGalleryViewer.setOption('transitionSeconds', .3);
         /* 3 seconds. very slow. */
-        //RiotGalleryViewer.setOption('transitionSeconds', 3);
+        RiotGalleryViewer.setOption('transitionSeconds', 3);
 
 
         /*
@@ -126,12 +125,15 @@
             - must be between 0.02 and 0.25
             - default value: 0.04
         */
+        /* 6 hundredths of a second (60 milliseconds). 10 frames per second. 
+            slightly higher value and less frames than default. won't be as smooth, but will be less resource intensive. */
+        RiotGalleryViewer.setOption('transitionFrameSeconds', 0.06);
         /* 2 hundredths of a second (20 milliseconds). 50 frames per second. 
-            low value. many frames, resource intensive.*/
+            very low value. many frames, resource intensive.*/
         //RiotGalleryViewer.setOption('transitionFrameSeconds', .02);
-        /* one quartre of a second (250 milliseconds). 4 frames per second. 
-            high value. few frames, transition will not be smooth.*/
-        RiotGalleryViewer.setOption('transitionFrameSeconds', 0.15);
+        /* one quarter of a second (250 milliseconds). 4 frames per second. 
+            very high value. few frames, transition will not be smooth.*/
+        //RiotGalleryViewer.setOption('transitionFrameSeconds', 0.25);
 
 
         /*
@@ -146,7 +148,7 @@
 
         /*
             # defaultImgSize
-                - default image size in pexels. 
+                - default image size in pixels. 
                 - will be used while an image is loading (spinner) and or fails loading (red background)
                 - must be between 200 and 1000
                 - default value: 300
@@ -169,9 +171,9 @@
         /*
             swipeMinPixels, swipeMinPercent, and swipeMaxSeconds are used to make sure that only
                 intended swipes change to the image. a swipe must be a certain speed (swipeMaxSeconds)
-                and must be certain distance (swipeMinPixels or swipeMinPercent) to registion. settings
+                and must be certain distance (swipeMinPixels or swipeMinPercent) to revision. settings
                 can make swipes easier (more likely to change images on swipe  or more 
-                diffiucult (avoid accidental swipes). changes to these settings are generally not needed. 
+                difficult (avoid accidental swipes). changes to these settings are generally not needed. 
             # swipeMinPixels
                 - if doTouchSwipe is true, this determines the minimum number of pixels to swipe to change the image
                 - if a swipe distance is too short, the user most most likely not trying to change images
@@ -180,7 +182,7 @@
             # swipeMinPercent
                 - if doTouchSwipe is true, this determines the percentage of the screen to swipe to change the image
                 - if a swipe distance is too short, the user most most likely not trying to change images
-                - both pixels and percent are both used to accomodate screen sizes (large screens can have swipes with more pixels, but less screen width percent. small screens can have swipes with fewer pixels, but more screen width percent). if both values are set (non zero), the next image will load as long as either value is reached, not both values.
+                - both pixels and percent are both used to accommodate screen sizes (large screens can have swipes with more pixels, but less screen width percent. small screens can have swipes with fewer pixels, but more screen width percent). if both values are set (non zero), the next image will load as long as either value is reached, not both values.
                 - must be between 0 and 90
                 - default value: 50
             # swipeMaxSeconds

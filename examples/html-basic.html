@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Riot Gallery Viewer - Basic HTML</title>
     <link rel="stylesheet" href="./example-pages-styles.css">
-    <link rel="stylesheet" href="../riot-gallery-viewer.min.css" />
+    <link rel="stylesheet" href="../riot-gallery-viewer.min.css">
 </head>
 
 <body>
@@ -16,15 +16,22 @@
 
         <!--
         note that there are several ways to add optional captions.
-        that can be added by adding a class (riot-gallery-image-caption or image-caption)
+        that can be added by adding a class (riot-gallery-caption)
         or by adding a title or alt tag to the the image. we can also set up images
         without a caption.
         -->
 
         <ul class="riot-gallery riot-gallery-style">
-            <li><a href="./images/blue-jay.jpg" target="blank"><img src="./images/blue-jay_thumb.jpg"></a><div class="image-caption">Blue Jay</div></li>
-            <li><a href="./images/cat.jpg" target="blank"><img src="./images/cat_thumb.jpg"></a><div class="image-caption">Cat</div></li>
-            <li><a href="./images/dog-at-lake.jpg" target="blank"><img src="./images/dog-at-lake_thumb.jpg" title="Dog At Lake"></a></li>
+            <li><a href="./images/blue-jay.jpg" target="blank"><img src="./images/blue-jay_thumb.jpg"></a>
+                <div class="riot-gallery-caption">Blue Jay</div>
+            </li>
+            <!-- note that both a div with a class of riot-gallery-caption and an alt tag on the img exist. The
+            div with the class has a higher precedence, so the caption will be "Cat sitting on a couch" (see readme.md) -->
+            <li><a href="./images/cat.jpg" target="blank"><img src="./images/cat_thumb.jpg" alt="cat"></a>
+                <div class="riot-gallery-caption">Cat sitting on a couch</div>
+            </li>
+            <li><a href="./images/dog-at-lake.jpg" target="blank"><img src="./images/dog-at-lake_thumb.jpg"
+                        title="Dog At Lake"></a></li>
             <li><a href="./images/lake.jpg" target="blank"><img src="./images/lake_thumb.jpg"></a></li>
         </ul>
 

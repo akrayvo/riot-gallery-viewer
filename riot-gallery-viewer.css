@@ -105,10 +105,10 @@ ul.riot-gallery-style {
 .riot-gallery-style figure {
     margin: 0;
     padding: 0;
+    position:relative;
 }
 
-.riot-gallery-style .riot-gallery-image-caption,
-.riot-gallery-style .image-caption,
+.riot-gallery-style .riot-gallery-caption,
 .riot-gallery-style figcaption {
     position: absolute;
     left: 0;
@@ -125,8 +125,7 @@ ul.riot-gallery-style {
     font-weight: bold;
 }
 
-.riot-gallery-style.riot-gallery-style-dark .riot-gallery-image-caption,
-.riot-gallery-style.riot-gallery-style-dark .image-caption,
+.riot-gallery-style.riot-gallery-style-dark .riot-gallery-caption,
 .riot-gallery-style.riot-gallery-style-dark figcaption {
     background-color: #000;
     background-color: rgba(0, 0, 0, 0.6);
