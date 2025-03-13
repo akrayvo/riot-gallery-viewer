@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Riot Gallery Viewer - HTML on Various HTML Tags</title>
+    <link rel="stylesheet" href="./example-pages-styles.css">
+    <link rel="stylesheet" href="../riot-gallery-viewer.min.css">
+    <!--
+        Only lists (ul or ol) can use the riot-gallery-style class for default styles.
+
+        These are simple styles to format the galleries.
+        -->
+    <style>
+        table.riot-gallery,
+        div.riot-gallery,
+        dl.riot-gallery {
+            border: 1px #000 solid;
+            background-color: #AAA;
+        }
+
+        p.riot-gallery {
+            padding: 10px;
+            background-color: #DDD;
+            border: 1px #000 solid;
+            line-height: 30px;
+        }
+
+        p.riot-gallery a {
+            font-weight:bold;
+        }
+
+        table.riot-gallery {
+            border-collapse: separate;
+            border-spacing: 10px;
+        }
+
+        table.riot-gallery td {
+            padding: 10px;
+            vertical-align: top;
+            text-align: center;
+            background-color: #DDD;
+        }
+
+        table.riot-gallery img,
+        div.riot-gallery img {
+            width: 250px;
+            height: 250px;
+        }
+
+        div.riot-gallery {
+            padding: 5px;
+        }
+
+        div.riot-gallery figure {
+            display: inline-block;
+            padding: 10px;
+            margin: 5px;
+            background-color: #DDD;
+            vertical-align: text-top;
+        }
+
+        div.riot-gallery figcaption {
+            width: 250px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        dl.riot-gallery dt {
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        dl.riot-gallery dt,
+        dl.riot-gallery dd {
+            background-color: #DDD;
+            padding-left: 10px;
+            padding-right: 10px;
+            margin-left: 10px;
+            margin-right: 10px;
+        }
+
+        dl.riot-gallery dt {
+            margin-top: 10px;
+            margin-bottom: 0;
+            padding-top: 10px;
+            padding-bottom: 0;
+        }
+
+        dl.riot-gallery dd {
+            margin-top: 0;
+            margin-bottom: 10px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+
+        dl.riot-gallery a,
+        dl.riot-gallery a:link,
+        dl.riot-gallery a:visited,
+        p.riot-gallery a,
+        p.riot-gallery a:link,
+        p.riot-gallery a:visited {
+            color: #008;
+            text-decoration: underline;
+        }
+
+
+        dl.riot-gallery a:hover,
+        dl.riot-gallery a:active,
+        p.riot-gallery a:hover,
+        p.riot-gallery a:active  {
+            color: #224;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="page-content">
+        <h1>Riot Gallery Viewer - HTML on Various HTML Tags</h1>
+        <div><a href="./">back to examples</a></div><br>
+
+
+
+        <!--
+        Galleries contain items. Each item has an image URL(full size), a clickable element, and a caption (optional).
+        
+        Simply add the "riot-gallery" class to any container element to make it a gallery.
+        
+        For lists (ul or ol), the default item containers are list items (li). For tables (table), the default item containers are cells (td).
+        All other item containers must have the class "riot-gallery-item".
+        
+        Data can be specified through data attributes, classes, or defaults. For example, captions below are set by the data attribute
+        of data-riot-gallery-caption, the class of riot-gallery-caption, or the tag of figcaption. See the readme.md file for more info.
+
+        Note that data is set in various ways (data attributes, classes, etc) below as examples. Normally, all data in a gallery would
+        be set the same way for consistency. 
+        -->
+
+
+        <h2>Gallery in a Table Tag</h2>
+        <table class="riot-gallery">
+            <tr>
+                <td>
+                    <a href="./images/blue-jay.jpg" target="blank">
+                        <img src="./images/blue-jay_thumb.jpg" data-riot-gallery-caption="A blue jay sitting on a post">
+                    </a>
+                </td>
+                <td data-riot-gallery-caption="A cat sitting on a couch">
+                    <a href="./images/cat.jpg" target="blank">
+                        <img src="./images/cat_thumb.jpg">
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <img src="./images/dog-at-lake_thumb.jpg" data-riot-gallery-image-url="./images/dog-at-lake.jpg"
+                        data-riot-gallery-caption="A dog sitting by a lake with mountains in the background">
+                </td>
+                <td>
+                    <a href="./images/lake.jpg" target="blank">
+                        <img src="./images/lake_thumb.jpg">
+                    </a>
+                    <div class="riot-gallery-caption">Lake with mountains in the background</div>
+                </td>
+            </tr>
+        </table>
+
+        <br><br>
+        <h2>Gallery in a DIV Tag with Child Figure Tags</h2>
+        <div class="riot-gallery">
+            <figure>
+                <a href="./images/party-lights.jpg" target="blank">
+                    <img src="./images/party-lights_thumb.jpg" data-riot-gallery-caption="Colored light bulbs">
+                </a>
+            </figure>
+            <figure>
+                <a href="./images/pennsylvania-landscape.jpg" target="blank">
+                    <img src="./images/pennsylvania-landscape_thumb.jpg">
+                </a>
+                <figcaption>A Beautiful Landscape</figcaption>
+            </figure>
+
+            <figure>
+                <img src="./images/port-au-prince-haiti_thumb.jpg"
+                    data-riot-gallery-image-url="./images/port-au-prince-haiti.jpg" data-riot-gallery-caption="Haiti">
+            </figure>
+            <figure>
+                <a href="./images/squirrel.jpg" target="blank">
+                    <img src="./images/squirrel.jpg">
+                </a>
+                <figcaption>A Squirrel on a tree</figcaption>
+            </figure>
+        </div>
+
+        <br><br>
+        <h2>Gallery in a DL Tag (definition list)</h2>
+        <dl class="riot-gallery">
+
+            <dt class="riot-gallery-item"><a href="./images/king-tut.jpg" target="blank"
+                    class="riot-gallery-caption">King Tut</a></dt>
+            <dd>Tutankhamun or Tutankhamen, was an ancient Egyptian pharaoh who ruled c. 1332 – 1323 BC during the late
+                Eighteenth Dynasty of ancient Egypt. Born Tutankhaten, he was likely a son of Akhenaten, thought to be
+                buried in KV55.</dd>
+
+            <dt class="riot-gallery-item"><a href="./images/waterfall.jpg" target="blank"
+                    class="riot-gallery-caption">Waterfall</a>
+            </dt>
+            <dd>A waterfall is any point in a river or stream where water flows over a vertical drop or a series of
+                steep drops. Waterfalls also occur where meltwater drops over the edge of a tabular iceberg or ice
+                shelf. </dd>
+
+            <dt class="riot-gallery-item" data-riot-gallery-caption="Dog sitting at a lake"><a
+                    href="./images/dog-at-lake.jpg" target="blank">Dog</a></dt>
+            <dd>The dog is a domesticated descendant of the gray wolf. Also called the domestic dog, it was selectively
+                bred
+                from an extinct population of wolves during the Late Pleistocene by hunter-gatherers. The dog was the
+                first species to be domesticated
+                by humans, over 14,000 years ago and before the development of agriculture.</dd>
+
+            <dt class="riot-gallery-item"><a href="./images/lake.jpg" target="blank">Lake</a></dt>
+            <dd>A lake is a large body of standing, inland water surrounded by land, often fed by rivers, springs, or
+                precipitation.</dd>
+
+        </dl>
+
+        <br><br>
+        <h2>Gallery in a P Tag (paragraph)</h2>
+        <p class="riot-gallery">
+            The <span class="riot-gallery-item" data-riot-gallery-caption="A blue jay sitting on a post"><a
+                    href="./images/blue-jay.jpg" target="blank">Blue Jay</a></span> is a passerine bird in
+            the family Corvidae, native to eastern North America. It lives in most of the eastern and central United
+            States; some eastern populations may be migratory. Resident populations are also in Newfoundland, Canada;
+            breeding populations are found across southern Canada.
+            The <span class="riot-gallery-item"><a href="./images/cat.jpg"
+                    data-riot-gallery-caption="A cat sitting on a couch" class="riot-gallery-item-clickable">Cat</a> is
+                a small domesticated carnivorous mammal. It is the
+                only domesticated species of the family Felidae. Advances in archaeology and genetics have shown that
+                the domestication of the cat occurred in the Near East around 7500 BC.</span>
+            The <a href="./images/dog-at-lake.jpg"
+                data-riot-gallery-caption="A dog sitting by a lake with mountains in the background"
+                data-riot-gallery-image-url="./images/dog-at-lake.jpg" class="riot-gallery-item" target="blank">Dog</a>
+            is a domesticated descendant of the gray wolf. Also called the domestic dog, it
+            was selectively bred from an extinct population of wolves during the Late Pleistocene by hunter-gatherers.
+            The dog was the first species to be domesticated by humans, over 14,000 years ago and before the development
+            of agriculture.
+            <span class="riot-gallery-item"><a href="./images/squirrel.jpg" target="blank"><span
+                    class="riot-gallery-caption">The Squirrel</span></a></span> family includes tree squirrels,
+            ground squirrels (including chipmunks and prairie dogs, among others), and flying squirrels. Squirrels are
+            indigenous to the Americas, Eurasia, and Africa, and were introduced by humans to Australia. The earliest
+            known fossilized squirrels date from the Eocene epoch, and among other living rodent families, the squirrels
+            are most closely related to the mountain beaver and dormice.
+        </p>
+
+    </div>
+
+    <script src="../riot-gallery-viewer.min.js?x=8"></script>
+    <script>
+        RiotGalleryViewer.setOption('doConsoleLog', true);
+    </script>
+</body>
+
+</html>

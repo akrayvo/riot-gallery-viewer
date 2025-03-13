@@ -105,6 +105,7 @@ ul.riot-gallery-style {
 .riot-gallery-style figure {
     margin: 0;
     padding: 0;
+    position:relative;
 }
 
 .riot-gallery-style .riot-gallery-caption,

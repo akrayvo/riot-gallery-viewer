@@ -277,9 +277,9 @@ const RiotGalleryViewer = {
                 return this.setOptionBoolean('doTouchSwipe', value);
             case 'swipeMinPixels'.toLowerCase():
                 return this.setOptionFloat('swipeMinPixels', value, 0, 1000);
-            case 'swipeMinPercent.toLowerCase()':
+            case 'swipeMinPercent'.toLowerCase():
                 return this.setOptionFloat('swipeMinPercent', value, 0, 90);
-            case 'swipeMaxSeconds.toLowerCase()':
+            case 'swipeMaxSeconds'.toLowerCase():
                 return this.setOptionFloat('swipeMaxSeconds', value, 0, 2);
         }
 
@@ -745,9 +745,8 @@ const RiotGalleryViewer = {
         const last = str.substring(str.length - 1);
         if (last === '"') {
             // remove last character
-            console.log('2str', str);
             str = str.substring(0, str.length - 1);
-            console.log('3str', str);
+
             if (str.length < 1) {
                 return '';
             }
@@ -1096,12 +1095,13 @@ const RiotGalleryViewer = {
      */
     setGalleriesByClass() {
         const elems = document.getElementsByClassName('riot-gallery');
-        /*for (let x = 0; x < elems.length; x++) {
+        if (!elems) {
+            return;
+        }
+
+        for (let x = 0; x < elems.length; x++) {
             this.setGalleryByElem(elems[x], null);
-        }*/
-        elems.forEach((elem) => {
-            this.setGalleryByElem(elem, null);
-        });
+        }
     },
 
     /*
@@ -1142,14 +1142,11 @@ const RiotGalleryViewer = {
             return false;
         }
 
-        /*for (let elemKey = 0; elemKey < elems.length; elemKey++) {
-            console.log('elemKey', elemKey);
+        for (let elemKey = 0; elemKey < elems.length; elemKey++) {
+            //console.log('elemKey', elemKey);
             this.setGalItemByElem(galKey, elems[elemKey]);
-        }*/
-        elems.forEach((elem) => {
-            this.setGalItemByElem(galKey, elem);
-        });
-
+        }
+        
         if (this.galleries[galKey].items.length < 1) {
             this.galleries[galKey].isError = true;
             this.galleries[galKey].errorMessages.push('no items found');
@@ -1289,8 +1286,6 @@ const RiotGalleryViewer = {
      */
     getImgUrlFromConElem(conElem) {
         let url;
-
-        console.log('getImgUrlFromConElem');
 
         // data-riot-gallery-image-url set on container or children
         // <li data-riot-gallery-image-url="./image.jpg"><img src="./thumb.jpg"></li>
@@ -1705,7 +1700,7 @@ const RiotGalleryViewer = {
     /*
      * add an invisible (opacity=0) element with a Material Icons
      * if Material Icons are loaded, the with should be low.
-     */    
+     */
     areMaterialIconsLoaded() {
         let divElem = document.createElement('div');
         divElem.style.position = "fixed";
@@ -1728,8 +1723,8 @@ const RiotGalleryViewer = {
     },
 
     /*
-     * add Material Icons (css URL)
-     */    
+     * add Material Icons (CSS URL)
+     */
     loadMaterialIcons() {
         if (this.isMaterialIconsLoadComplete) {
             this.addMaterialIconsToHtml();
@@ -1761,7 +1756,7 @@ const RiotGalleryViewer = {
 
     /*
      * replace previous, next and close button text with Material Icons
-     */    
+     */
     addMaterialIconsToHtml() {
 
         let closeElems = document.getElementsByClassName('riot-gallery-viewer-close-con');
@@ -1911,7 +1906,7 @@ const RiotGalleryViewer = {
 
     /*
      * get the X and Y coordinates for a swipe event
-     */    
+     */
     getSwipeXYFromEvent(event) {
         if (event.TouchList) {
             if (event.TouchList[0]) {
@@ -1934,7 +1929,7 @@ const RiotGalleryViewer = {
 
     /* Touchscreen Swipe - END
      *************************************************************
-     *************************************************************/  
+     *************************************************************/
 
 
     /*************************************************************
@@ -2071,7 +2066,7 @@ const RiotGalleryViewer = {
 
     /*
      * update values for a gallery item/image 
-     */    
+     */
     updateGalItem(galKey, itemKey, img, isError) {
         if (!this.isGalItem(galKey, itemKey)) {
             return;
@@ -2096,7 +2091,7 @@ const RiotGalleryViewer = {
 
     /*
      * end a transition from one item/image to another
-     */    
+     */
     endTransition() {
         // clear the JavaScript interval (stop animation) and remote the transition information
         if (this.transition) {
@@ -2133,7 +2128,7 @@ const RiotGalleryViewer = {
 
     /*
      * remove the previous image viewer (the viewer for the previous image that transitioned out)
-     */  
+     */
     removePrevViewer() {
         if (this.viewerPrevKey !== null) {
             this.elems.imageCons[this.viewerPrevKey].classList.remove('is-displayed');
@@ -2145,7 +2140,7 @@ const RiotGalleryViewer = {
 
     /*
      * show the next frame in the transition animation
-     */ 
+     */
     transitionFrame() {
         if (!this.transition) {
             this.endTransition();
@@ -2363,7 +2358,6 @@ const RiotGalleryViewer = {
      * places the images (old and new for transitions) into the previously calculated location
      */
     placeImgInPosition() {
-        console.log('placeImgInPosition() {');
         const curK = this.viewerCurKey;
 
         if (curK === null) {
@@ -2433,7 +2427,7 @@ const RiotGalleryViewer = {
         if (curLeft !== null) {
             this.elems.imageCons[curK].style.left = curLeft + 'px';
         }
-        console.log('if (this.options.transitionType === \'fade\' && isNewTransition) {', this.options.transitionType, isNewTransition);
+
         if (this.options.transitionType === 'fade' && isNewTransition) {
             console.log('if (this.options.transitionType === \'fade\' && isNewTransition) {');
             this.elems.imageCons[curK].style.opacity = 0;
@@ -2492,7 +2486,7 @@ const RiotGalleryViewer = {
 
     /*
      * get the tag name (ul, li, div, a, etc)
-     */     
+     */
     getElemTagName(elem) {
         if (!elem) {
             // invalid element
@@ -2510,7 +2504,7 @@ const RiotGalleryViewer = {
     /*
      * get the value of an attribute, either on the current element or a child
      * used to get data-riot-gallery-image-url and data-riot-gallery-caption
-     */    
+     */
     getSubElemAttrVal(elem, attr) {
         if (!elem || !attr) {
             return null;
@@ -2535,7 +2529,7 @@ const RiotGalleryViewer = {
     /*
      * get the value of an attribute in a child
      * ex get the href of an a tag or the src of an img tag
-     */      
+     */
     getSubElemAttrValBySelector(elem, selector, attr) {
         const subElem = this.getSubElemBySelector(elem, selector);
         if (!subElem) {
@@ -2674,7 +2668,6 @@ const RiotGalleryViewer = {
      * only if options.doConsoleLog is true
      */
     consoleLog(val1, val2, val3, val4, val5, val6, val7) {
-        console.log('consoleLog', 'if (this.options.doConsoleLog) {', this.options.doConsoleLog);
         if (this.options.doConsoleLog) {
             if (typeof val7 !== 'undefined') {
                 console.log(val1, '|', val2, '|', val3, '|', val4, '|', val5, '|', val6, '|', val7);
@@ -2765,14 +2758,21 @@ const RiotGalleryViewer = {
             }
         }
 
-        for (let x = 0; x < from.length; x++) {
+        /*for (let x = 0; x < from.length; x++) {
             let curFrom = from[x];
             let prev = '';
             while (prev !== str) {
                 prev = str;
                 str = str.replace(curFrom, to, str);
             }
-        }
+        }*/
+        from.forEach((curFrom) => {
+            let prev = '';
+            while (prev !== str) {
+                prev = str;
+                str = str.replace(curFrom, to, str);
+            }
+        });
 
         return str;
     },
