@@ -141,7 +141,7 @@ const RiotGalleryViewer = {
         // effect when transitioning from one image to another. see validTransitionTypes
         transitionType: 'slide',
         // the number of seconds to transition from one image to another; min = 0.1, max = 5
-        transitionSeconds: 0.7,
+        transitionSeconds: 0.5,
         // the number of seconds between animation updates.
         // less time (more frames/updates) will require more processing
         // more time (time frames/updates) will result in smoother animation
