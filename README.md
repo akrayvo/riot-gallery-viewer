@@ -146,7 +146,7 @@ RiotGalleryViewer.setOption("useMaterialIcons", false);
 - text to display in the caption if an image does not load
 - can include HTML
 - set to empty string or NULL to show no message
-- default value: "**<i>Could Not Load Image</i>**"
+- default value: "**&lt;i&gt;Could Not Load Image&lt;/i&gt;**"
 
 # defaultImgSize
 - default image size in pixels. 
