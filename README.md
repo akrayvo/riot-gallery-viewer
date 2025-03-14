@@ -13,14 +13,17 @@ A simple, easy-to-implement, flexible image viewer. It displays a modal window w
 
 ## Requirements
 
-- none (No jQuery or other libraries needed. only uses JavaScript, CSS, and HTML; will work on any modern web browser on any device)
+- Material Icons are optionally automatically loaded from "http://googleapis.com/".
+- The viewer does not user jQuery or any other libraries. It only uses JavaScript, CSS, and HTML, so will work on any modern web browser on any device.
 
 ## Gallery Components and Functionality
-A gallery is set up within an HTML tag container. Items are inside the container. Each item can include a full-sized image URL, a clickable element (usually an image thumbnail), and a caption (optional). When an item is clicked/selected in the gallery, the viewer opens with the full-sized image and caption (if set). The viewer also includes a close button, a previous image button, and a next image button.
+A gallery is set up within an HTML tag container. Items are inside the container. Each item includes a full-sized image URL, a clickable element (usually an image thumbnail), and a caption (optional). When an item is clicked/selected in the gallery, the viewer opens with the full-sized image and caption (if set). The viewer also includes a close button, a previous image button, and a next image button.
 
 ## Installation
 
 Add **riot-gallery-viewer.min.css** and **riot-gallery-viewer.min.js** files to your project.
+
+Add the **riot-gallery** class to the gallery container element.
 
 ## Basic Example (HTML)
 An HTML image gallery with a class on that container.
@@ -33,13 +36,13 @@ An HTML image gallery with a class on that container.
 - in HTML, add an unordered list (ul) with a class of **riot-gallery**
 - add list items (li). Each should contain an image. The easiest way to add captions is to either add
 a **title** attribute to the image or add text to a container with a class of **riot-gallery-caption**
- either add your own styles or add the **riot-gallery-style** class to use the default riot gallery gallery styles
+- either add your own styles or add the **riot-gallery-style** class to use the default riot gallery gallery styles
 ```
 <ul class="riot-gallery riot-gallery-style">
-    <li><img src="./images/blue-jay.jpg" alt="Blue Jay"></li>
-    <li><img src="./images/squirrel.jpg"><div class="riot-gallery-caption">squirrel</div></li>
-    <li><img src="./images/port-au-prince-haiti.jpg" /></li>
-    <li><img src="./images/pennsylvania-landscape.jpg" /></li>
+    <li><a href="./images/blue-jay.jpg" target="_blank"><img src="./images/blue-jay_thumb.jpg" alt="Blue Jay"></a></li>
+    <li><a href="./images/squirrel.jpg" target="_blank"><img src="./images/squirrel_thumb.jpg"></a><div class="riot-gallery-caption">Squirrel</div></li>
+    <li><a href="./images/cat.jpg" target="_blank"><img src="./images/cat_thumb.jpg" alt="Cat"></a></li>
+    <li><a href="./images/pennsylvania-landscape.jpg" target="_blank"><img src="./images/pennsylvania-landscape_thumb.jpg" alt="Landscape"></a></li>
 </ul>
 ```
 
@@ -70,7 +73,7 @@ An HTML empty image gallery with images added in javascript to populate it.
 - parameter 1 is the id of the gallery container
 - parameter 2 is the URL of the full size image (loads in viewer)
 - parameter 3 is the URL of the thumbnail image (loads in the gallery)
-- parameter 43 is the caption (option)
+- parameter 4 is the caption (optional)
 ```
 <script>
 RiotGalleryViewer.addImage('gallery-1', './images/cat.jpg', './images/cat_thumb.jpg', 'White Cat');
@@ -89,15 +92,15 @@ RiotGalleryViewer.setOption("useMaterialIcons", false);
 ```
 
 # doConsoleLog
-- write information to the console log and error log. needed for troubleshooting/testing/development only
-- used for troubleshooting/testing/development only.
+- write information to the console log and error log
+- used for troubleshooting/testing/development only
 - boolean (true or false)
 - default value: **false**
 
 # doConsoleTrace
-- write a code trace on every console and error log. needed for troubleshooting/testing/development
-- used for troubleshooting/testing/development only.
-- rarely needed, but can help with troubleshooting.
+- write a code trace on every console and error log
+- used for troubleshooting/testing/development only
+- rarely needed, but can help with troubleshooting
 - boolean (true or false)
 - default value: **false**
 
@@ -109,7 +112,7 @@ RiotGalleryViewer.setOption("useMaterialIcons", false);
 - **galleryload**: when a gallery is loaded, preload all images in the gallery
 - **pageload**: load all images in all galleries when the page is loaded
 - preloading will make viewing images faster, but could load images that are never viewed which is inefficient
-- for galleries with many images or large image sizes, it is not recommended to use galleryload or pageload.
+- for galleries with many images or large image sizes, it is not recommended to use galleryload or pageload
 - default value: **prevnext**
 
 # useMaterialIcons
@@ -119,7 +122,7 @@ RiotGalleryViewer.setOption("useMaterialIcons", false);
 - default value: **true**
 
 # transitionType
-- effect when transitioning from one image to the next
+- effect when transitioning from one image to another
 - valid values are = **none**, **slide**, **fade**, **slidefade**, and **size**
 - **none**: no transition; just remove the old image and display the new image
 - **slide**: horizontally slide the old image out and the new image in; the direction depends on if the next or previous image is loaded
@@ -129,13 +132,13 @@ RiotGalleryViewer.setOption("useMaterialIcons", false);
 - default value: **slide**
 
 # transitionSeconds
-- the number of seconds to transition from one image to another. 
+- the number of seconds to transition from one image to another
 - must be between 0.1 and 5
-- default value: **0.7**
+- default value: **0.5**
 
 # transitionFrameSeconds
-- the number of seconds between animation updates.
-- less time (more frames/updates) will require more processing. more time (time frames/updates) will result in smoother animation.
+- the number of seconds between animation updates
+- less time (more frames/updates) will require more processing; more time (time frames/updates) will result in smoother animation
 - must be between 0.02 and 0.25
 - default value: **0.04**
 
