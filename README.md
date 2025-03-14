@@ -155,21 +155,21 @@ RiotGalleryViewer.setOption("useMaterialIcons", false);
 - default value: **300**
 
 # doTouchSwipe
-- allow users on touch screens (phones, tables) to swipe to the previous or next image.
-- in order to avoid false swipes, swipeMinPixels, swipeMinPercent, and swipeMaxSeconds are set and can be customized.
+- allow users on touch screens (phones, tables) to swipe to the previous or next image
+- in order to avoid false swipes, swipeMinPixels, swipeMinPercent, and swipeMaxSeconds are set and can be customized
 - boolean (true or false)
-- default image size. will be used while an image is loading (spinner) and or fails loading (red background)
+- default value: **true**
 
 # swipeMinPixels
 - if doTouchSwipe is true, this determines the minimum number of pixels to swipe to change the image
-- if a swipe distance is too short, the user most most likely not trying to change images
+- if a swipe distance is too short, the is user most likely not trying to change images
 - must be between 0 and 1000
 - default value: **200**
 
 # swipeMinPercent
 - if doTouchSwipe is true, this determines the percentage of the screen to swipe to change the image
 - if a swipe distance is too short, the user most most likely not trying to change images
-- both pixels and percent are both used to accommodate screen sizes (large screens can have swipes with more pixels, but less screen width percent. small screens can have swipes with fewer pixels, but more screen width percent). if both values are set (non zero), the next image will load as long as either value is reached, not both values.
+- both pixels and percent are both used to accommodate screen sizes (large screens can have swipes with more pixels, but less screen width percent. small screens can have swipes with fewer pixels, but more screen width percent). if both values are set (non zero), the next image will load as long as either value is reached, not both values
 - must be between 0 and 90
 - default value: **50**
 
@@ -180,14 +180,14 @@ RiotGalleryViewer.setOption("useMaterialIcons", false);
 - default value: **0.8**
 
 ## HTML setup
-The program is very flexible in how to set items in the gallery. For instance, setting up the images in an html table, list, or div.
+The program is very flexible in how to set items in the gallery. For instance, setting up the images in an html table, list, or div tag.
 
 # Gallery Containers
 The gallery container can be any HTML container element. Just add the **riot-gallery** class. A web page can have multiple gallery containers.
 
 # Item Containers
-Items (images) containers can be any HTML container element. 
-- If an element in the container has the **riot-gallery-item** class, all elements in the gallery container with this calls will be item containers.
+Item/image containers can be any HTML container element. 
+- If an element in the container has the **riot-gallery-item** class, all elements in the gallery container with this class will be item containers.
 - If no element with the **riot-gallery-item** is in the gallery container, the following rules are used to find items:
     - If the container element is a list (**ul** or **ol**), the item containers are list item (**li**)
     elements.
@@ -214,7 +214,7 @@ href from a link (**a**) tag with a class of **riot-gallery-image-link**
 
 src from an image (**img**) tag with a class of **riot-gallery-image-thumb**
 ```
-<li><a href="./image.jpg" class="image-link"><img src="./thumb.jpg"></a></li>
+<li><a href="./image.jpg"><img src="./thumb.jpg" class="riot-gallery-image-thumb"></a></li>
 ```
 
 href from a link (**a**) tag
@@ -228,7 +228,8 @@ src from an image (**img**) tag
 ```
 
 ## Item Clickable Element
-The element that is clicked to load the full sized image in the viewer. 
+The element that is clicked to load the full sized image in the viewer.
+
 Generally, the best way to set the image URL is to include a link (**a**) tag around the thumbnail image, but  but there are rare instances where another method will be better. If no other element is found, the item container itself will be clickable, so there will always be a clickable element. The following methods (in order) are used to find a clickable element inside an item container:
 
 any tag with a class of **riot-gallery-item-clickable**
@@ -243,12 +244,12 @@ a link tag (**a**) with a class of **riot-gallery-image-link**
 
 an image tag (**img**) with a class of **riot-gallery-image-thumb**
 ```
-<li><a href="./image.jpg" class="riot-gallery-image-link"><img src="./thumb.jpg"></a></li>
+<li><a href="./image.jpg"><img src="./thumb.jpg" class="riot-gallery-image-thumb"></a></li>
 ```
 
-an image tag (**img**) with a data attribute of **data-riot-gallery-image-url**
+data attribute of **data-riot-gallery-image-url** set on the item container or any children
 ```
-<li><img src="./thumb.jpg" data-riot-gallery-image-url="./image.jpg"></li>
+<li data-riot-gallery-image-url="./image.jpg"><img src="./thumb.jpg"></li>
 ```
 
 a link tag (**a**)
@@ -261,7 +262,7 @@ an image tag (**img**)
 <li><img src="./thumb.jpg"></li>
 ```
 
-the item container itself
+the item container itself (usually the **li** tag)
 
 ## Item Caption (optional)
 Text related to the item image that will display with image. The best way to add a caption depends on if you want it do display and the tag type of the item container. The following methods (in order) are used to find a caption inside an item container:
@@ -279,7 +280,7 @@ text inside a tag with a class of **riot-gallery-caption**
 <li><img src="./image.jpg"><div class="riot-gallery-caption">My Pic</div></li>
 ```
 
-text inside a figure caption (**figcaption**)tag
+text inside a figure caption (**figcaption**) tag
 ```
 <li><figure><img src="./image.jpg"><figcaption>My Pic</figcaption></figure></li>
 ```
@@ -339,18 +340,23 @@ the addImagesByFile function has 2 parameters:
 RiotGalleryViewer.addImagesByFile('gallery-1', './image-list.txt');
 </script>
 ```
-The file name and extension do not matter.
+The file name can have any name or extension.
 
-The format of the file is very flexible. Each line of the file is a separate image. Image information in each line can be contained in **double quotes**, separated by **tabs**, or both. Each line is processed individually; formatting can be different on each line. Each line can have 3 parameters, additional information will be ignored. blank lines are ignored. double quotes can be escaped with a backslash. ex: Dwayne \"The Rock\" Johnson
+The format of the file is very flexible. Each line of the file is a separate image. Image information in each line can be contained in **double quotes**, separated by **tabs**, or both. Each line is processed individually; formatting can be different on each line. Each line can have 3 parameters, additional information will be ignored. blank lines are ignored. double quotes can be escaped with a backslash.
 - full sized image URL
 - thumbnail image URL (optional, but recommended for efficiency)
 - caption (optional)
 ```
 "./images/blue-jay.jpg" "./images/blue-jay_thumb.jpg" "Blue Jay"
-"./images/cat.jpg" "./images/cat_thumb.jpg"
-./images/party-lights.jpg	./images/party-lights_thumb.jpg	Party	\"Lights\"
-"./images/pennsylvania-landscape.jpg"	"./images/pennsylvania-landscape_thumb.jpg"	"Landscape"
-./images/port-au-prince-haiti.jpg	./images/port-au-prince-haiti_thumb.jpg
+"./images/cat.jpg" "./images/cat_thumb.jpg" "A Cat"
+"./images/party-lights.jpg" "./images/party-lights_thumb.jpg" "lights for \"The Big Party\""
+"./images/lake.jpg" "./images/lake_thumb.jpg" "A nice lake"
+```
+```
+./images/blue-jay.jpg	./images/blue-jay_thumb.jpg	Blue Jay
+./images/cat.jpg	./images/cat.jpg	A Cat
+./images/party-lights.jpg	./images/party-lights_thumb.jpg	lights for \"The Big Party\
+./images/lake.jpg	./images/lake_thumb.jpg	A nice lake
 ```
 
 
@@ -364,14 +370,22 @@ uses the same addImagesByFile function as adding images through a file list. has
 RiotGalleryViewer.addImagesByFile('gallery-1', './images.json');
 </script>
 ```
-The file name and extension do not matter. Note that the same function is used to process a formatted text list or a JSON file. The function checks the formats and processed it appropriately.
+The file name can have any name or extension. Note that the same function (addImagesByFile) is used to process a formatted text list or a JSON file. The function checks the file format and processes ite appropriately.
 
-Image must be valid JSON that can be parsed by JavaScript's JSON.parse function. an array of images is required. each image can have the full image URL, the thumbnail image url, and the caption . each image can be either an object with **url**, **thumbURL**, can **caption** parameters or an array with values in that order (0=url, 1=thumbURL, 2=caption). these formats can both be used in the same file. thumbURL is optional but recommended and caption is optional.
+The file must be valid JSON that can be parsed by JavaScript's JSON.parse function. an array of images is required. Each image can have the full image URL, the thumbnail image url, and the caption. Each image can be either an object with **url**, **thumbURL**, can **caption** parameters or an array with values in that order (0=url, 1=thumbURL, 2=caption). these formats can both be used in the same file. thumbURL is optional but recommended. caption is optional.
 ```
 [
 {"url":"./images/blue-jay.jpg","thumbUrl":"./images/blue-jay_thumb.jpg","caption":"Blue Jay"},
-{"url":"./images/cat.jpg","thumbUrl":"./images/cat.jpg"},
-["./images/lake.jpg", "./images/lake_thumb.jpg", "Lake"],
-["./images/waterfall.jpg","./images/waterfall_thumb.jpg"]
+{"url":"./images/cat.jpg","thumbUrl":"./images/cat_thumb.jpg"},
+{"url":"./images/lake.jpg","thumbUrl":"./images/lake_thumb.jpg","caption":"A nice lake"},
+{"url":"./images/waterfall.jpg","thumbUrl":"./images/waterfall_thumb.jpg","caption":"A pretty waterfall"}
+]
+```
+```
+[
+["./images/blue-jay.jpg", "./images/blue-jay.jpg", "Blue Jay"],
+["./images/cat.jpg", "./images/cat_thumb.jpg"],
+["./images/lake.jpg", "./images/lake_thumb.jpg", "A nice lake"],
+["./images/waterfall.jpg", "./images/waterfall_thumb.jpg", "A pretty waterfall"]
 ]
 ```
