@@ -46,8 +46,8 @@
         /*
             # doConsoleTrace
                 - write a code trace on every console and error log. needed for troubleshooting/testing/development
-                - used for troubleshooting/testing/development only.
-                - rarely needed, but can help with troubleshooting.
+                - used for troubleshooting/testing/development only
+                - rarely needed, but can help with troubleshooting
                 - boolean (true or false)
                 - default value: **false**
         */
@@ -59,13 +59,13 @@
             # preloadImagesType
             - if and when images should be preloaded
             - valid values are = "none", "prevnext", "galleryload", and "pageload"
-            - "none" = do not preload images. images are only loaded when they are clicked.
-            - "prevnext" = when an image is viewed, the previous and next images are preloaded.
-            - "galleryload" = when any image in a gallery is viewed, every other image in the gallery is preloaded.
-            - "pageload" when the HTML page is loaded, all images in all galleries are preloaded.
+            - "none" = do not preload images. images are only loaded when they are clicked
+            - "prevnext" = when an image is viewed, the previous and next images are preloaded
+            - "galleryload" = when any image in a gallery is viewed, every other image in the gallery is preloaded
+            - "pageload" when the HTML page is loaded, all images in all galleries are preloaded
             - preloading will make viewing images faster, but could result in images 
-                loading that are never viewed. for galleries with many images or large image sizes, 
-                it is not recommended to use galleryload or pageload.
+                loading that are never viewed; for galleries with many images or large image sizes,
+                it is not recommended to use galleryload or pageload
             - default value: "prevnext"
         */
         //RiotGalleryViewer.setOption('preloadImagesType', 'none');
@@ -78,7 +78,7 @@
             # useMaterialIcons
                 - should material icons be loaded?
                 - boolean (true or false)
-                - if set, the close, previous, and next buttons will look nicer. 
+                - if set, the close, previous, and next buttons will look nicer
                     if not, the page will load slightly faster
                 - default value: true
         */
@@ -90,13 +90,13 @@
             # transitionType
                 - effect when transitioning from one image to another
                 - valid values are = "none", "slide", "fade", "slidefade", and "size"
-                - "none" = load image immediately with no transition effect.
-                - "slide" = horizontally slide the new image in and the old image out. 
-                    the direction depends on if the next or previous image is loaded.
+                - "none" = load image immediately with no transition effect
+                - "slide" = horizontally slide the new image in and the old image out
+                    the direction depends on if the next or previous image is loaded
                 - "fade" = fade out the old image and fade in the new image
                 - "slidefade" = do both the slide and fade transitions
                 - "size" = move from the old image's size/dimensions to the new image's 
-                    size/dimensions. will not appear to do anything if images are the same sizes.
+                    size/dimensions. will not appear to do anything if images are the same sizes
                 - default value: "slide"
         */
         //RiotGalleryViewer.setOption('transitionType', 'none');
@@ -108,9 +108,9 @@
 
         /*
             # transitionSeconds
-                - the number of seconds to transition from one image to another. 
+                - the number of seconds to transition from one image to another
                 - must be between 0.1 and 5
-                - default value: 0.7
+                - default value: 0.5
         */
         /* 3 tenths of a second (200 milliseconds). very fast. */
         //RiotGalleryViewer.setOption('transitionSeconds', .3);
@@ -120,8 +120,8 @@
 
         /*
             # transitionFrameSeconds
-            - the number of seconds between animation updates.
-            - less time (more frames/updates) will require more processing. more time (time frames/updates) will result in smoother animation.
+            - the number of seconds between animation updates
+            - less time (more frames/updates) will require more processing. more time (time frames/updates) will result in smoother animation
             - must be between 0.02 and 0.25
             - default value: 0.04
         */
@@ -158,9 +158,9 @@
 
         /*
             # doTouchSwipe
-                - allow users on touch screens (phones, tables) to swipe to the previous or next image.
+                - allow users on touch screens (phones, tables) to swipe to the previous or next image
                 - in order to avoid false swipes, swipeMinPixels, swipeMinPercent, 
-                    and swipeMaxSeconds are set and can be customized.
+                    and swipeMaxSeconds are set and can be customized
                 - boolean (true or false)
                 - default image size. will be used while an image is loading (spinner) and or fails loading (red background)
         */
