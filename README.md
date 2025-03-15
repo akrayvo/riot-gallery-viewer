@@ -398,7 +398,7 @@ The file must be valid JSON that can be parsed by JavaScript's JSON.parse functi
 
 By default, the program uses Material Icons hosted by Google to make the **previous**, **next**, and **close** buttons look nicer.
 
-If **useMaterialIcons** is set to true (default), the program checks if they are available and will automatically load them. If the icons have not loaded yet, or if **useMaterialIcons** is set to false, text is used for the buttons (ex: the letter "x" on the close button)
+If **useMaterialIcons** is set to true (default), the program checks if they are available and will automatically load them. If the icons have not loaded yet or if **useMaterialIcons** is set to false, text is used for the buttons (ex: the letter "x" on the close button)
 
 Material Icons can be removed by setting **useMaterialIcons** to false
 ```
@@ -406,10 +406,3 @@ Material Icons can be removed by setting **useMaterialIcons** to false
 RiotGalleryViewer.setOption("useMaterialIcons", false);
 </script>
 ```
-
-To load the icons at page load, add the following code to the **head** section of your HTML. This is optional. It will make the gallery icons load slightly faster, but will also cause the icons to be loaded even if the
-viewer is never opened.
-```
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
-```
-
