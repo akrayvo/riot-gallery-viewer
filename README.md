@@ -1,4 +1,4 @@
-# riot-gallery-viewer
+# Riot Gallery Viewer
 
 [View on Github »](https://github.com/akrayvo/riot-gallery-viewer)
 
