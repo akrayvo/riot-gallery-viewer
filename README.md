@@ -2,7 +2,9 @@
 
 [View on Github »](https://github.com/akrayvo/riot-gallery-viewer)
 
-A simple, easy-to-implement, flexible image viewer. It displays a modal window with the full-sized image, an optional label, and previous/next buttons. It can also optionally create the HTML for the image gallery.
+An image viewer for galleries that is simple, easy-to-implement, and flexible. Works with images of any size on any device. Includes image transitions effects (slide, fade in/out, resize, etc.), image preloading, captions, loading image spinner, HTML image gallery generation, previous/next buttons, and optional gallery styles.
+
+tags: **javascript**, **css**, **image-viewer**, **image-gallery**, **image-gallery-application**
 
 ## Working examples
 
@@ -86,9 +88,11 @@ RiotGalleryViewer.addImage('gallery-1', './images/dog-at-lake.jpg', './images/do
 
 The gallery viewer is very customizable. use the **setOption** function to customize the functionality. The function parameters are option name and option value. for example:
 ```
+<script>
 RiotGalleryViewer.setOption("transitionType", "fade");
 RiotGalleryViewer.setOption("transitionSeconds", 1.1);
 RiotGalleryViewer.setOption("useMaterialIcons", false);
+</script>
 ```
 
 # doConsoleLog
@@ -389,3 +393,23 @@ The file must be valid JSON that can be parsed by JavaScript's JSON.parse functi
 ["./images/waterfall.jpg", "./images/waterfall_thumb.jpg", "A pretty waterfall"]
 ]
 ```
+
+## Material Icons
+
+By default, the program uses Material Icons hosted by Google to make the **previous**, **next**, and **close** buttons look nicer.
+
+If **useMaterialIcons** is set to true (default), the program checks if they are available and will automatically load them. If the icons have not loaded yet, or if **useMaterialIcons** is set to false, text is used for the buttons (ex: the letter "x" on the close button)
+
+Material Icons can be removed by setting **useMaterialIcons** to false
+```
+<script>
+RiotGalleryViewer.setOption("useMaterialIcons", false);
+</script>
+```
+
+To load the icons at page load, add the following code to the **head** section of your HTML. This is optional. It will make the gallery icons load slightly faster, but will also cause the icons to be loaded even if the
+viewer is never opened.
+```
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
+```
+
